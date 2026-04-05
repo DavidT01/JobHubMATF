@@ -11,8 +11,8 @@ namespace Profile.API.Data
 
         }
 
-        public DbSet<CandidateProfile> CandidateProfiles { get; set; }
-        public DbSet<CompanyProfile> CompanyProfiles { get; set; }
+        public DbSet<CandidateProfile> CandidateProfiles { get; set; } = null!;
+        public DbSet<CompanyProfile> CompanyProfiles { get; set; } = null!;
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
