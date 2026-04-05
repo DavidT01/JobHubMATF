@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var connectionString = builder.Configuration.GetConnectionString("ProfileDbConnection");
+var connectionString = builder.Configuration.GetConnectionString("ProfileDbConnection") ?? throw new InvalidOperationException("Connection string 'ProfileDbConnection' is not valid.");
 builder.Services.AddDbContext<ProfileContext>(options => options.UseNpgsql(connectionString));
 
 var app = builder.Build();
