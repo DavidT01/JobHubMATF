@@ -1,9 +1,13 @@
+using Catalog.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<ICatalogContext, CatalogContext>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
 
 var app = builder.Build();
 
