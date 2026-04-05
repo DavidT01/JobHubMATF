@@ -13,6 +13,8 @@ builder.Services.AddOpenApi();
 var connectionString = builder.Configuration.GetConnectionString("ProfileDbConnection") ?? throw new InvalidOperationException("Connection string 'ProfileDbConnection' is not valid.");
 builder.Services.AddDbContext<ProfileContext>(options => options.UseNpgsql(connectionString));
 
+builder.Services.AddScoped<IProfileContext, ProfileContext>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
