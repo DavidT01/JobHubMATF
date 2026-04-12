@@ -14,5 +14,11 @@ public class CandidateMappingProfile : AutoMapper.Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.ModifiedAt, opt => opt.Ignore());
+
+        CreateMap<UpdateCandidateProfileCommand, CandidateProfile>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.ModifiedAt, opt => opt.Ignore());
     }
 }
