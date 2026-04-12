@@ -1,0 +1,18 @@
+﻿using Profile.API.DTO;
+using Profile.API.Entities;
+using Profile.API.Features.CandidateProfiles.Commands;
+
+namespace Profile.API.Mapping;
+
+public class CandidateMappingProfile : AutoMapper.Profile
+{
+    public CandidateMappingProfile()
+    {
+        CreateMap<CandidateProfile, CandidateProfileDto>();
+
+        CreateMap<CreateCandidateProfileCommand, CandidateProfile>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.ModifiedAt, opt => opt.Ignore());
+    }
+}
