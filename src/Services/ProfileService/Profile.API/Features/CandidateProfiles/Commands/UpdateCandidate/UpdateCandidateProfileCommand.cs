@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Profile.API.Features.CandidateProfiles.Commands
+namespace Profile.API.Features.CandidateProfiles.Commands.UpdateCandidate
 {
     public class UpdateCandidateProfileCommand : IRequest<bool>
     {

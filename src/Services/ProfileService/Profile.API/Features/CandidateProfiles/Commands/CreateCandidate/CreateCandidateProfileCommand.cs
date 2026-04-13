@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Profile.API.Features.CandidateProfiles.Commands
+namespace Profile.API.Features.CandidateProfiles.Commands.CreateCandidate
 {
     public class CreateCandidateProfileCommand : IRequest<Guid>
     {

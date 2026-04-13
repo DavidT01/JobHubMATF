@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Profile.API.Data;
 using Profile.API.DTO;
 
-namespace Profile.API.Features.CandidateProfiles.Queries
+namespace Profile.API.Features.CandidateProfiles.Queries.GetCandidateProfile
 {
     public class GetCandidateProfileQueryHandler(IProfileContext context, IMapper mapper, ILogger<GetCandidateProfileQueryHandler> logger) : IRequestHandler<GetCandidateProfileQuery, CandidateProfileDto?>
     {

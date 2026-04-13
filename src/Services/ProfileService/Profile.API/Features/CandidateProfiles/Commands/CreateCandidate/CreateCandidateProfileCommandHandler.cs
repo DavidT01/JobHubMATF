@@ -3,7 +3,7 @@ using MediatR;
 using Profile.API.Data;
 using Profile.API.Entities;
 
-namespace Profile.API.Features.CandidateProfiles.Commands
+namespace Profile.API.Features.CandidateProfiles.Commands.CreateCandidate
 {
     public class CreateCandidateProfileCommandHandler(IProfileContext context, IMapper mapper, ILogger<CreateCandidateProfileCommandHandler> logger) : IRequestHandler<CreateCandidateProfileCommand, Guid>
     {

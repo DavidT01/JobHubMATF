@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Profile.API.Data;
 
-namespace Profile.API.Features.CandidateProfiles.Commands
+namespace Profile.API.Features.CandidateProfiles.Commands.DeleteCandidate
 {
     public class DeleteCandidateProfileCommandHandler(IProfileContext context, ILogger<DeleteCandidateProfileCommandHandler> logger) : IRequestHandler<DeleteCandidateProfileCommand, bool>
     {

@@ -1,6 +1,7 @@
 ﻿using Profile.API.DTO;
 using Profile.API.Entities;
-using Profile.API.Features.CandidateProfiles.Commands;
+using Profile.API.Features.CandidateProfiles.Commands.CreateCandidate;
+using Profile.API.Features.CandidateProfiles.Commands.UpdateCandidate;
 
 namespace Profile.API.Mapping;
 
