@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Profile.API.Data;
 
-namespace Profile.API.Features.CandidateProfiles.Commands
+namespace Profile.API.Features.CandidateProfiles.Commands.UpdateCandidate
 {
     public class UpdateCandidateProfileCommandHandler(IProfileContext context, IMapper mapper, ILogger<UpdateCandidateProfileCommandHandler> logger) : IRequestHandler<UpdateCandidateProfileCommand, bool>
     {
