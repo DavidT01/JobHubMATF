@@ -1,6 +1,8 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Scalar.AspNetCore;
 using Profile.API.Data;
+using Scalar.AspNetCore;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,12 @@ var connectionString = builder.Configuration.GetConnectionString("ProfileDbConne
 builder.Services.AddDbContext<ProfileContext>(options => options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<IProfileContext, ProfileContext>();
+
+builder.Services.AddAutoMapper(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 var app = builder.Build();
 
