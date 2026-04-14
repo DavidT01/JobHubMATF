@@ -16,7 +16,7 @@ namespace Profile.API.Features.CandidateProfiles.Commands.CreateCandidate
             context.CandidateProfiles.Add(entity);
             await context.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation("Successfully create candidate profile with Id {ProfileId} for user {UserId}", entity.Id, request.UserId);
+            logger.LogInformation("Successfully created candidate profile with Id {ProfileId} for user {UserId}", entity.Id, request.UserId);
 
             return entity.Id;
         }

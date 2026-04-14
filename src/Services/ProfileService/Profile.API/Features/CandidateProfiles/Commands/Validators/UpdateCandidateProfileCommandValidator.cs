@@ -20,7 +20,7 @@ namespace Profile.API.Features.CandidateProfiles.Commands.Validators
             RuleFor(p => p.Email).NotEmpty().WithMessage("Email is required.")
                 .EmailAddress().WithMessage("Invalid email format.");
 
-            RuleFor(p => p.PhoneNumber).MaximumLength(20).WithMessage("Phone number cannot exceed 20 digits.");
+            RuleFor(p => p.PhoneNumber).MaximumLength(20).WithMessage("Phone number cannot exceed 20 characters.");
 
             RuleFor(p => p.Location).MaximumLength(30).WithMessage("Location cannot exceed 30 characters.");
 
