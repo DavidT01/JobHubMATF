@@ -1,4 +1,4 @@
-﻿namespace Profile.API.DTO;
+﻿namespace Profile.API.DTOs;
 
 public class CandidateProfileDto
 {
