@@ -9,7 +9,7 @@ namespace Profile.API.Features.CandidateProfiles.Commands.UpdateCandidate
     {
         public async Task<bool> Handle(UpdateCandidateProfileCommand request, CancellationToken cancellationToken)
         {
-            var entity = await context.CandidateProfiles.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+            var entity = await context.CandidateProfiles.FirstOrDefaultAsync(p => p.Id == request.Id && p.UserId == request.UserId, cancellationToken);
 
             if(entity == null)
             {
