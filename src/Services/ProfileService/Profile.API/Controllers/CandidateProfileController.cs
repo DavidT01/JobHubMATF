@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Profile.API.DTO;
+using Profile.API.DTOs;
 using Profile.API.Features.CandidateProfiles.Commands.CreateCandidate;
 using Profile.API.Features.CandidateProfiles.Commands.DeleteCandidate;
 using Profile.API.Features.CandidateProfiles.Commands.UpdateCandidate;
