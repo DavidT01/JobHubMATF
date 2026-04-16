@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Profile.API.Extensions;
 using Profile.API.Features.CompanyProfiles.Commands.UpdateCompany;
 
 namespace Profile.API.Features.CompanyProfiles.Commands.Validators
@@ -21,22 +22,11 @@ namespace Profile.API.Features.CompanyProfiles.Commands.Validators
 
             RuleFor(p => p.ContactPhone).MaximumLength(20).WithMessage("Contact phone cannot exceed 20 characters.");
 
-            RuleFor(p => p.WebsiteUrl)
-                .Must(BeAValidUrl).WithMessage("Website URL must be a valid link.")
-                .When(p => !string.IsNullOrEmpty(p.WebsiteUrl));
+            RuleFor(p => p.WebsiteUrl).MustBeValidUrl().WithName("WebsiteUrl");
 
-            RuleFor(p => p.LinkedInUrl)
-                .Must(BeAValidUrl).WithMessage("LinkedIn URL must be a valid link.")
-                .When(p => !string.IsNullOrEmpty(p.LinkedInUrl));
+            RuleFor(p => p.LinkedInUrl).MustBeValidUrl().WithName("LinkedInUrl");
 
-            RuleFor(p => p.LogoUrl)
-                .Must(BeAValidUrl).WithMessage("Logo URL must be a valid link.")
-                .When(p => !string.IsNullOrEmpty(p.LogoUrl));
-        }
-
-        private bool BeAValidUrl(string? url)
-        {
-            return Uri.TryCreate(url, UriKind.Absolute, out Uri? outUri) && (outUri.Scheme == Uri.UriSchemeHttp || outUri.Scheme == Uri.UriSchemeHttps);
+            RuleFor(p => p.LogoUrl).MustBeValidUrl().WithName("LogoUrl");
         }
     }
 }

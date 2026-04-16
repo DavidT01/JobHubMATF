@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Profile.API.Extensions;
 using Profile.API.Features.CandidateProfiles.Commands.UpdateCandidate;
 
 namespace Profile.API.Features.CandidateProfiles.Commands.Validators
@@ -24,26 +25,13 @@ namespace Profile.API.Features.CandidateProfiles.Commands.Validators
 
             RuleFor(p => p.Location).MaximumLength(30).WithMessage("Location cannot exceed 30 characters.");
 
-            RuleFor(p => p.GithubUrl)
-                .Must(BeAValidUrl).WithMessage("GitHub URL must be a valid link.")
-                .When(p => !string.IsNullOrEmpty(p.GithubUrl));
+            RuleFor(p => p.GithubUrl).MustBeValidUrl().WithName("GithubUrl");
 
-            RuleFor(p => p.GitlabUrl)
-                .Must(BeAValidUrl).WithMessage("GitLab URL must be a valid link.")
-                .When(p => !string.IsNullOrEmpty(p.GitlabUrl));
+            RuleFor(p => p.GitlabUrl).MustBeValidUrl().WithName("GitlabUrl");
 
-            RuleFor(p => p.LinkedInUrl)
-                .Must(BeAValidUrl).WithMessage("LinkedIn URL must be a valid link.")
-                .When(p => !string.IsNullOrEmpty(p.LinkedInUrl));
+            RuleFor(p => p.LinkedInUrl).MustBeValidUrl().WithName("LinkedInUrl");
 
-            RuleFor(p => p.CvUrl)
-                .Must(BeAValidUrl).WithMessage("CV URL must be a valid link.")
-                .When(p => !string.IsNullOrEmpty(p.CvUrl));
-        }
-
-        private bool BeAValidUrl(string? url)
-        {
-            return Uri.TryCreate(url, UriKind.Absolute, out Uri? outUri) && (outUri.Scheme == Uri.UriSchemeHttp || outUri.Scheme == Uri.UriSchemeHttps);
+            RuleFor(p => p.CvUrl).MustBeValidUrl().WithName("CvUrl");
         }
     }
 }
