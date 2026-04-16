@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Profile.API.DTO;
+using Profile.API.DTOs;
 
 namespace Profile.API.Features.CandidateProfiles.Queries.GetCandidateProfile
 {
