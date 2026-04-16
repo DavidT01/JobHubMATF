@@ -19,6 +19,8 @@ namespace Profile.API.Features.CandidateProfiles.Commands.UpdateCandidate
 
             mapper.Map(request, entity);
 
+            entity.ModifiedAt = DateTime.UtcNow;
+
             await context.SaveChangesAsync(cancellationToken);
             logger.LogInformation("Successfully updated candidate profile {ProfileId}", request.Id);
 
