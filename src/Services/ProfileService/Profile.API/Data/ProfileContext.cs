@@ -19,6 +19,7 @@ namespace Profile.API.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<CandidateProfile>().HasIndex(p => p.UserId).IsUnique();
+            modelBuilder.Entity<CompanyProfile>().HasIndex(p => p.UserId).IsUnique();
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
