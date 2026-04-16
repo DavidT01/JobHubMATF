@@ -13,7 +13,7 @@ namespace Profile.API.Extensions
 
                 return Uri.TryCreate(url, UriKind.Absolute, out Uri? outUri)
                     && (outUri.Scheme == Uri.UriSchemeHttp || outUri.Scheme == Uri.UriSchemeHttps);
-            }).WithMessage("'{Link}' must be a valid HTTP or HTTPS URL.");
+            }).WithMessage("'{PropertyName}' must be a valid HTTP or HTTPS URL.");
         }
     }
 }
