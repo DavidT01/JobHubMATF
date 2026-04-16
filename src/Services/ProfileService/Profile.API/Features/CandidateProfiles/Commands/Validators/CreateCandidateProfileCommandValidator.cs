@@ -1,11 +1,13 @@
 ﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using Profile.API.Data;
 using Profile.API.Features.CandidateProfiles.Commands.CreateCandidate;
 
 namespace Profile.API.Features.CandidateProfiles.Commands.Validators
 {
     public class CreateCandidateProfileCommandValidator : AbstractValidator<CreateCandidateProfileCommand>
     {
-        public CreateCandidateProfileCommandValidator()
+        public CreateCandidateProfileCommandValidator(IProfileContext context)
         {
             RuleFor(p => p.UserId).NotEmpty().WithMessage("UserId is required.");
 
@@ -19,6 +21,10 @@ namespace Profile.API.Features.CandidateProfiles.Commands.Validators
                 .EmailAddress().WithMessage("Invalid email format.");
 
             RuleFor(p => p.PhoneNumber).MaximumLength(20).WithMessage("Phone number cannot exceed 20 characters.");
+
+            RuleFor(p => p.UserId)
+                .MustAsync(async (userId, cancellationToken) => !await context.CandidateProfiles.AnyAsync(p => p.UserId == userId, cancellationToken))
+                .WithMessage("Profile for this user already exists.");
         }
     }
 }
