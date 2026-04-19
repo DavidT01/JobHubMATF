@@ -28,6 +28,14 @@ namespace Profile.API.Features.CandidateProfiles.Commands.UploadCv
                 await request.File.CopyToAsync(fileStream, cancellationToken);
             }
 
+            if(!string.IsNullOrEmpty(profile.CvUrl))
+            {
+                var oldFilePath = Path.Combine(cvsFolder, Path.GetFileName(profile.CvUrl));
+
+                if (File.Exists(oldFilePath))
+                    File.Delete(oldFilePath);
+            }
+
             var fileUrl = $"/uploads/cvs/{fileName}";
             profile.CvUrl = fileUrl;
             profile.ModifiedAt = DateTime.UtcNow;
