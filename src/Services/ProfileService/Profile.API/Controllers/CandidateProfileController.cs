@@ -4,6 +4,7 @@ using Profile.API.DTOs;
 using Profile.API.Features.CandidateProfiles.Commands.CreateCandidate;
 using Profile.API.Features.CandidateProfiles.Commands.DeleteCandidate;
 using Profile.API.Features.CandidateProfiles.Commands.UpdateCandidate;
+using Profile.API.Features.CandidateProfiles.Commands.UploadCv;
 using Profile.API.Features.CandidateProfiles.Queries.GetCandidateProfile;
 
 namespace Profile.API.Controllers
@@ -30,6 +31,17 @@ namespace Profile.API.Controllers
             logger.LogInformation("Received CreateCandidateProfile request for userId: {UserId}", command.UserId);
             var id = await mediator.Send(command);
             return CreatedAtAction(nameof(GetCandidateProfile), new { userId = command.UserId }, id);
+        }
+
+        [HttpPost("{id}/cv")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UploadCv(Guid id, IFormFile file)
+        {
+            logger.LogInformation("Received CV upload request for candidate Id: {Id}", id);
+            var url = await mediator.Send(new UploadCandidateCvCommand { Id = id, File = file });
+            return url != null ? Ok(new { CvUrl = url }) : NotFound();
         }
 
         [HttpPut("{id}")]
