@@ -25,13 +25,13 @@ namespace Profile.API.Features.CandidateProfiles.Commands.Validators
 
             RuleFor(p => p.Location).MaximumLength(30).WithMessage("Location cannot exceed 30 characters.");
 
-            RuleFor(p => p.GithubUrl).MustBeValidUrl().WithName("GithubUrl");
+            RuleFor(p => p.GithubUrl).ValidUrl().WithName("GithubUrl");
 
-            RuleFor(p => p.GitlabUrl).MustBeValidUrl().WithName("GitlabUrl");
+            RuleFor(p => p.GitlabUrl).ValidUrl().WithName("GitlabUrl");
 
-            RuleFor(p => p.LinkedInUrl).MustBeValidUrl().WithName("LinkedInUrl");
+            RuleFor(p => p.LinkedInUrl).ValidUrl().WithName("LinkedInUrl");
 
-            RuleFor(p => p.CvUrl).MustBeValidUrl().WithName("CvUrl");
+            RuleFor(p => p.CvUrl).ValidUrl().WithName("CvUrl");
         }
     }
 }

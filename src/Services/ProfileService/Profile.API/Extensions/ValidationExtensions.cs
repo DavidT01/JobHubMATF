@@ -4,7 +4,7 @@ namespace Profile.API.Extensions
 {
     public static class ValidationExtensions
     {
-        public static IRuleBuilderOptions<T, string?> MustBeValidUrl<T>(this IRuleBuilder<T, string?> ruleBuilder)
+        public static IRuleBuilderOptions<T, string?> ValidUrl<T>(this IRuleBuilder<T, string?> ruleBuilder)
         {
             return ruleBuilder.Must(url =>
             {

@@ -22,11 +22,11 @@ namespace Profile.API.Features.CompanyProfiles.Commands.Validators
 
             RuleFor(p => p.ContactPhone).MaximumLength(20).WithMessage("Contact phone cannot exceed 20 characters.");
 
-            RuleFor(p => p.WebsiteUrl).MustBeValidUrl().WithName("WebsiteUrl");
+            RuleFor(p => p.WebsiteUrl).ValidUrl().WithName("WebsiteUrl");
 
-            RuleFor(p => p.LinkedInUrl).MustBeValidUrl().WithName("LinkedInUrl");
+            RuleFor(p => p.LinkedInUrl).ValidUrl().WithName("LinkedInUrl");
 
-            RuleFor(p => p.LogoUrl).MustBeValidUrl().WithName("LogoUrl");
+            RuleFor(p => p.LogoUrl).ValidUrl().WithName("LogoUrl");
         }
     }
 }
