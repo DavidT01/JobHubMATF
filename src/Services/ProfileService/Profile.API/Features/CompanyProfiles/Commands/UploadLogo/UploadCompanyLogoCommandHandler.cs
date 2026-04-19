@@ -20,7 +20,7 @@ namespace Profile.API.Features.CompanyProfiles.Commands.UploadLogo
             var logosFolder = Path.Combine(rootPath, "uploads", "logos");
             Directory.CreateDirectory(logosFolder);
 
-            var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(request.File.FileName)}";
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(request.File.FileName)}";
             var filePath = Path.Combine(logosFolder, fileName);
 
             using (var fileStream = new FileStream(filePath, FileMode.Create))

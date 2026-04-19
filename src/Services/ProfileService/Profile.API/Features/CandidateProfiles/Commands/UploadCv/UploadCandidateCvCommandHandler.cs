@@ -20,7 +20,7 @@ namespace Profile.API.Features.CandidateProfiles.Commands.UploadCv
             var cvsFolder = Path.Combine(rootPath, "uploads", "cvs");
             Directory.CreateDirectory(cvsFolder);
 
-            var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(request.File.FileName)}";
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(request.File.FileName)}";
             var filePath = Path.Combine(cvsFolder, fileName);
 
             using (var fileStream = new FileStream(filePath, FileMode.Create))
