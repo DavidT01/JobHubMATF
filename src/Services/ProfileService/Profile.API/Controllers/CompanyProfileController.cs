@@ -4,6 +4,7 @@ using Profile.API.DTOs;
 using Profile.API.Features.CompanyProfiles.Commands.CreateCompany;
 using Profile.API.Features.CompanyProfiles.Commands.DeleteCompany;
 using Profile.API.Features.CompanyProfiles.Commands.UpdateCompany;
+using Profile.API.Features.CompanyProfiles.Commands.UploadLogo;
 using Profile.API.Features.CompanyProfiles.Queries.GetCompanyProfile;
 
 namespace Profile.API.Controllers
@@ -30,6 +31,17 @@ namespace Profile.API.Controllers
             logger.LogInformation("Received CreateCompanyProfile request for userId: {UserId}", command.UserId);
             var id = await mediator.Send(command);
             return CreatedAtAction(nameof(GetCompanyProfile), new { userId = command.UserId }, id);
+        }
+
+        [HttpPost("{id}/logo")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UploadLogo(Guid id, IFormFile file)
+        {
+            logger.LogInformation("Received Logo upload request for company Id: {Id}", id);
+            var url = await mediator.Send(new UploadCompanyLogoCommand { Id = id, File = file });
+            return url != null ? Ok(new { Logo = url }) : NotFound();
         }
 
         [HttpPut("{id}")]
