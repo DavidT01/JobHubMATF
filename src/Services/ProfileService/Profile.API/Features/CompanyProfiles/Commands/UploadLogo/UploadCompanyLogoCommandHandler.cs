@@ -16,7 +16,7 @@ namespace Profile.API.Features.CompanyProfiles.Commands.UploadLogo
                 return null;
             }
 
-            var rootPath = environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var rootPath = environment.WebRootPath ?? throw new InvalidOperationException("WebRootPath is not configured.");
             var logosFolder = Path.Combine(rootPath, "uploads", "logos");
             Directory.CreateDirectory(logosFolder);
 

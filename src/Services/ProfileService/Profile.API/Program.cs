@@ -9,6 +9,8 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
 builder.Services.AddControllers();
 
 // Add services to the container.
@@ -43,17 +45,12 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-var wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-if(!Directory.Exists(wwwrootPath))
+if(!Directory.Exists(app.Environment.WebRootPath))
 {
-    Directory.CreateDirectory(wwwrootPath);
+    Directory.CreateDirectory(app.Environment.WebRootPath);
 }
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(wwwrootPath),
-    RequestPath = ""
-});
+app.UseStaticFiles();
 
 app.MapControllers();
 
