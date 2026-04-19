@@ -34,14 +34,14 @@ namespace Profile.API.Controllers
         }
 
         [HttpPost("{id}/cv")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UrlResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UploadCv(Guid id, IFormFile file)
         {
             logger.LogInformation("Received CV upload request for candidate Id: {Id}", id);
             var url = await mediator.Send(new UploadCandidateCvCommand { Id = id, File = file });
-            return url != null ? Ok(new { CvUrl = url }) : NotFound();
+            return url != null ? Ok(new UrlResponseDto(url)) : NotFound();
         }
 
         [HttpPut("{id}")]
