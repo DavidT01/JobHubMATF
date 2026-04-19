@@ -34,14 +34,14 @@ namespace Profile.API.Controllers
         }
 
         [HttpPost("{id}/logo")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UrlResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UploadLogo(Guid id, IFormFile file)
         {
             logger.LogInformation("Received Logo upload request for company Id: {Id}", id);
             var url = await mediator.Send(new UploadCompanyLogoCommand { Id = id, File = file });
-            return url != null ? Ok(new { Logo = url }) : NotFound();
+            return url != null ? Ok(new UrlResponseDto(url)) : NotFound();
         }
 
         [HttpPut("{id}")]
