@@ -34,10 +34,12 @@ namespace Profile.API.Controllers
         }
 
         [HttpPost("{id}/cv")]
+        [Consumes("multipart/form-data")]
+        [RequestSizeLimit(5 * 1024 * 1024)]
         [ProducesResponseType(typeof(UrlResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UploadCv(Guid id, IFormFile file)
+        public async Task<IActionResult> UploadCv(Guid id, [FromForm] IFormFile file)
         {
             logger.LogInformation("Received CV upload request for candidate Id: {Id}", id);
             var url = await mediator.Send(new UploadCandidateCvCommand { Id = id, File = file });
