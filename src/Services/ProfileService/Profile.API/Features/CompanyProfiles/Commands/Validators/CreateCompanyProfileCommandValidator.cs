@@ -9,7 +9,9 @@ namespace Profile.API.Features.CompanyProfiles.Commands.Validators
     {
         public CreateCompanyProfileCommandValidator(IProfileContext context)
         {
-            RuleFor(p => p.UserId).NotEmpty().WithMessage("UserId is required.")
+            RuleFor(p => p.UserId)
+                .Cascade(CascadeMode.Stop)
+                .NotEmpty().WithMessage("UserId is required.")
                 .MustAsync(async (userId, cancellationToken) => !await context.CompanyProfiles.AnyAsync(p => p.UserId == userId, cancellationToken))
                 .WithMessage("Company profile for this user already exists.");
         
