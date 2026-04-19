@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Profile.API.Data;
-using Profile.API.Features.CompanyProfiles.Commands.CreateCompany;
 
 namespace Profile.API.Features.CompanyProfiles.Commands.DeleteCompany
 {
