@@ -16,7 +16,7 @@ namespace Profile.API.Features.CandidateProfiles.Commands.UploadCv
                 return null;
             }
 
-            var rootPath = environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var rootPath = environment.WebRootPath ?? throw new InvalidOperationException("WebRootPath is not configured.");
             var cvsFolder = Path.Combine(rootPath, "uploads", "cvs");
             Directory.CreateDirectory(cvsFolder);
 
