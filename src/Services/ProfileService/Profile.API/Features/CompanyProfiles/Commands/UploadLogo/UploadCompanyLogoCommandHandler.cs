@@ -28,6 +28,14 @@ namespace Profile.API.Features.CompanyProfiles.Commands.UploadLogo
                 await request.File.CopyToAsync(fileStream, cancellationToken);
             }
 
+            if (!string.IsNullOrEmpty(profile.LogoUrl))
+            {
+                var oldFilePath = Path.Combine(logosFolder, Path.GetFileName(profile.LogoUrl));
+
+                if (File.Exists(oldFilePath))
+                    File.Delete(oldFilePath);
+            }
+
             var fileUrl = $"/uploads/logos/{fileName}";
             profile.LogoUrl = fileUrl;
             profile.ModifiedAt = DateTime.UtcNow;
