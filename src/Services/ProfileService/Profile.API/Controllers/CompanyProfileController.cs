@@ -34,10 +34,12 @@ namespace Profile.API.Controllers
         }
 
         [HttpPost("{id}/logo")]
+        [Consumes("multipart/form-data")]
+        [RequestSizeLimit(5 * 1024 * 1024)]
         [ProducesResponseType(typeof(UrlResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UploadLogo(Guid id, IFormFile file)
+        public async Task<IActionResult> UploadLogo(Guid id, [FromForm] IFormFile file)
         {
             logger.LogInformation("Received Logo upload request for company Id: {Id}", id);
             var url = await mediator.Send(new UploadCompanyLogoCommand { Id = id, File = file });
