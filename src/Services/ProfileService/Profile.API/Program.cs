@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Profile.API.Data;
 using Profile.API.Exceptions;
 using Profile.API.Features.Behaviors;
@@ -42,7 +43,17 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseStaticFiles();
+var wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+if(!Directory.Exists(wwwrootPath))
+{
+    Directory.CreateDirectory(wwwrootPath);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(wwwrootPath),
+    RequestPath = ""
+});
 
 app.MapControllers();
 
