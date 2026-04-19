@@ -42,6 +42,8 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseStaticFiles();
+
 app.MapControllers();
 
 app.Run();
