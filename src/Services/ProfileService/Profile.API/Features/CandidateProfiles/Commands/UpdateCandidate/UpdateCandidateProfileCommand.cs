@@ -16,6 +16,7 @@ namespace Profile.API.Features.CandidateProfiles.Commands.UpdateCandidate
         public string Projects { get; set; } = string.Empty;
         public string Skills { get; set; } = string.Empty;
         public string Languages { get; set; } = string.Empty;
+        public string? PictureUrl { get; set; }
         public string CvUrl { get; set; } = string.Empty;
         public string? GithubUrl { get; set; }
         public string? GitlabUrl { get; set; }
