@@ -31,7 +31,9 @@ namespace Profile.API.Features.CandidateProfiles.Commands.Validators
 
             RuleFor(p => p.LinkedInUrl).ValidUrl().WithName("LinkedInUrl");
 
-            RuleFor(p => p.CvUrl).ValidUrl().WithName("CvUrl");
+            RuleFor(p => p.CvUrl).MustBeValidUrl().WithName("CvUrl");
+
+            RuleFor(p => p.PictureUrl).MustBeValidUrl().WithName("PictureUrl");
         }
     }
 }
