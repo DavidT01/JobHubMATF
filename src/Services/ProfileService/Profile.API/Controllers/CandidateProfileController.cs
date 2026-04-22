@@ -5,6 +5,7 @@ using Profile.API.Features.CandidateProfiles.Commands.CreateCandidate;
 using Profile.API.Features.CandidateProfiles.Commands.DeleteCandidate;
 using Profile.API.Features.CandidateProfiles.Commands.UpdateCandidate;
 using Profile.API.Features.CandidateProfiles.Commands.UploadCv;
+using Profile.API.Features.CandidateProfiles.Commands.UploadPicture;
 using Profile.API.Features.CandidateProfiles.Queries.GetCandidateProfile;
 
 namespace Profile.API.Controllers
@@ -43,6 +44,19 @@ namespace Profile.API.Controllers
         {
             logger.LogInformation("Received CV upload request for candidate Id: {Id}", id);
             var url = await mediator.Send(new UploadCandidateCvCommand { Id = id, File = file });
+            return url != null ? Ok(new UrlResponseDto(url)) : NotFound();
+        }
+
+        [HttpPost("{id}/picture")]
+        [Consumes("multipart/form-data")]
+        [RequestSizeLimit(5 * 1024 * 1024)]
+        [ProducesResponseType(typeof(UrlResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UploadPicture(Guid id, [FromForm] IFormFile file)
+        {
+            logger.LogInformation("Received picture upload request for candidate Id: {Id}", id);
+            var url = await mediator.Send(new UploadCandidatePictureCommand { Id = id, File = file });
             return url != null ? Ok(new UrlResponseDto(url)) : NotFound();
         }
 
