@@ -15,6 +15,7 @@ public class CandidateProfileDto
     public string Skills { get; set; } = string.Empty;
     public string Languages { get; set; } = string.Empty;
     public string CvUrl { get; set; } = string.Empty;
+    public string? PictureUrl { get; set; }
     public string? GithubUrl { get; set; }
     public string? GitlabUrl { get; set; }
     public string? LinkedInUrl { get; set; }
