@@ -40,5 +40,12 @@ namespace Chat.API.Controllers
 
             return Ok(messages);
         }
+
+        [HttpGet("{chatId}")]
+        public async Task<ActionResult<List<Message>>> GetMessagesByChatId(string chatId)
+        {
+            var messages = await _chatService.GetMessagesByChatIdAsync(chatId);
+            return Ok(messages);
+        }
     }
 }

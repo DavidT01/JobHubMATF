@@ -55,6 +55,7 @@ namespace Chat.API.Services
             // 1. Uzmi ili kreiraj chat
             var chat = await GetOrCreateChatAsync(senderId, receiverId);
 
+            
             // 2. Kreiraj poruku
             var message = new Message
             {
@@ -94,6 +95,14 @@ namespace Chat.API.Services
                 .ToListAsync();
 
             return messages;
+        }
+
+        public async Task<List<Message>> GetMessagesByChatIdAsync(string chatId)
+        {
+            return await _messages
+                .Find(m => m.ChatId == chatId)
+                .SortBy(m => m.Timestamp)
+                .ToListAsync();
         }
     }
 }
