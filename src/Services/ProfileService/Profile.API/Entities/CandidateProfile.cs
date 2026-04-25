@@ -9,11 +9,11 @@
         public string Email { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
-        public string Education { get; set; } = string.Empty;
-        public string Experience { get; set; } = string.Empty;
-        public string Projects { get; set; } = string.Empty;
-        public string Skills { get; set; } = string.Empty;
-        public string Languages { get; set; } = string.Empty;
+        public List<Education> Education { get; set; } = new();
+        public List<Experience> Experience { get; set; } = new();
+        public List<Project> Projects { get; set; } = new();
+        public List<string> Skills { get; set; } = new();
+        public List<Language> Languages { get; set; } = new();
         public string CvUrl { get; set; } = string.Empty;
         public string? PictureUrl { get; set; }
         public string? GithubUrl { get; set; }
