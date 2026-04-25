@@ -9,7 +9,11 @@ namespace Profile.API.Mapping
     {
         public CandidateMappingProfile()
         {
-            CreateMap<CandidateProfile, CandidateProfileDto>();
+            CreateMap<CandidateProfile, CandidateProfileDto>().ReverseMap();
+            CreateMap<Education, EducationDto>().ReverseMap();
+            CreateMap<Experience, ExperienceDto>().ReverseMap();
+            CreateMap<Project, ProjectDto>().ReverseMap();
+            CreateMap<Language, LanguageDto>().ReverseMap();
 
             CreateMap<CreateCandidateProfileCommand, CandidateProfile>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
