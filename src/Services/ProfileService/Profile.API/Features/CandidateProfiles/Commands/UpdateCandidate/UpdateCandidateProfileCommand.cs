@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Profile.API.DTOs;
 
 namespace Profile.API.Features.CandidateProfiles.Commands.UpdateCandidate
 {
@@ -11,11 +12,11 @@ namespace Profile.API.Features.CandidateProfiles.Commands.UpdateCandidate
         public string Email { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
-        public string Education { get; set; } = string.Empty;
-        public string Experience { get; set; } = string.Empty;
-        public string Projects { get; set; } = string.Empty;
-        public string Skills { get; set; } = string.Empty;
-        public string Languages { get; set; } = string.Empty;
+        public List<EducationDto> Education { get; set; } = new();
+        public List<ExperienceDto> Experience { get; set; } = new();
+        public List<ProjectDto> Projects { get; set; } = new();
+        public List<string> Skills { get; set; } = new();
+        public List<LanguageDto> Languages { get; set; } = new();
         public string? PictureUrl { get; set; }
         public string CvUrl { get; set; } = string.Empty;
         public string? GithubUrl { get; set; }
