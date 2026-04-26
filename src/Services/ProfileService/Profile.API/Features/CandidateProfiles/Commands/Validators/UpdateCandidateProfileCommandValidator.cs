@@ -34,6 +34,13 @@ namespace Profile.API.Features.CandidateProfiles.Commands.Validators
             RuleFor(p => p.CvUrl).ValidUrl().WithName("CvUrl");
 
             RuleFor(p => p.PictureUrl).ValidUrl().WithName("PictureUrl");
+
+            RuleForEach(p => p.Skills).MaximumLength(20).WithMessage("Skill cannot exceed 20 characters.");
+
+            RuleForEach(p => p.Education).SetValidator(new EducationDtoValidator());
+            RuleForEach(p => p.Experience).SetValidator(new ExperienceDtoValidator());
+            RuleForEach(p => p.Projects).SetValidator(new ProjectDtoValidator());
+            RuleForEach(p => p.Languages).SetValidator(new LanguageDtoValidator());
         }
     }
 }

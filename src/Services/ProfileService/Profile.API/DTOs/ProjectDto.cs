@@ -1,4 +1,4 @@
 ﻿namespace Profile.API.DTOs
 {
-    public record ProjectDto(string Name, string Description, string RepositoryLink);
+    public record ProjectDto(string Name, string? Description, string? RepositoryUrl);
 }
