@@ -13,8 +13,8 @@ namespace Profile.API.Data
 
         public DbSet<CandidateProfile> CandidateProfiles { get; set; } = null!;
         public DbSet<CompanyProfile> CompanyProfiles { get; set; } = null!;
-        public DbSet<Education> Educations { get; set; } = null!;
-        public DbSet<Experience> Experiences { get; set; } = null!;
+        public DbSet<Education> Education { get; set; } = null!;
+        public DbSet<Experience> Experience { get; set; } = null!;
         public DbSet<Project> Projects { get; set; } = null!;
         public DbSet<Language> Languages { get; set; } = null!;
 
