@@ -10,7 +10,12 @@ namespace Profile.API.Features.CandidateProfiles.Queries.GetCandidateProfile
     {
         public async Task<CandidateProfileDto?> Handle(GetCandidateProfileQuery request, CancellationToken cancellationToken)
         {
-            var profile = await context.CandidateProfiles.FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);
+            var profile = await context.CandidateProfiles
+                .Include(p => p.Education)
+                .Include(p => p.Experience)
+                .Include(p => p.Projects)
+                .Include(p => p.Languages)
+                .FirstOrDefaultAsync(p => p.UserId == request.UserId, cancellationToken);
 
             if(profile == null)
             {
