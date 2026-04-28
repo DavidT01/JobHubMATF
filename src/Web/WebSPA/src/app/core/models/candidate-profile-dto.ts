@@ -17,8 +17,8 @@ export interface CandidateProfileDto {
   skills: string[];
   languages: LanguageDto[];
   cvUrl: string;
-  githubUrl?: string;
-  gitlabUrl?: string;
-  linkedInUrl?: string;
-  pictureUrl?: string;
+  githubUrl?: string | null;
+  gitlabUrl?: string | null;
+  linkedInUrl?: string | null;
+  pictureUrl?: string | null;
 }
