@@ -1,12 +1,30 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CandidateProfileService } from '../../core/services/candidate-profile/candidate-profile-service';
 import { CandidateProfileDto } from '../../core/models/candidate-profile-dto';
+import { DatePipe } from '@angular/common';
+
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-candidate-profile',
-  imports: [],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule, 
+    DatePipe,
+    MatButtonModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatChipsModule,
+    MatIconModule
+  ],
   templateUrl: './candidate-profile.html',
   styleUrl: './candidate-profile.scss',
 })
@@ -40,11 +58,12 @@ export class CandidateProfileComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: [''],
       location: [''],
-      education: [''],
-      experience: [''],
-      projects: [''],
-      skills: [''],
-      languages: [''],
+      education: this.fb.array([]),
+      experience: this.fb.array([]),
+      projects: this.fb.array([]),
+      skills: this.fb.array([]),
+      languages: this.fb.array([]),
+      cvUrl: [''],
       githubUrl: [''],
       gitlabUrl: [''],
       linkedInUrl: ['']
@@ -55,27 +74,111 @@ export class CandidateProfileComponent implements OnInit {
     this.profileService.getProfile(this.userId).subscribe({
       next: (data) => {
         this.profileData.set(data);
+        this.patchFormArrays(data);
         this.form.patchValue(data);
         this.isLoading.set(false);
       },
       error: (err) => {
         console.error(err);
+        this.isLoading.set(false);
         if (err.status === 404) {
-          this.router.navigate(['/']); // maybe create a not found component?
+          this.router.navigate(['/']);
         }
       }
     });
   }
 
+  private patchFormArrays(data: CandidateProfileDto): void {
+    this.educationForms.clear();
+    this.experienceForms.clear();
+    this.projectsForms.clear();
+    this.skillsForms.clear();
+    this.languagesForms.clear();
+    
+    data.education?.forEach(() => this.addEducation());
+    data.experience?.forEach(() => this.addExperience());
+    data.projects?.forEach(() => this.addProject());
+    data.skills?.forEach(() => this.addSkill());
+    data.languages?.forEach(() => this.addLanguage());
+
+    const formattedData = { ...data };
+    if (formattedData.education) {
+      formattedData.education = formattedData.education.map(e => ({
+        ...e, 
+        startDate: e.startDate ? new Date(e.startDate).toISOString().split('T')[0] as string : '',
+        endDate: e.endDate ? new Date(e.endDate).toISOString().split('T')[0] as string : null
+      })) as any;
+    }
+    
+    if (formattedData.experience) {
+      formattedData.experience = formattedData.experience.map(e => ({
+        ...e, 
+        startDate: e.startDate ? new Date(e.startDate).toISOString().split('T')[0] as string : '',
+        endDate: e.endDate ? new Date(e.endDate).toISOString().split('T')[0] as string : null
+      })) as any;
+    }
+
+    this.form.patchValue(formattedData);
+  }
+
+  get educationForms() { return this.form.get('education') as FormArray; }
+  get experienceForms() { return this.form.get('experience') as FormArray; }
+  get projectsForms() { return this.form.get('projects') as FormArray; }
+  get skillsForms() { return this.form.get('skills') as FormArray; }
+  get languagesForms() { return this.form.get('languages') as FormArray; }
+
+  addEducation() {
+    this.educationForms.push(this.fb.group({
+      institutionName: ['', Validators.required],
+      startDate: ['', Validators.required],
+      endDate: [null],
+      degree: [null]
+    }));
+  }
+  removeEducation(i: number) { this.educationForms.removeAt(i); }
+
+  addExperience() {
+    this.experienceForms.push(this.fb.group({
+      companyName: ['', Validators.required],
+      position: ['', Validators.required],
+      startDate: ['', Validators.required],
+      endDate: [null]
+    }));
+  }
+  removeExperience(i: number) { this.experienceForms.removeAt(i); }
+
+  addProject() {
+    this.projectsForms.push(this.fb.group({
+      name: ['', Validators.required],
+      description: [null],
+      repositoryUrl: [null]
+    }));
+  }
+  removeProject(i: number) { this.projectsForms.removeAt(i); }
+
+  addSkill() { this.skillsForms.push(this.fb.control('', Validators.required)); }
+  removeSkill(i: number) { this.skillsForms.removeAt(i); }
+
+  addLanguage() {
+    this.languagesForms.push(this.fb.group({
+      name: ['', Validators.required],
+      level: [null]
+    }));
+  }
+  removeLanguage(i: number) { this.languagesForms.removeAt(i); }
+
   toggleEditMode(): void {
-    if (this.isEditMode() && this.profileData()?.id)
+    if (this.isEditMode() && this.profileData()?.id) {
       this.loadProfile();
+    }
     this.isEditMode.update(v => !v);
   }
 
   saveProfile(): void {
-    if (this.form.invalid || !this.profileData()?.id)
+    if (this.form.invalid || !this.profileData()?.id) {
+      this.form.markAllAsTouched();
       return;
+    }
 
     const data = { ...this.profileData()!, ...this.form.value, userId: this.userId };
     this.profileService.updateProfile(this.profileData()!.id, data).subscribe({
@@ -88,8 +191,7 @@ export class CandidateProfileComponent implements OnInit {
 
   deleteProfile(): void {
     const id = this.profileData()?.id;
-    if (!id)
-      return;
+    if (!id) return;
 
     this.profileService.deleteProfile(id).subscribe({
       next: () => {
