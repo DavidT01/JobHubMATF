@@ -1,1 +1,442 @@
-<p>candidate-profile works!</p>
+@if (isLoading()) {
+  <div class="loading-spinner">
+    <p>Loading profile...</p>
+  </div>
+} @else {
+  <div class="profile-container">
+
+    <!-- HEADER -->
+    <mat-card class="profile-header">
+      <div class="header-content-wrapper">
+        <div class="header-left">
+          <div class="profile-title">
+            @if (!isEditMode()) {
+              <h1>{{ profileData()?.firstName }} {{ profileData()?.lastName }}</h1>
+            } @else {
+              <h1>Edit Profile</h1>
+            }
+          </div>
+        </div>
+        <div class="header-actions">
+          @if (!isEditMode()) {
+            <button mat-flat-button color="primary" (click)="toggleEditMode()">Edit Profile</button>
+            <button mat-stroked-button color="warn" (click)="deleteProfile()">Delete Profile</button>
+          } @else {
+            <button mat-stroked-button (click)="toggleEditMode()">Cancel</button>
+          }
+        </div>
+      </div>
+    </mat-card>
+
+    @if (!isEditMode()) {
+      <!-- VIEW MODE -->
+      <div class="profile-content">
+
+        <!-- General Information -->
+        <mat-card class="profile-section">
+          <mat-card-header>
+            <mat-card-title>General Information</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="info-grid">
+              <div class="info-item"><strong>Email:</strong> {{ profileData()?.email }}</div>
+              <div class="info-item"><strong>Phone:</strong> {{ profileData()?.phoneNumber || 'Not provided' }}</div>
+              <div class="info-item"><strong>Location:</strong> {{ profileData()?.location || 'Not provided' }}</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Experience -->
+        <mat-card class="profile-section">
+          <mat-card-header>
+            <mat-card-title>Experience</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (profileData()?.experience?.length) {
+              <div class="list-container">
+                @for (exp of profileData()?.experience; track $index) {
+                  <div class="list-card">
+                    <h3>{{ exp.position }} at {{ exp.companyName }}</h3>
+                    <span class="date-badge">{{ exp.startDate | date:'mediumDate' }} - {{ exp.endDate ? (exp.endDate | date:'mediumDate') : 'Present' }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="empty-state">No experience added.</p>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Education -->
+        <mat-card class="profile-section">
+          <mat-card-header>
+             <mat-card-title>Education</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (profileData()?.education?.length) {
+              <div class="list-container">
+                @for (edu of profileData()?.education; track $index) {
+                  <div class="list-card">
+                    <h3>{{ edu.degree }}</h3>
+                    <p>{{ edu.institutionName }}</p>
+                    <span class="date-badge">{{ edu.startDate | date:'mediumDate' }} - {{ edu.endDate ? (edu.endDate | date:'mediumDate') : 'Present' }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="empty-state">No education added.</p>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Projects -->
+        <mat-card class="profile-section">
+          <mat-card-header>
+             <mat-card-title>Projects</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (profileData()?.projects?.length) {
+              <div class="list-container">
+                @for (proj of profileData()?.projects; track $index) {
+                  <div class="list-card">
+                    <h3>{{ proj.name }}</h3>
+                    <p>{{ proj.description }}</p>
+                    @if (proj.repositoryUrl) {
+                      <a [href]="proj.repositoryUrl" target="_blank" class="link-btn">View Repository</a>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="empty-state">No projects added.</p>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Skills -->
+        <mat-card class="profile-section">
+          <mat-card-header>
+             <mat-card-title>Skills</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (profileData()?.skills?.length) {
+              <mat-chip-set>
+                @for (skill of profileData()?.skills; track $index) {
+                  <mat-chip>{{ skill }}</mat-chip>
+                }
+              </mat-chip-set>
+            } @else {
+              <p class="empty-state">No skills added.</p>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Languages -->
+        <mat-card class="profile-section">
+          <mat-card-header>
+             <mat-card-title>Languages</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (profileData()?.languages?.length) {
+              <mat-chip-set>
+                @for (lang of profileData()?.languages; track $index) {
+                  <mat-chip color="accent" highlighted="true">{{ lang.name }}{{ lang.level ? ' (' + lang.level + ')' : '' }}</mat-chip>
+                }
+              </mat-chip-set>
+            } @else {
+              <p class="empty-state">No languages added.</p>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Links -->
+        <mat-card class="profile-section">
+          <mat-card-header>
+            <mat-card-title>Links</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="info-grid">
+              <div class="info-item">
+                <strong>GitHub:</strong>
+                @if (profileData()?.githubUrl) {
+                  <a [href]="profileData()?.githubUrl" target="_blank">{{ profileData()?.githubUrl }}</a>
+                } @else {
+                  <span class="not-provided">Not provided</span>
+                }
+              </div>
+              <div class="info-item">
+                <strong>GitLab:</strong>
+                @if (profileData()?.gitlabUrl) {
+                  <a [href]="profileData()?.gitlabUrl" target="_blank">{{ profileData()?.gitlabUrl }}</a>
+                } @else {
+                  <span class="not-provided">Not provided</span>
+                }
+              </div>
+              <div class="info-item">
+                <strong>LinkedIn:</strong>
+                @if (profileData()?.linkedInUrl) {
+                  <a [href]="profileData()?.linkedInUrl" target="_blank">{{ profileData()?.linkedInUrl }}</a>
+                } @else {
+                  <span class="not-provided">Not provided</span>
+                }
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    } @else {
+      <!-- EDIT MODE -->
+      <form [formGroup]="form" (ngSubmit)="saveProfile()" class="profile-form">
+
+        <!-- General Information -->
+        <mat-card class="form-section">
+          <mat-card-header>
+            <mat-card-title>General Information</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="form-row-2">
+              <mat-form-field appearance="outline">
+                <mat-label>First Name</mat-label>
+                <input matInput type="text" formControlName="firstName" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Last Name</mat-label>
+                <input matInput type="text" formControlName="lastName" />
+              </mat-form-field>
+            </div>
+            <div class="form-row-3">
+              <mat-form-field appearance="outline">
+                <mat-label>Email</mat-label>
+                <input matInput type="email" formControlName="email" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Phone Number</mat-label>
+                <input matInput type="text" formControlName="phoneNumber" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Location</mat-label>
+                <input matInput type="text" formControlName="location" />
+              </mat-form-field>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Experience -->
+        <mat-card class="form-section">
+          <div class="section-title-with-action">
+            <mat-card-title>Experience</mat-card-title>
+            <button mat-mini-fab color="warn" type="button" (click)="addExperience()" title="Add Experience">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <mat-card-content>
+            <div formArrayName="experience" class="list-container">
+              @for (expCtrl of experienceForms.controls; track $index) {
+              <div [formGroupName]="$index" class="array-item-row">
+                <div class="array-item-card flex-grow">
+                  <div class="form-grid">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Company Name</mat-label>
+                      <input matInput type="text" formControlName="companyName" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Position</mat-label>
+                      <input matInput type="text" formControlName="position" />
+                    </mat-form-field>
+                  </div>
+                  <div class="form-grid">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Start Date</mat-label>
+                      <input matInput type="date" formControlName="startDate" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>End Date</mat-label>
+                      <input matInput type="date" formControlName="endDate" />
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="array-item-actions">
+                  <button mat-mini-fab color="warn" type="button" (click)="removeExperience($index)" title="Remove">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Education -->
+        <mat-card class="form-section">
+          <div class="section-title-with-action">
+            <mat-card-title>Education</mat-card-title>
+            <button mat-mini-fab color="warn" type="button" (click)="addEducation()" title="Add Education">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <mat-card-content>
+            <div formArrayName="education" class="list-container">
+              @for (eduCtrl of educationForms.controls; track $index) {
+              <div [formGroupName]="$index" class="array-item-row">
+                <div class="array-item-card flex-grow">
+                  <div class="form-grid">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Institution Name</mat-label>
+                      <input matInput type="text" formControlName="institutionName" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Degree</mat-label>
+                      <input matInput type="text" formControlName="degree" />
+                    </mat-form-field>
+                  </div>
+                  <div class="form-grid">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Start Date</mat-label>
+                      <input matInput type="date" formControlName="startDate" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>End Date</mat-label>
+                      <input matInput type="date" formControlName="endDate" />
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="array-item-actions">
+                  <button mat-mini-fab color="warn" type="button" (click)="removeEducation($index)" title="Remove">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Projects -->
+        <mat-card class="form-section">
+          <div class="section-title-with-action">
+            <mat-card-title>Projects</mat-card-title>
+            <button mat-mini-fab color="warn" type="button" (click)="addProject()" title="Add Project">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <mat-card-content>
+            <div formArrayName="projects" class="list-container">
+              @for (projCtrl of projectsForms.controls; track $index) {
+              <div [formGroupName]="$index" class="array-item-row">
+                <div class="array-item-card flex-grow">
+                  <div class="form-grid">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Project Name</mat-label>
+                      <input matInput type="text" formControlName="name" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Description</mat-label>
+                      <textarea matInput formControlName="description" rows="3"></textarea>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Repository URL</mat-label>
+                      <input matInput type="text" formControlName="repositoryUrl" />
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="array-item-actions">
+                  <button mat-mini-fab color="warn" type="button" (click)="removeProject($index)" title="Remove">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Skills -->
+        <mat-card class="form-section">
+          <div class="section-title-with-action">
+            <mat-card-title>Skills</mat-card-title>
+            <button mat-mini-fab color="warn" type="button" (click)="addSkill()" title="Add Skill">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <mat-card-content>
+            <div formArrayName="skills" class="tags-edit-container">
+              @for (skillCtrl of skillsForms.controls; track $index) {
+              <div class="tag-input-group array-item-row" style="align-items: center; margin-bottom: 1rem;">
+                <mat-form-field appearance="outline" class="flex-grow" subscriptSizing="dynamic">
+                  <mat-label>Skill name</mat-label>
+                  <input matInput type="text" [formControlName]="$index" />
+                </mat-form-field>
+                <div class="array-item-actions">
+                  <button mat-mini-fab color="warn" type="button" (click)="removeSkill($index)" title="Remove Skill">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Languages -->
+        <mat-card class="form-section">
+          <div class="section-title-with-action">
+            <mat-card-title>Languages</mat-card-title>
+            <button mat-mini-fab color="warn" type="button" (click)="addLanguage()" title="Add Language">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <mat-card-content>
+            <div formArrayName="languages" class="list-container">
+              @for (langCtrl of languagesForms.controls; track $index) {
+              <div [formGroupName]="$index" class="array-item-row">
+                <div class="array-item-card flex-grow inline-card" style="display:flex; gap:1rem; align-items:baseline; flex-wrap: wrap; padding: 1.5rem;">
+                  <mat-form-field appearance="outline" style="flex:1; min-width: 150px; margin-bottom: -1.25em;">
+                    <mat-label>Language</mat-label>
+                    <input matInput type="text" formControlName="name" placeholder="e.g. English" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" style="flex:1; min-width: 150px; margin-bottom: -1.25em;">
+                    <mat-label>Level</mat-label>
+                    <input matInput type="text" formControlName="level" placeholder="e.g. C1, Native" />
+                  </mat-form-field>
+                </div>
+                <div class="array-item-actions">
+                  <button mat-mini-fab color="warn" type="button" (click)="removeLanguage($index)" title="Remove">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Links -->
+        <mat-card class="form-section">
+          <mat-card-header>
+            <mat-card-title>Links</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>GitHub URL</mat-label>
+                <input matInput type="text" formControlName="githubUrl" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>GitLab URL</mat-label>
+                <input matInput type="text" formControlName="gitlabUrl" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>LinkedIn URL</mat-label>
+                <input matInput type="text" formControlName="linkedInUrl" />
+              </mat-form-field>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <div class="form-actions">
+          <button mat-flat-button color="primary" type="submit" style="padding: 0 2rem; font-size: 1.1rem;">Save Profile</button>
+        </div>
+      </form>
+    }
+  </div>
+}
