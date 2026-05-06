@@ -4,21 +4,21 @@ namespace Identity.API.Models
 {
     public class RegisterDto
     {
-        [Required(ErrorMessage = "Ime je obavezno.")]
+        [Required(ErrorMessage = "First name is required.")]
         public string? FirstName { get; set; }
 
-        [Required(ErrorMessage = "Prezime je obavezno.")]
+        [Required(ErrorMessage = "Last name is required.")]
         public string? LastName { get; set; }
 
-        [Required(ErrorMessage = "Email je obavezan.")]
-        [EmailAddress(ErrorMessage = "Nevalidan format email adrese.")]
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email format.")]
         public string? Email { get; set; }
 
-        [Required(ErrorMessage = "Lozinka je obavezna.")]
-        [MinLength(6, ErrorMessage = "Lozinka mora imati barem 6 karaktera.")]
+        [Required(ErrorMessage = "Password is required.")]
+        [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
         public string? Password { get; set; }
 
-        [Required(ErrorMessage = "Uloga je obavezna.")]
+        [Required(ErrorMessage = "Role is required.")]
         public string? Role { get; set; } 
     }
 }
