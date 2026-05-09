@@ -11,6 +11,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+
+import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog-component';
 
 @Component({
   selector: 'app-candidate-profile',
@@ -23,7 +26,8 @@ import { MatIconModule } from '@angular/material/icon';
     MatFormFieldModule,
     MatInputModule,
     MatChipsModule,
-    MatIconModule
+    MatIconModule,
+    MatDialogModule
   ],
   templateUrl: './candidate-profile.html',
   styleUrl: './candidate-profile.scss',
@@ -33,6 +37,7 @@ export class CandidateProfileComponent implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private profileService = inject(CandidateProfileService);
+  private dialog = inject(MatDialog);
 
   profileData = signal<CandidateProfileDto | null>(null);
   isLoading = signal<boolean>(true);
@@ -71,6 +76,41 @@ export class CandidateProfileComponent implements OnInit {
   }
 
   loadProfile(): void {
+    if (this.userId === 'test') {
+      const testData: any = {
+        id: 'test-id-12345',
+        userId: 'test',
+        firstName: 'Test',
+        lastName: 'Korisnik',
+        email: 'test@example.com',
+        phoneNumber: '+381601234567',
+        location: 'Beograd',
+        education: [
+          { institutionName: 'MATF', startDate: '2019-10-01T00:00:00Z', endDate: '2023-09-30T00:00:00Z', degree: 'BSc' }
+        ],
+        experience: [
+          { companyName: 'Tech Firma', position: 'Frontend Developer', startDate: '2023-10-01T00:00:00Z', endDate: null }
+        ],
+        projects: [
+          { name: 'JobHub', description: 'Platforma za poslove', repositoryUrl: 'https://github.com/test/jobhub' }
+        ],
+        skills: ['Angular', 'TypeScript', 'C#'],
+        languages: [
+          { name: 'Engleski', level: 'C1' }
+        ],
+        cvUrl: '',
+        githubUrl: 'https://github.com/test',
+        gitlabUrl: '',
+        linkedInUrl: ''
+      };
+      
+      this.profileData.set(testData);
+      this.patchFormArrays(testData);
+      this.form.patchValue(testData);
+      this.isLoading.set(false);
+      return;
+    }
+
     this.profileService.getProfile(this.userId).subscribe({
       next: (data) => {
         this.profileData.set(data);
@@ -191,12 +231,22 @@ export class CandidateProfileComponent implements OnInit {
 
   deleteProfile(): void {
     const id = this.profileData()?.id;
-    if (!id) return;
+    if (!id)
+      return;
 
-    this.profileService.deleteProfile(id).subscribe({
-      next: () => {
-        this.router.navigate(['/']);
-      }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: { message: 'Are you sure you want to delete your profile? This action is permanent.' }
     });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.profileService.deleteProfile(id).subscribe({
+          next: () => {
+            this.router.navigate(['/']);
+          }
+        });
+      }
+    })
   }
 }
