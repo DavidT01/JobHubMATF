@@ -1,8 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CandidateProfileService } from '../../core/services/candidate-profile/candidate-profile-service';
-import { CandidateProfileDto } from '../../core/models/candidate-profile-dto';
 import { DatePipe } from '@angular/common';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -12,7 +10,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
+import { CandidateProfileService } from '../../core/services/candidate-profile/candidate-profile-service';
+import { CandidateProfileDto } from '../../core/models/candidate-profile-dto';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog-component';
 
 @Component({
@@ -27,7 +29,9 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-
     MatInputModule,
     MatChipsModule,
     MatIconModule,
-    MatDialogModule
+    MatDialogModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   templateUrl: './candidate-profile.html',
   styleUrl: './candidate-profile.scss',
@@ -76,41 +80,6 @@ export class CandidateProfileComponent implements OnInit {
   }
 
   loadProfile(): void {
-    if (this.userId === 'test') {
-      const testData: any = {
-        id: 'test-id-12345',
-        userId: 'test',
-        firstName: 'Test',
-        lastName: 'Korisnik',
-        email: 'test@example.com',
-        phoneNumber: '+381601234567',
-        location: 'Beograd',
-        education: [
-          { institutionName: 'MATF', startDate: '2019-10-01T00:00:00Z', endDate: '2023-09-30T00:00:00Z', degree: 'BSc' }
-        ],
-        experience: [
-          { companyName: 'Tech Firma', position: 'Frontend Developer', startDate: '2023-10-01T00:00:00Z', endDate: null }
-        ],
-        projects: [
-          { name: 'JobHub', description: 'Platforma za poslove', repositoryUrl: 'https://github.com/test/jobhub' }
-        ],
-        skills: ['Angular', 'TypeScript', 'C#'],
-        languages: [
-          { name: 'Engleski', level: 'C1' }
-        ],
-        cvUrl: '',
-        githubUrl: 'https://github.com/test',
-        gitlabUrl: '',
-        linkedInUrl: ''
-      };
-      
-      this.profileData.set(testData);
-      this.patchFormArrays(testData);
-      this.form.patchValue(testData);
-      this.isLoading.set(false);
-      return;
-    }
-
     this.profileService.getProfile(this.userId).subscribe({
       next: (data) => {
         this.profileData.set(data);
@@ -206,6 +175,22 @@ export class CandidateProfileComponent implements OnInit {
     }));
   }
   removeLanguage(i: number) { this.languagesForms.removeAt(i); }
+
+  calculateDuration(startDate: string | Date | undefined, endDate: string | Date | null | undefined): string {
+    if (!startDate)
+      return '';
+
+    const start = new Date(startDate);
+    const end = endDate ? new Date(endDate) : new Date();
+
+    let months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+    const years = Math.floor(months / 12);
+    const monthsRemainder = months % 12;
+
+    return [years > 0 ? `${years} yr` : '',
+      monthsRemainder > 0 ? `${monthsRemainder} mo` : ''
+    ].join(' ').trim();
+  }
 
   toggleEditMode(): void {
     if (this.isEditMode() && this.profileData()?.id) {
