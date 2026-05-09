@@ -85,7 +85,7 @@ export class CompanyProfileComponent implements OnInit {
     this.isEditMode.update(v => !v);
   }
 
-  sveProfile(): void {
+  saveProfile(): void {
     if (this.form.invalid || !this.profileData()?.id) {
       this.form.markAllAsTouched();
       return;
