@@ -18,7 +18,7 @@ import { CandidateProfileDto } from '../../core/models/candidate-profile-dto';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog-component';
 
 @Component({
-  selector: 'app-candidate-profile',
+  selector: 'app-candidate-profile-component',
   standalone: true,
   imports: [
     ReactiveFormsModule, 
@@ -33,8 +33,8 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-
     MatDatepickerModule,
     MatNativeDateModule
   ],
-  templateUrl: './candidate-profile.html',
-  styleUrl: './candidate-profile.scss',
+  templateUrl: './candidate-profile-component.html',
+  styleUrl: './candidate-profile-component.scss',
 })
 export class CandidateProfileComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -221,7 +221,7 @@ export class CandidateProfileComponent implements OnInit {
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
-      data: { message: 'Are you sure you want to delete your profile? This action is permanent.' }
+      data: { message: 'Are you sure you want to delete your candidate profile? This action is permanent.' }
     });
 
     dialogRef.afterClosed().subscribe(result => {
