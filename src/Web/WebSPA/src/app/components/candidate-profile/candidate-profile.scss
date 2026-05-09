@@ -149,3 +149,15 @@ mat-form-field { width: 100%; }
 .empty-state { font-style: italic; opacity: 0.6; }
 
 .loading-spinner { text-align: center; padding: 3rem; font-size: 1.2rem; opacity: 0.6; }
+
+.duration-badge {
+  display: inline-block;
+  background-color: #a19999;
+  color: #333;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+  margin-left: 8px;
+  vertical-align: middle;
+}

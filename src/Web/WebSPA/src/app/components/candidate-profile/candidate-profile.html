@@ -57,7 +57,7 @@
                 @for (exp of profileData()?.experience; track $index) {
                   <div class="list-card">
                     <h3>{{ exp.position }} at {{ exp.companyName }}</h3>
-                    <span class="date-badge">{{ exp.startDate | date:'mediumDate' }} - {{ exp.endDate ? (exp.endDate | date:'mediumDate') : 'Present' }}</span>
+                    <span class="date-badge">{{ exp.startDate | date:'mediumDate' }} - {{ exp.endDate ? (exp.endDate | date:'mediumDate') : 'Present' }}</span> <span class="duration-badge">{{ calculateDuration(exp.startDate, exp.endDate) }}</span>
                   </div>
                 }
               </div>
@@ -76,11 +76,11 @@
             @if (profileData()?.education?.length) {
               <div class="list-container">
                 @for (edu of profileData()?.education; track $index) {
-                  <div class="list-card">
-                    <h3>{{ edu.degree }}</h3>
-                    <p>{{ edu.institutionName }}</p>
-                    <span class="date-badge">{{ edu.startDate | date:'mediumDate' }} - {{ edu.endDate ? (edu.endDate | date:'mediumDate') : 'Present' }}</span>
-                  </div>
+                <div class="list-card">
+                  <h3>{{ edu.degree }}</h3>
+                  <p>{{ edu.institutionName }}</p>
+                  <span class="date-badge">{{ edu.startDate | date:'mediumDate' }} - {{ edu.endDate ? (edu.endDate | date:'mediumDate') : 'Present' }}</span> <span class="duration-badge">{{ calculateDuration(edu.startDate, edu.endDate) }}</span>
+                </div>
                 }
               </div>
             } @else {
@@ -247,11 +247,15 @@
                   <div class="form-grid">
                     <mat-form-field appearance="outline">
                       <mat-label>Start Date</mat-label>
-                      <input matInput type="date" formControlName="startDate" />
+                      <input matInput [matDatepicker]="expStartPicker" formControlName="startDate" />
+                      <mat-datepicker-toggle matIconSuffix [for]="expStartPicker"></mat-datepicker-toggle>
+                      <mat-datepicker #expStartPicker></mat-datepicker>
                     </mat-form-field>
                     <mat-form-field appearance="outline">
                       <mat-label>End Date</mat-label>
-                      <input matInput type="date" formControlName="endDate" />
+                      <input matInput [matDatepicker]="expEndPicker" formControlName="endDate" />
+                      <mat-datepicker-toggle matIconSuffix [for]="expEndPicker"></mat-datepicker-toggle>
+                      <mat-datepicker #expEndPicker></mat-datepicker>
                     </mat-form-field>
                   </div>
                 </div>
@@ -292,11 +296,15 @@
                   <div class="form-grid">
                     <mat-form-field appearance="outline">
                       <mat-label>Start Date</mat-label>
-                      <input matInput type="date" formControlName="startDate" />
+                      <input matInput [matDatepicker]="eduStartPicker" formControlName="startDate" />
+                      <mat-datepicker-toggle matIconSuffix [for]="eduStartPicker"></mat-datepicker-toggle>
+                      <mat-datepicker #eduStartPicker></mat-datepicker>
                     </mat-form-field>
                     <mat-form-field appearance="outline">
                       <mat-label>End Date</mat-label>
-                      <input matInput type="date" formControlName="endDate" />
+                      <input matInput [matDatepicker]="eduEndPicker" formControlName="startDate" />
+                      <mat-datepicker-toggle matIconSuffix [for]="eduEndPicker"></mat-datepicker-toggle>
+                      <mat-datepicker #eduEndPicker></mat-datepicker>
                     </mat-form-field>
                   </div>
                 </div>
