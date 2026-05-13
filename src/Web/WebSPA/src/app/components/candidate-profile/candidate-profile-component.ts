@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -42,6 +43,7 @@ export class CandidateProfileComponent implements OnInit {
   private fb = inject(FormBuilder);
   private profileService = inject(CandidateProfileService);
   private dialog = inject(MatDialog);
+  public api = environment.apiUrl;
 
   profileData = signal<CandidateProfileDto | null>(null);
   isLoading = signal<boolean>(true);
@@ -190,6 +192,30 @@ export class CandidateProfileComponent implements OnInit {
     return [years > 0 ? `${years} yr` : '',
       monthsRemainder > 0 ? `${monthsRemainder} mo` : ''
     ].join(' ').trim();
+  }
+
+  onPictureSelected(event: any): void {
+    const file = event.target.files[0];
+    const id = this.profileData()?.id;
+    if (file && id) {
+      this.profileService.uploadPicture(id, file).subscribe({
+        next: (res) => {
+          this.profileData.update(current => current ? { ...current, pictureUrl: res.url } : null);
+        }
+      });
+    }
+  }
+
+  onCvSelected(event: any): void {
+    const file = event.target.files[0];
+    const id = this.profileData()?.id;
+    if (file && id) {
+      this.profileService.uploadCv(id, file).subscribe({
+        next: (res) => {
+          this.profileData.update(current => current ? { ...current, cvUrl: res.url } : null);
+        }
+      });
+    }
   }
 
   toggleEditMode(): void {
