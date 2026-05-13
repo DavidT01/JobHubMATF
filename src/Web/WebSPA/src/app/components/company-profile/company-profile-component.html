@@ -9,6 +9,29 @@
     <mat-card class="profile-header">
       <div class="header-content-wrapper">
         <div class="header-left">
+          <div class="company-logo-wrapper" [class.edit-mode]="isEditMode()">
+            <div class="logo-container" (click)="isEditMode() ? logoInput.click() : null">
+              @if (profileData()?.logoUrl) {
+                <img [src]="apiUrl + '/' + profileData()?.logoUrl" alt="Company Logo" class="company-logo">
+              } @else {
+                <div class="logo-placeholder">
+                  <mat-icon>business</mat-icon>
+                </div>
+              }
+              @if (isEditMode()) {
+                <div class="logo-overlay">
+                  <mat-icon>camera_alt</mat-icon>
+                </div>
+              }
+            </div>
+            <input type="file" #logoInput (change)="onLogoSelected($event)" accept="image/png, image/jpeg" style="display: none;" />
+            @if (isEditMode() && profileData()?.logoUrl) {
+              <button mat-mini-fab color="warn" class="delete-logo-btn" (click)="deleteLogo()" type="button" title="Remove Logo">
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </div>
+
           <div class="profile-title">
             @if (!isEditMode()) {
               <h1>{{ profileData()?.companyName }}</h1>
