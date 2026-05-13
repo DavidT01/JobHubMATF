@@ -9,6 +9,29 @@
     <mat-card class="profile-header">
       <div class="header-content-wrapper">
         <div class="header-left">
+          <div class="candidate-picture-wrapper" [class.edit-mode]="isEditMode()">
+            <div class="avatar-container" (click)="isEditMode() ? fileInput.click() : null">
+              @if (profileData()?.pictureUrl) {
+                <img [src]="apiUrl + '/' + profileData()?.pictureUrl" alt="Profile Picture" class="profile-picture">
+              } @else {
+                <div class="avatar-placeholder">
+                  <mat-icon>person</mat-icon>
+                </div>
+              }
+              @if (isEditMode()) {
+                <div class="avatar-overlay">
+                  <mat-icon>camera_alt</mat-icon>
+                </div>
+              }
+            </div>
+            <input type="file" #fileInput (change)="onPictureSelected($event)" accept="image/png, image/jpeg" style="display: none;" />
+            @if (isEditMode() && profileData()?.pictureUrl) {
+              <button mat-mini-fab color="warn" class="delete-pic-btn" (click)="deletePicture()" type="button" title="Remove Picture">
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </div>
+
           <div class="profile-title">
             @if (!isEditMode()) {
               <h1>{{ profileData()?.firstName }} {{ profileData()?.lastName }}</h1>
@@ -176,6 +199,15 @@
                 <strong>LinkedIn:</strong>
                 @if (profileData()?.linkedInUrl) {
                   <a [href]="profileData()?.linkedInUrl" target="_blank">{{ profileData()?.linkedInUrl }}</a>
+                } @else {
+                  <span class="not-provided">Not provided</span>
+                }
+              </div>
+
+              <div class="info-item">
+                <strong>CV:</strong>
+                @if (profileData()?.cvUrl) {
+                  <a [href]="apiUrl + '/' + profileData()?.cvUrl" target="_blank">Download CV</a>
                 } @else {
                   <span class="not-provided">Not provided</span>
                 }
@@ -424,7 +456,7 @@
             <mat-card-title>Links</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <div class="form-grid">
+            <div class="form-grid" style="margin-bottom: 24px;">
               <mat-form-field appearance="outline">
                 <mat-label>GitHub URL</mat-label>
                 <input matInput type="text" formControlName="githubUrl" />
@@ -437,6 +469,30 @@
                 <mat-label>LinkedIn URL</mat-label>
                 <input matInput type="text" formControlName="linkedInUrl" />
               </mat-form-field>
+            </div>
+
+            <div class="cv-upload-section inline-cv-upload">
+              <span class="upload-label">CV:</span>
+              
+              @if (profileData()?.cvUrl) {
+                 <a [href]="apiUrl + '/' + profileData()?.cvUrl" target="_blank" class="current-file-link">
+                    View file
+                 </a> 
+              } @else {
+                 <span class="not-provided current-file-link">Not uploaded</span>
+              }
+
+              <div class="cv-actions">
+                <input type="file" #cvInput (change)="onCvSelected($event)" accept="application/pdf" style="display: none;" />
+                <button mat-stroked-button color="primary" type="button" (click)="cvInput.click()" style="line-height: normal; padding: 0 12px; height: 32px;">
+                  <mat-icon style="margin-right: 4px; font-size: 18px; width: 18px; height: 18px;">upload_file</mat-icon> Choose File
+                </button>
+                @if (profileData()?.cvUrl) {
+                  <button mat-stroked-button color="warn" type="button" (click)="deleteCv()" style="line-height: normal; padding: 0 12px; height: 32px;">
+                    <mat-icon style="margin-right: 4px; font-size: 18px; width: 18px; height: 18px;">delete</mat-icon> Remove
+                  </button>
+                }
+              </div>
             </div>
           </mat-card-content>
         </mat-card>
