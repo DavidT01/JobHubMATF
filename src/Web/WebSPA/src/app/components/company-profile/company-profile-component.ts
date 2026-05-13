@@ -1,12 +1,14 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 
 import { CompanyProfileDto } from '../../core/models/company-profile-dto';
 import { CompanyProfileService } from '../../core/services/company-profile/company-profile-service';
@@ -20,7 +22,8 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog-compone
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatDialogModule
+    MatDialogModule,
+    MatIconModule
   ],
   templateUrl: './company-profile-component.html',
   styleUrl: './company-profile-component.scss',
@@ -31,6 +34,7 @@ export class CompanyProfileComponent implements OnInit {
   private fb = inject(FormBuilder);
   private profileService = inject(CompanyProfileService);
   private dialog = inject(MatDialog);
+  public apiUrl = environment.apiUrl;
 
   profileData = signal<CompanyProfileDto | null>(null);
   isLoading = signal<boolean>(true);
@@ -88,6 +92,10 @@ export class CompanyProfileComponent implements OnInit {
         }
       });
     }
+  }
+
+  deleteLogo(): void {
+    this.profileData.update(current => current ? { ...current, logoUrl: '' } : null);
   }
 
   toggleEditMode(): void {
