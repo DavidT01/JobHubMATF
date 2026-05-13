@@ -78,6 +78,18 @@ export class CompanyProfileComponent implements OnInit {
     });
   }
 
+  onLogoSelected(event: any): void {
+    const file = event.target.files[0];
+    const id = this.profileData()?.id;
+    if (file && id) {
+      this.profileService.uploadLogo(id, file).subscribe({
+        next: (res) => {
+          this.profileData.update(current => current ? { ...current, logoUrl: res.url } : null);
+        }
+      });
+    }
+  }
+
   toggleEditMode(): void {
     if (this.isEditMode() && this.profileData()?.id) {
       this.loadProfile();
