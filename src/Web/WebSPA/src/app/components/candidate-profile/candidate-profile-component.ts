@@ -43,7 +43,7 @@ export class CandidateProfileComponent implements OnInit {
   private fb = inject(FormBuilder);
   private profileService = inject(CandidateProfileService);
   private dialog = inject(MatDialog);
-  public api = environment.apiUrl;
+  public apiUrl = environment.apiUrl;
 
   profileData = signal<CandidateProfileDto | null>(null);
   isLoading = signal<boolean>(true);
@@ -206,6 +206,10 @@ export class CandidateProfileComponent implements OnInit {
     }
   }
 
+  deletePicture(): void {
+    this.profileData.update(current => current ? { ...current, pictureUrl: '' } : null);
+  }
+
   onCvSelected(event: any): void {
     const file = event.target.files[0];
     const id = this.profileData()?.id;
@@ -213,9 +217,15 @@ export class CandidateProfileComponent implements OnInit {
       this.profileService.uploadCv(id, file).subscribe({
         next: (res) => {
           this.profileData.update(current => current ? { ...current, cvUrl: res.url } : null);
+          this.form.patchValue({ cvUrl: res.url });
         }
       });
     }
+  }
+
+  deleteCv(): void {
+    this.profileData.update(current => current ? { ...current, cvUrl: '' } : null);
+    this.form.patchValue({ cvUrl: '' });
   }
 
   toggleEditMode(): void {
