@@ -28,12 +28,12 @@ export class CandidateProfileService {
   uploadCv(id: string, file: File): Observable<UrlResponseDto> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<UrlResponseDto>('${this.api}/{id}/cv', formData);
+    return this.http.post<UrlResponseDto>(`${this.api}/${id}/cv`, formData);
   }
 
   uploadPicture(id: string, file: File): Observable<UrlResponseDto> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<UrlResponseDto>('${this.api}/{id}/picture', formData);
+    return this.http.post<UrlResponseDto>(`${this.api}/${id}/picture`, formData);
   }
 }
