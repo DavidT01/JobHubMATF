@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>f55613ae-76e6-4f82-b7d5-a4c70e176f5b</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>.</DockerfileContext>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.13.19" />
+  </ItemGroup>
+
+</Project>
