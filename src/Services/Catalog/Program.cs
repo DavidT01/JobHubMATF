@@ -1,10 +1,12 @@
 using Catalog.Data;
+using Catalog.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<ICatalogContext, CatalogContext>();
+builder.Services.AddSingleton<ICatalogContext, CatalogContext>();
+builder.Services.AddScoped<IJobRepository,JobRepository>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
