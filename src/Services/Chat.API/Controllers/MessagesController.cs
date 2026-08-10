@@ -1,7 +1,11 @@
-﻿
+﻿using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Chat.API.Models;
 using Chat.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Chat.API.Controllers
 {
@@ -15,8 +19,10 @@ namespace Chat.API.Controllers
         {
             _chatService = chatService;
         }
+
         [HttpPost]
-        public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request) {
+        public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request)
+        {
             if (string.IsNullOrEmpty(request.Text))
                 return BadRequest("Message cannot be empty");
 
@@ -27,7 +33,6 @@ namespace Chat.API.Controllers
             );
 
             return Ok(message);
-
         }
 
         [HttpGet]
@@ -47,5 +52,20 @@ namespace Chat.API.Controllers
             var messages = await _chatService.GetMessagesByChatIdAsync(chatId);
             return Ok(messages);
         }
+
+        [Authorize]
+        [HttpGet("me")]
+        public IActionResult Me()
+        {
+            return Ok(new
+            {
+                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                Email = User.FindFirstValue(ClaimTypes.Email),
+                Name = User.FindFirstValue(ClaimTypes.Name),
+                Roles = User.FindAll(ClaimTypes.Role).Select(x => x.Value)
+            });
+        }
+
+        
     }
 }
