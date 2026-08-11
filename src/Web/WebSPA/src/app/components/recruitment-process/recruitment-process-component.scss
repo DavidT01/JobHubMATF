@@ -1,0 +1,31 @@
+.profile-container { 
+  max-width: 900px; 
+  margin: 2rem auto; 
+  padding-bottom: 2rem;
+}
+
+mat-card {
+  margin-bottom: 2rem; 
+}
+
+mat-card-header {
+  margin-bottom: 1.5rem !important;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background-color: var(--mat-sys-surface-variant);
+  border-radius: 8px;
+  text-align: center;
+  gap: 1.5rem;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--mat-sys-on-surface-variant);
+}
