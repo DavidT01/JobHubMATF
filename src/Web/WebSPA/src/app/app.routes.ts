@@ -10,5 +10,10 @@ export const routes: Routes = [
     path: 'profile/company/:userId',
     loadComponent: () => import('./components/company-profile/company-profile-component')
       .then(c => c.CompanyProfileComponent)
+  },
+  {
+    path: 'recruitment-processes/:jobId',
+    loadComponent: () => import('./components/recruitment-process/recruitment-process-component')
+      .then(c => c.RecruitmentProcessComponent)
   }
 ];
