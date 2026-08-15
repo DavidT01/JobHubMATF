@@ -1,0 +1,23 @@
+<div class="chat-container">
+  <h2>Chat sa korisnikom: {{ receiverId }}</h2>
+
+  <div class="messages-list">
+    <div *ngFor="let msg of messages"
+         [ngClass]="{
+        'my-message': msg.senderId === currentUserId,
+        'other-message': msg.senderId !== currentUserId
+      }"
+         class="message-item">
+      <span class="sender">{{ msg.senderId }}:</span>
+      <span class="text">{{ msg.content }}</span>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <input type="text"
+           [(ngModel)]="newMessageContent"
+           placeholder="Ukucajte poruku..."
+           (keyup.enter)="sendMessage()" />
+    <button (click)="sendMessage()">Pošalji</button>
+  </div>
+</div>
