@@ -15,6 +15,7 @@ namespace Chat.API.Controllers
             _chatService = chatService;
         }
 
+        // 1. Stari endpoint za dobijanje/kreiranje objekta chata (ostavljen radi kompatibilnosti)
         [HttpGet("{user1}/{user2}")]
         public async Task<ActionResult<Models.Chat>> GetChat(string user1, string user2)
         {

@@ -78,25 +78,25 @@ export class ChatService {
     }
   }
 
-  public loadHistory(otherUserId: string, jwtToken: string): void {
+  public loadHistory(otherUserId: string, myUserId: string, jwtToken: string = 'TVOJ_JWT_TOKEN'): void {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${jwtToken}`
     });
 
-    this.http.get<any>(`${this.gatewayUrl}/api/chat/history/${otherUserId}`, { headers })
+    // Gađamo tačan endpoint iz MessagesController-a
+    this.http.get<any[]>(`${this.gatewayUrl}/api/messages?user1=${myUserId}&user2=${otherUserId}`, { headers })
       .subscribe({
         next: (response) => {
-          console.log('📜 Istorija sa servera:', response);
+          console.log('📜 Istorija poruka iz baze:', response);
 
-          let historyArray: ChatMessage[] = [];
-
-          if (Array.isArray(response)) {
-            historyArray = response;
-          } else if (response && Array.isArray(response.messages)) {
-            historyArray = response.messages;
-          } else if (response && Array.isArray(response.$values)) {
-            historyArray = response.$values;
-          }
+          // Mapiramo polja ako se imena na backendu razlikuju (npr. Text -> content, ReciverId -> receiverId)
+          const historyArray: ChatMessage[] = (response || []).map((msg: any) => ({
+            id: msg.id,
+            senderId: msg.senderId,
+            receiverId: msg.reciverId || msg.receiverId,
+            content: msg.text || msg.content,
+            timestamp: msg.timestamp || msg.createdAt
+          }));
 
           this.ngZone.run(() => {
             this.messagesSubject.next(historyArray);
