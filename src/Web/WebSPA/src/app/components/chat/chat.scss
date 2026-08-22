@@ -1,90 +1,138 @@
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f0f2f5;
+  box-sizing: border-box;
+  margin: 0;
+}
+
 .chat-container {
+  position: relative; /* Ključno da bi se bedž pozicionirao u odnosu na chat */
   display: flex;
   flex-direction: column;
-  height: 500px;
-  max-width: 600px;
-  margin: 20px auto;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  height: 600px;
+  width: 450px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
 
-  .chat-header {
-    padding: 15px;
+.messages-list {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth; /* Glatki skrol na klik */
+}
+
+.message-item {
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  word-wrap: break-word;
+  display: flex;
+  flex-direction: column;
+}
+
+  .message-item.sent {
+    align-self: flex-end;
     background-color: #007bff;
     color: white;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-
-    h3 {
-      margin: 0;
-      font-size: 1.1rem;
-    }
+    border-bottom-right-radius: 2px;
   }
 
-  .messages-list {
-    flex: 1;
-    padding: 15px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
-    .message-bubble {
-      max-width: 70%;
-      padding: 10px 14px;
-      border-radius: 15px;
-      font-size: 0.95rem;
-
-      .message-time {
-        font-size: 0.7rem;
-        opacity: 0.7;
-        margin-top: 4px;
-        text-align: right;
-      }
-    }
-
-    .my-message {
-      align-self: flex-end;
-      background-color: #007bff;
-      color: white;
-      border-bottom-right-radius: 2px;
-    }
-
-    .other-message {
-      align-self: flex-start;
-      background-color: #e9ecef;
-      color: #333;
-      border-bottom-left-radius: 2px;
-    }
+  .message-item.received {
+    align-self: flex-start;
+    background-color: #e9ecef;
+    color: #333;
+    border-bottom-left-radius: 2px;
   }
 
-  .chat-input-area {
-    display: flex;
-    padding: 10px;
-    border-top: 1px solid #ddd;
-    background-color: white;
+.message-time {
+  font-size: 0.7em;
+  margin-top: 4px;
+  align-self: flex-end;
+  opacity: 0.8;
+}
 
-    input {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      outline: none;
-    }
+/* Plutajuće dugme u donjem desnom uglu */
+.new-message-badge {
+  position: absolute;
+  bottom: 75px; /* Tik iznad unosa za tekst */
+  right: 20px; /* Smešteno sa desne strane */
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: #ffffff;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 123, 255, 0.35);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: badgePop 0.3s ease-out;
 
-    button {
-      margin-left: 10px;
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 123, 255, 0.45);
+    background: linear-gradient(135deg, #0069d9, #004494);
+  }
 
-      &:hover {
-        background-color: #0056b3;
-      }
-    }
+  &:active {
+    transform: translateY(0);
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
   }
 }
+
+@keyframes badgePop {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.chat-input-container {
+  display: flex;
+  padding: 10px;
+  background: #fff;
+  border-top: 1px solid #ccc;
+}
+
+  .chat-input-container input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+  }
+
+  .chat-input-container button {
+    margin-left: 8px;
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }

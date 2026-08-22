@@ -50,17 +50,17 @@ export class ChatService {
   private addMessageListener(): void {
     this.hubConnection.off('ReceiveMessage');
 
-    this.hubConnection.on('ReceiveMessage', (senderId: string, receiverId: string, content: string, timestamp: Date) => {
+    // Vraćamo 4 pojedinačna parametra kako ih tvoj ChatHub i šalje
+    this.hubConnection.on('ReceiveMessage', (senderId: string, receiverId: string, content: string, timestamp: any) => {
       console.log('📩 Primljena poruka sa servera:', { senderId, receiverId, content, timestamp });
 
       const newMessage: ChatMessage = {
-        senderId,
-        receiverId,
-        content,
-        timestamp
+        senderId: senderId,
+        receiverId: receiverId,
+        content: content,
+        timestamp: timestamp ? new Date(timestamp) : new Date()
       };
 
-      // OBNOVLJEN DEO: Pokrećemo azuriranje unutar Angular Zone!
       this.ngZone.run(() => {
         const currentMessages = this.messagesSubject.value;
         this.messagesSubject.next([...currentMessages, newMessage]);

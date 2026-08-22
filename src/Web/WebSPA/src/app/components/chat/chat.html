@@ -1,23 +1,33 @@
 <div class="chat-container">
-  <h2>Chat sa korisnikom: {{ receiverId }}</h2>
+  <h3>Chat sa korisnikom: {{ receiverId }}</h3>
 
-  <div class="messages-list">
+  <!-- Lista poruka sa skrolom -->
+  <div class="messages-list" #scrollContainer (scroll)="onScroll()">
     <div *ngFor="let msg of messages"
-         [ngClass]="{
-        'my-message': msg.senderId === currentUserId,
-        'other-message': msg.senderId !== currentUserId
-      }"
-         class="message-item">
-      <span class="sender">{{ msg.senderId }}:</span>
-      <span class="text">{{ msg.content }}</span>
+         class="message-item"
+         [ngClass]="{'sent': msg.senderId === myId, 'received': msg.senderId !== myId}">
+
+      <span class="message-content">{{ msg.content }}</span>
+      <span class="message-time" *ngIf="msg.timestamp">{{ msg.timestamp | date:'HH:mm' }}</span>
     </div>
   </div>
 
-  <div class="input-area">
+  <!-- Plutajuće dugme na desnoj strani -->
+  <div class="new-message-badge"
+       *ngIf="unreadCount > 0"
+       (click)="scrollToBottomManual()">
+    <span>Nova poruka ({{ unreadCount }})</span>
+    <svg viewBox="0 0 24 24">
+      <path d="M11 4v12.17l-5.58-5.59L4 12l8 8 8-8-1.41-1.41L13 16.17V4h-2z" />
+    </svg>
+  </div>
+
+  <!-- Polje za unos poruke -->
+  <div class="chat-input-container">
     <input type="text"
            [(ngModel)]="newMessageContent"
-           placeholder="Ukucajte poruku..."
-           (keyup.enter)="sendMessage()" />
+           (keyup.enter)="sendMessage()"
+           placeholder="Ukucajte poruku..." />
     <button (click)="sendMessage()">Pošalji</button>
   </div>
 </div>
