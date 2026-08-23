@@ -5,6 +5,7 @@ using MediatR;
 using FluentValidation;
 using Recruitment.API.Features.Behaviors;
 using System.Reflection;
+using Recruitment.API.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<RecruitmentContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("RecruitmentDatabase")));
 
+builder.Services.AddScoped<IMeetingService, GoogleMeetingService>();
+
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
@@ -25,6 +28,8 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
+builder.Services.AddExceptionHandler<Recruitment.API.Exceptions.RecruitmentExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
@@ -35,6 +40,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseExceptionHandler();
 app.UseAuthorization();
 
 app.MapControllers();
