@@ -2,8 +2,18 @@
 
 namespace Recruitment.API.Exceptions
 {
-    public class RecruitmentValidationException(IEnumerable<ValidationFailure> errors) : Exception("Validation failed.")
+    public class RecruitmentValidationException : Exception
     {
-        public IEnumerable<ValidationFailure> Errors { get; } = errors;
+        public IEnumerable<ValidationFailure> Errors { get; }
+
+        public RecruitmentValidationException(IEnumerable<ValidationFailure> errors) : base("Validation failed.")
+        {
+            Errors = errors;
+        }
+
+        public RecruitmentValidationException(string message) : base(message)
+        {
+            Errors = [new ValidationFailure(string.Empty, message)];
+        }
     }
 }
