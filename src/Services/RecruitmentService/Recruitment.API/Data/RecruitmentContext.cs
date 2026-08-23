@@ -3,15 +3,11 @@ using Recruitment.API.Entities;
 
 namespace Recruitment.API.Data
 {
-    public class RecruitmentContext : DbContext
+    public class RecruitmentContext(DbContextOptions<RecruitmentContext> options) : DbContext(options)
     {
-        public RecruitmentContext(DbContextOptions<RecruitmentContext> options) : base(options)
-        {
-
-        }
-
         public DbSet<RecruitmentProcess> Processes { get; set; }
         public DbSet<SelectionRound> Rounds { get; set; }
+        public DbSet<InterviewSchedule> InterviewSchedules { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -21,6 +17,12 @@ namespace Recruitment.API.Data
                 .HasOne(sr => sr.RecruitmentProcess)
                 .WithMany(rp => rp.Rounds)
                 .HasForeignKey(sr => sr.RecruitmentProcessId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<InterviewSchedule>()
+                .HasOne(i => i.SelectionRound)
+                .WithMany()
+                .HasForeignKey(i => i.SelectionRoundId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
