@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Recruitment.API.Data;
@@ -11,9 +12,11 @@ using Recruitment.API.Data;
 namespace Recruitment.API.Migrations
 {
     [DbContext(typeof(RecruitmentContext))]
-    partial class RecruitmentContextModelSnapshot : ModelSnapshot
+    [Migration("20260823125656_AddInterviewSchedule")]
+    partial class AddInterviewSchedule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
