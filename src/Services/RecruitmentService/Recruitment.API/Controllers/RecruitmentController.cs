@@ -8,7 +8,7 @@ using Recruitment.API.Features.Queries.GetProcessByJobId;
 namespace Recruitment.API.Controllers
 {
     [ApiController]
-    [Route("api/recruitment-processes")]
+    [Route("api/[controller]")]
     public class RecruitmentController(IMediator mediator, ILogger<RecruitmentController> logger) : ControllerBase
     {
         [HttpGet("job/{jobId}")]
