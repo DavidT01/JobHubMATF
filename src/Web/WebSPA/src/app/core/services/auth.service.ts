@@ -7,6 +7,14 @@ export interface LoginResponse {
   expiration: string;
 }
 
+export interface MeResponse {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  roles: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -15,7 +23,7 @@ export class AuthService {
   private apiUrl = 'http://localhost:5283/api/auth';
   private readonly TOKEN_KEY = 'auth_token';
 
-  login(model: any): Observable<LoginResponse> {
+  login(model: { email?: string | null; password?: string | null }): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, model).pipe(
       tap(response => {
         if (response.token) {
@@ -25,8 +33,12 @@ export class AuthService {
     );
   }
 
-  register(model: any): Observable<any> {
+  register(model: unknown): Observable<unknown> {
     return this.http.post(`${this.apiUrl}/register`, model);
+  }
+
+  me(): Observable<MeResponse> {
+    return this.http.get<MeResponse>(`${this.apiUrl}/me`);
   }
 
   logout(): void {
