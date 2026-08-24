@@ -1,5 +1,9 @@
 <div class="chat-container">
-  <h3>Chat sa korisnikom: {{ receiverId }}</h3>
+  <!-- Zaglavlje chata sa info o tebi i sagovorniku -->
+  <div class="chat-header">
+    <h3>Chat sa korisnikom: <strong>{{ receiverId }}</strong></h3>
+    <span class="my-badge">Ulogovan kao: <strong>{{ myId }}</strong></span>
+  </div>
 
   <!-- Lista poruka sa skrolom -->
   <div class="messages-list" #scrollContainer (scroll)="onScroll()">

@@ -136,3 +136,28 @@
     border-radius: 4px;
     cursor: pointer;
   }
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #333;
+  }
+
+  .my-badge {
+    font-size: 0.8rem;
+    background-color: #e3f2fd;
+    color: #0d47a1;
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid #bbdefb;
+    font-weight: 500;
+  }
+}

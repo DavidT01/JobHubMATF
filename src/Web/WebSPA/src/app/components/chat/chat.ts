@@ -27,6 +27,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   private messageSub!: Subscription;
   private routeSub!: Subscription;
   private isInitialLoad: boolean = true;
+  private previousMessagesCount: number = 0;
 
   constructor(
     private chatService: ChatService,
@@ -36,50 +37,76 @@ export class ChatComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    this.chatService.startConnection();
+
     this.routeSub = this.route.queryParams.subscribe(params => {
-      if (params['as']) {
-        this.myId = params['as'];
-        this.currentUserId = params['as'];
-      }
+      // Identitet pošiljaoca se uvek uzima iz tokena
+      this.myId = this.chatService.getMyUserIdFromToken();
+      this.currentUserId = this.myId;
+
+      // Iz URL-a čitamo samo sa kim se dopisujemo
       if (params['to']) {
         this.receiverId = params['to'];
+      } else {
+        // Ako sam ja user1, default sagovornik je user2 i obrnuto
+        this.receiverId = (this.myId.toLowerCase() === 'user1') ? 'user2' : 'user1';
       }
 
       this.isInitialLoad = true;
       this.unreadCount = 0;
-      this.chatService.startConnection(this.myId);
+      this.previousMessagesCount = 0;
+
       this.chatService.loadHistory(this.receiverId, this.myId);
     });
 
-    this.messageSub = this.chatService.messages$.subscribe((messages) => {
-      this.messages = messages;
+    this.messageSub = this.chatService.messages$.subscribe((allMessages) => {
+      this.ngZone.run(() => {
+        const myClean = String(this.myId).trim().toLowerCase();
+        const recClean = String(this.receiverId).trim().toLowerCase();
 
-      const lastMsg = messages[messages.length - 1];
+        // Potpuno Case-Insensitive poređenje (user1 == USER1)
+        const filtered = allMessages.filter(m => {
+          const s = String(m.senderId || '').trim().toLowerCase();
+          const r = String(m.receiverId || '').trim().toLowerCase();
 
-      // Rešavamo NG0100 grešku: odlažemo izmenu stanja za sledeći tick
-      setTimeout(() => {
-        if (this.isInitialLoad) {
-          this.smartScrollToBottom(true);
-          this.isInitialLoad = false;
-        } else {
-          if (this.isUserNearBottom()) {
-            this.smartScrollToBottom(false);
-          } else {
-            // Povećavamo brojač samo ako je poruku poslao DRUGI korisnik
-            if (lastMsg && lastMsg.senderId !== this.myId) {
-              this.unreadCount++;
+          return (s === myClean && r === recClean) || (s === recClean && r === myClean);
+        });
+
+        const isNewMessageAdded = filtered.length > this.previousMessagesCount;
+        this.messages = filtered;
+
+        const lastMsg = this.messages[this.messages.length - 1];
+
+        setTimeout(() => {
+          if (this.isInitialLoad) {
+            this.smartScrollToBottom(true);
+            this.isInitialLoad = false;
+          } else if (isNewMessageAdded && lastMsg) {
+            const isFromOther = String(lastMsg.senderId).trim().toLowerCase() !== myClean;
+
+            if (isFromOther) {
+              if (this.isUserNearBottom()) {
+                this.smartScrollToBottom(false);
+              } else {
+                this.unreadCount++;
+              }
+            } else {
+              this.smartScrollToBottom(true);
             }
           }
-        }
-        this.cdr.detectChanges();
-      }, 0);
+
+          this.previousMessagesCount = this.messages.length;
+          this.cdr.detectChanges();
+        }, 0);
+      });
     });
   }
 
   sendMessage(): void {
     if (!this.newMessageContent.trim()) return;
 
-    this.chatService.sendMessage(this.myId, this.receiverId, this.newMessageContent);
+    // Prosleđujemo receiverId, sadržaj i TRENUTNI myId
+    this.chatService.sendMessage(this.receiverId, this.newMessageContent, this.myId);
     this.newMessageContent = '';
 
     this.unreadCount = 0;
@@ -106,7 +133,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   private isUserNearBottom(): boolean {
     if (!this.scrollContainer) return false;
-    const threshold = 250;
+    const threshold = 150;
     const position = this.scrollContainer.nativeElement.scrollTop + this.scrollContainer.nativeElement.clientHeight;
     const height = this.scrollContainer.nativeElement.scrollHeight;
     return height - position <= threshold;
