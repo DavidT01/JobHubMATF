@@ -3,7 +3,7 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--mat-sys-primary) 0%, var(--mat-sys-tertiary) 100%);
   padding: 20px;
 }
 
@@ -48,13 +48,12 @@ mat-card-header {
   letter-spacing: 1px;
   border-radius: 8px;
   margin-top: 8px;
-  background: #667eea;
-  color: white;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
 
   &:hover {
-    background: #5a67d8;
+    filter: brightness(0.95);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
   }
 
   &:disabled {
@@ -74,7 +73,7 @@ mat-card-header {
   }
 
   a {
-    color: #667eea;
+    color: var(--mat-sys-primary);
     font-weight: 600;
     text-decoration: none;
 

@@ -44,7 +44,7 @@ export class RegisterComponent {
     role: ['Candidate', [Validators.required]]
   });
 
-  roles = ['Candidate', 'Employer', 'Admin'];
+  roles = ['Candidate', 'Employer'];
   hidePassword = true;
 
   onSubmit(): void {
