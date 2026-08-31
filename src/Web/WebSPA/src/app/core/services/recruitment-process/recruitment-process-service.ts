@@ -6,12 +6,15 @@ import { environment } from '../../../../environments/environment';
 import { RecruitmentProcessDto } from '../../models/recruitment-process-dto';
 import { SelectionRoundDto } from '../../models/selection-round-dto';
 import { CreateProcessCommandDto } from '../../models/create-process-command-dto';
+import { InterviewScheduleDto } from '../../models/interview-schedule-dto';
+import { ScheduleInterviewCommand } from '../../models/schedule-interview-command';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RecruitmentProcessService {
-  private apiUrl = `${environment.apiUrl}/recruitment-processes`;
+  private apiUrl = `${environment.apiUrl}/Recruitment`;
+  private interviewUrl = `${environment.apiUrl}/Interview`;
 
   constructor(private http: HttpClient) { }
 
@@ -25,5 +28,9 @@ export class RecruitmentProcessService {
 
   updateRounds(processId: string, rounds: SelectionRoundDto[]): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/${processId}/rounds`, rounds);
+  }
+
+  scheduleInterview(command: ScheduleInterviewCommand): Observable<InterviewScheduleDto> {
+    return this.http.post<InterviewScheduleDto>(`${this.interviewUrl}/schedule`, command);
   }
 }
