@@ -1,5 +1,7 @@
+using Catalog.Clients;
 using Catalog.Entities;
 using Catalog.Repositories;
+using Catalog.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Catalog.Controllers;
@@ -9,9 +11,13 @@ namespace Catalog.Controllers;
 public class CatalogController : ControllerBase
 {
     private readonly IJobRepository _repository;
-    public CatalogController(IJobRepository repository)
+    private readonly IMatchingService _matchingService;
+    private readonly IProfileApiClient _profileApiClient;
+    public CatalogController(IJobRepository repository , IMatchingService matchingService, IProfileApiClient profileApiClient)
     {
         _repository = repository;
+        _matchingService = matchingService;
+        _profileApiClient = profileApiClient;
     }
     
     [HttpGet]
@@ -116,4 +122,19 @@ public class CatalogController : ControllerBase
         return Ok(jobs);
     }
     
+    [HttpGet("match/{jobId}/{userId}")]
+    public async Task<IActionResult> MatchJobToCandidate(string jobId, string userId)
+    {
+        var job = await _repository.GetByIdAsync(jobId);
+        if (job == null)
+            return NotFound("Job did not found");
+        
+        var candidate = await _profileApiClient.GetCandidateByIdAsync(userId);
+        if (candidate == null)
+            return NotFound("Candidate did not found");
+
+        var result = _matchingService.CalculateMatch(job, candidate);
+        return Ok(result);
+    }
+
 }

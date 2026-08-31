@@ -1,6 +1,8 @@
 using Catalog.Data;
 using Catalog.Repositories;
 using System.Text.Json.Serialization;
+using Catalog.Clients;
+using Catalog.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,13 @@ builder.Services.AddCors(options =>
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
+
+builder.Services.AddHttpClient<IProfileApiClient, ProfileApiClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProfileApi"]!);
+});
+
+builder.Services.AddScoped<IMatchingService,MatchingService>();
 
 var app = builder.Build();
 
