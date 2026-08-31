@@ -8,6 +8,10 @@ import { SelectionRoundDto } from '../../models/selection-round-dto';
 import { CreateProcessCommandDto } from '../../models/create-process-command-dto';
 import { InterviewScheduleDto } from '../../models/interview-schedule-dto';
 import { ScheduleInterviewCommand } from '../../models/schedule-interview-command';
+import { CandidateEvaluationDto } from '../../models/candidate-evaluation-dto';
+import { EvaluateCandidateCommand } from '../../models/evaluate-candidate-command';
+import { CandidateProgressDto } from '../../models/candidate-progress-dto';
+import { AdvanceCandidateCommand } from '../../models/advance-candidate-command';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +19,7 @@ import { ScheduleInterviewCommand } from '../../models/schedule-interview-comman
 export class RecruitmentProcessService {
   private apiUrl = `${environment.apiUrl}/Recruitment`;
   private interviewUrl = `${environment.apiUrl}/Interview`;
+  private candidateUrl = `${environment.apiUrl}/Candidate`;
 
   constructor(private http: HttpClient) { }
 
@@ -32,5 +37,21 @@ export class RecruitmentProcessService {
 
   scheduleInterview(command: ScheduleInterviewCommand): Observable<InterviewScheduleDto> {
     return this.http.post<InterviewScheduleDto>(`${this.interviewUrl}/schedule`, command);
+  }
+
+  evaluateCandidate(command: EvaluateCandidateCommand): Observable<CandidateEvaluationDto> {
+    return this.http.post<CandidateEvaluationDto>(`${this.candidateUrl}/evaluate`, command);
+  }
+
+  advanceCandidate(command: AdvanceCandidateCommand): Observable<CandidateProgressDto> {
+    return this.http.post<CandidateProgressDto>(`${this.candidateUrl}/advance`, command);
+  }
+
+  getCandidateEvaluations(candidateId: string): Observable<CandidateEvaluationDto[]> {
+    return this.http.get<CandidateEvaluationDto[]>(`${this.candidateUrl}/${candidateId}/evaluations`);
+  }
+
+  getCandidateProgress(candidateId: string, processId: string): Observable<CandidateProgressDto> {
+    return this.http.get<CandidateProgressDto>(`${this.candidateUrl}/${candidateId}/process/${processId}/progress`);
   }
 }
