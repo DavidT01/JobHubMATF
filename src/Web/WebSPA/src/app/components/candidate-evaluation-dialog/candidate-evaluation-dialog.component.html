@@ -1,0 +1,24 @@
+<h2 mat-dialog-title>Candidate Evaluation</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="save()" class="evaluation-form">
+    
+    <div class="score-container">
+      <label>Candidate Score (1-10): {{ form.get('score')?.value }}</label>
+      <mat-slider min="1" max="10" step="1" discrete>
+        <input matSliderThumb formControlName="score">
+      </mat-slider>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notes & Feedback</mat-label>
+      <textarea matInput formControlName="notes" rows="5" placeholder="Enter evaluation notes here..."></textarea>
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="loading()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="save()" [disabled]="form.invalid || loading()">
+    {{ loading() ? 'Saving...' : 'Save Evaluation' }}
+  </button>
+</mat-dialog-actions>
