@@ -15,5 +15,11 @@ export const routes: Routes = [
     path: 'recruitment-processes/:jobId',
     loadComponent: () => import('./components/recruitment-process/recruitment-process-component')
       .then(c => c.RecruitmentProcessComponent)
+  },
+  {
+    path: 'applications/:applicationId',
+    loadComponent: () => import('./components/candidate-application-view/candidate-application-view')
+      .then(c => c.CandidateApplicationViewComponent)
   }
 ];
+

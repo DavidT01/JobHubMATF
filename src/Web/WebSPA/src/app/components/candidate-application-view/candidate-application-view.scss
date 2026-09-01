@@ -1,0 +1,33 @@
+.application-view-container {
+  padding: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+
+  .application-card {
+    margin-bottom: 24px;
+
+    .candidate-info, .recruitment-info {
+      padding: 16px 0;
+
+      h3 {
+        margin-top: 0;
+        color: #3f51b5; /* Primary color hint */
+      }
+      p {
+        margin-bottom: 8px;
+        font-size: 15px;
+      }
+      .explanation {
+        color: #666;
+        font-size: 14px;
+        margin-top: 12px;
+      }
+    }
+  }
+
+  mat-card-actions {
+    button {
+      margin-left: 8px;
+    }
+  }
+}

@@ -1,0 +1,39 @@
+<div class="application-view-container">
+  <mat-card class="application-card">
+    <mat-card-header>
+      <mat-card-title>Application: {{ applicationMock.jobTitle }}</mat-card-title>
+      <mat-card-subtitle>Status: {{ applicationMock.status }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="candidate-info">
+        <h3>Candidate Profile</h3>
+        <p><strong>Name:</strong> {{ applicationMock.candidate.firstName }} {{ applicationMock.candidate.lastName }}</p>
+        <p><strong>Email:</strong> {{ applicationMock.candidate.email }}</p>
+        <p><strong>Phone:</strong> {{ applicationMock.candidate.phone }}</p>
+        <p><strong>Summary:</strong> {{ applicationMock.candidate.experience }}</p>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="recruitment-info">
+        <h3>Current Recruitment Stage</h3>
+        <p><strong>Round:</strong> {{ applicationMock.currentRoundName }}</p>
+        <p class="explanation">
+          <i>Actions trigger features from the Recruitment Service based on gathered application details via gRPC.</i>
+        </p>
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button mat-stroked-button color="primary" (click)="scheduleInterview()">
+        <mat-icon>event</mat-icon>
+        Schedule Interview
+      </button>
+      <button mat-raised-button color="accent" (click)="evaluateCandidate()">
+        <mat-icon>star_rate</mat-icon>
+        Evaluate Candidate
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
