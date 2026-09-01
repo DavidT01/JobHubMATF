@@ -1,36 +1,31 @@
 <div class="application-view-container">
   <mat-card class="application-card">
     <mat-card-header>
-      <mat-card-title>Application: {{ applicationMock.jobTitle }}</mat-card-title>
-      <mat-card-subtitle>Status: {{ applicationMock.status }}</mat-card-subtitle>
+      <mat-card-title>Application Details</mat-card-title>
+      <!-- TODO: Display the application job title and status received through gRPC. -->
     </mat-card-header>
 
     <mat-card-content>
       <div class="candidate-info">
         <h3>Candidate Profile</h3>
-        <p><strong>Name:</strong> {{ applicationMock.candidate.firstName }} {{ applicationMock.candidate.lastName }}</p>
-        <p><strong>Email:</strong> {{ applicationMock.candidate.email }}</p>
-        <p><strong>Phone:</strong> {{ applicationMock.candidate.phone }}</p>
-        <p><strong>Summary:</strong> {{ applicationMock.candidate.experience }}</p>
+        <!-- TODO: Display candidate profile details received through gRPC. -->
       </div>
 
       <mat-divider></mat-divider>
 
       <div class="recruitment-info">
         <h3>Current Recruitment Stage</h3>
-        <p><strong>Round:</strong> {{ applicationMock.currentRoundName }}</p>
-        <p class="explanation">
-          <i>Actions trigger features from the Recruitment Service based on gathered application details via gRPC.</i>
-        </p>
+        <!-- TODO: Display the current selection round received through gRPC. -->
       </div>
     </mat-card-content>
 
     <mat-card-actions align="end">
-      <button mat-stroked-button color="primary" (click)="scheduleInterview()">
+      <!-- TODO: Enable this action when application and candidate data are available through gRPC. -->
+      <button mat-stroked-button color="primary" (click)="scheduleInterview()" disabled>
         <mat-icon>event</mat-icon>
         Schedule Interview
       </button>
-      <button mat-raised-button color="accent" (click)="evaluateCandidate()">
+      <button mat-raised-button color="accent" (click)="evaluateCandidate()" disabled>
         <mat-icon>star_rate</mat-icon>
         Evaluate Candidate
       </button>
