@@ -76,15 +76,6 @@ export class ScheduleInterviewDialogComponent {
       attendeeEmails: emails
     };
 
-    this.recruitmentService.scheduleInterview(command).subscribe({
-      next: (schedule) => {
-        this.loading.set(false);
-        this.dialogRef.close(schedule);
-      },
-      error: (err) => {
-        console.error('Error scheduling interview', err);
-        this.loading.set(false);
-      }
-    });
+    // TODO: Call this.recruitmentService.scheduleInterview(command), close the dialog, and display errors.
   }
 }
