@@ -53,6 +53,6 @@ export class CandidateEvaluationDialogComponent {
       notes: formValue.notes
     };
 
-    // TODO: Call this.recruitmentService.evaluateCandidate(command) and handle the response
+    // TODO: Call this.recruitmentService.evaluateCandidate(command), close the dialog, and display errors.
   }
 }

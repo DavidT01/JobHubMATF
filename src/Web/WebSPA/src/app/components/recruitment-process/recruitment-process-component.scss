@@ -29,3 +29,27 @@ mat-card-header {
   font-size: 1.1rem;
   color: var(--mat-sys-on-surface-variant);
 }
+
+.rounds-list {
+    list-style-type: none;
+    padding: 0;
+    
+    li {
+        margin-bottom: 16px;
+        padding: 16px;
+        border: 1px solid var(--mat-sys-outline);
+        border-radius: 4px;
+        background-color: var(--mat-sys-surface);
+        transition: all 0.2s ease-in-out;
+
+        strong {
+            font-size: 1.1em;
+            color: var(--mat-sys-on-surface);
+        }
+
+        p {
+            margin: 8px 0;
+            color: var(--mat-sys-on-surface-variant);
+        }
+    }
+}
