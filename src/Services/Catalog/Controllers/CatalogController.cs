@@ -13,11 +13,16 @@ public class CatalogController : ControllerBase
     private readonly IJobRepository _repository;
     private readonly IMatchingService _matchingService;
     private readonly IProfileApiClient _profileApiClient;
-    public CatalogController(IJobRepository repository , IMatchingService matchingService, IProfileApiClient profileApiClient)
+    private readonly IBookmarkRepository _bookmarkRepository;
+    public CatalogController(IJobRepository repository, 
+                             IMatchingService matchingService, 
+                             IProfileApiClient profileApiClient ,
+                             IBookmarkRepository  bookmarkRepository)
     {
         _repository = repository;
         _matchingService = matchingService;
         _profileApiClient = profileApiClient;
+        _bookmarkRepository = bookmarkRepository;
     }
     
     [HttpGet]
@@ -136,5 +141,42 @@ public class CatalogController : ControllerBase
         var result = _matchingService.CalculateMatch(job, candidate);
         return Ok(result);
     }
+    
+    [HttpPost("bookmarks")]
+    public async Task<IActionResult> AddBookmark([FromBody] string userId, [FromBody] string jobId)
+    {
+        var alreadyExists = await _bookmarkRepository.IsBookmarkedAsync(userId, jobId);
+        if (alreadyExists)
+            return Conflict("Bookmark already exists");
+        
+        await _bookmarkRepository.AddAsync(userId, jobId);
+        return Ok();
+    }
+    
+    [HttpDelete("bookmarks")]
+    public async Task<IActionResult> RemoveBookmark([FromQuery] string userId, [FromQuery] string jobId)
+    {
+        var result = await _bookmarkRepository.RemoveAsync(userId, jobId);
+        if (!result)
+            return NotFound();
+        return Ok();
+    }
+
+    public async Task<ActionResult<IEnumerable<Job>>> GetBookmarkedJobs(string userId)
+    {
+        var bookmarks = await _bookmarkRepository.GetByUserIdAsync(userId);
+        var jobIds = bookmarks.Select(b => b.Id);
+
+        var jobs = new List<Job>();
+        foreach (var jobId in jobIds)
+        {
+            var job = await _repository.GetByIdAsync(jobId);
+            if (job != null)
+                jobs.Add(job);
+        }
+
+        return Ok(jobs);
+    }
+
 
 }

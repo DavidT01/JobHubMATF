@@ -31,6 +31,7 @@ builder.Services.AddHttpClient<IProfileApiClient, ProfileApiClient>(client =>
 });
 
 builder.Services.AddScoped<IMatchingService,MatchingService>();
+builder.Services.AddScoped<IBookmarkRepository,BookmarkRepository>();
 
 var app = builder.Build();
 
