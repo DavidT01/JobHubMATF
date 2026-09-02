@@ -2,6 +2,8 @@ using System.Text;
 using System.Security.Claims;
 using ApplicationService.Application.Authorization;
 using ApplicationService.Infrastructure.Authorization;
+using ApplicationService.Application.Profiles;
+using ApplicationService.Infrastructure.Profiles;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -34,6 +36,18 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, HttpCurrentUser>();
+        services.AddHttpClient<ICandidateProfileReader, CandidateProfileClient>(client =>
+        {
+            var baseUrl = configuration["Services:ProfileBaseUrl"];
+            if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                throw new InvalidOperationException("Services:ProfileBaseUrl must be an absolute HTTP(S) URL.");
+            }
+
+            client.BaseAddress = new Uri(uri.AbsoluteUri.TrimEnd('/') + "/");
+            client.Timeout = TimeSpan.FromSeconds(10);
+        }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

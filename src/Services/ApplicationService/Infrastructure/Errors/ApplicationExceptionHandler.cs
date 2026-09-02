@@ -30,6 +30,7 @@ public sealed class ApplicationExceptionHandler(
             ResourceNotFoundException => CreateProblem(404, "Resource not found.", exception.Message),
             ConflictException => CreateProblem(409, "Request conflicts with the current state.", exception.Message),
             ForbiddenException => CreateProblem(403, "Access denied.", exception.Message),
+            DependencyUnavailableException => CreateProblem(503, "A required service is unavailable.", exception.Message),
             BadHttpRequestException badRequest => CreateProblem(
                 badRequest.StatusCode, "Invalid HTTP request.", "The request could not be processed."),
             _ => CreateProblem(500, "An unexpected error occurred.", "Please try again later.")

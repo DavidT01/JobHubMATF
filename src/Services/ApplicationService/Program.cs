@@ -2,11 +2,14 @@ using ApplicationService.Application;
 using ApplicationService.Infrastructure;
 using ApplicationService.Infrastructure.Errors;
 using ApplicationService.Persistence;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddOpenApi();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddProblemDetails(options =>
 {
     options.CustomizeProblemDetails = context =>
@@ -34,6 +37,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapHealthChecks("/health");
+app.MapControllers();
 
 app.UseHttpsRedirection();
 
