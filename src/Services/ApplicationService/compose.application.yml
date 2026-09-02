@@ -25,6 +25,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_HTTP_PORTS: 8080
       ConnectionStrings__ApplicationDatabase: Host=application-db;Port=5432;Database=jobhub_applications;Username=postgres;Password=postgres
+      JwtSettings__Secret: ${JWT_SECRET:?Set JWT_SECRET to the Identity signing key}
     ports:
       - "5020:8080"
     depends_on:
