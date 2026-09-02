@@ -6,6 +6,7 @@ namespace ApplicationService.Domain.Entities;
 public sealed class JobApplication
 {
     public const int MaximumCoverLetterLength = 5_000;
+    public const int CatalogJobIdLength = 24;
 
     private JobApplication()
     {
@@ -14,7 +15,7 @@ public sealed class JobApplication
     private JobApplication(
         Guid id,
         Guid candidateId,
-        Guid jobId,
+        string jobId,
         string? coverLetter,
         DateTimeOffset submittedAtUtc)
     {
@@ -31,7 +32,7 @@ public sealed class JobApplication
 
     public Guid CandidateId { get; private set; }
 
-    public Guid JobId { get; private set; }
+    public string JobId { get; private set; } = null!;
 
     public string? CoverLetter { get; private set; }
 
@@ -43,7 +44,7 @@ public sealed class JobApplication
 
     public static JobApplication Create(
         Guid candidateId,
-        Guid jobId,
+        string jobId,
         string? coverLetter,
         DateTimeOffset submittedAtUtc)
     {
@@ -52,15 +53,17 @@ public sealed class JobApplication
             throw new ApplicationDomainException("Candidate identifier is required.");
         }
 
-        if (jobId == Guid.Empty)
+        if (string.IsNullOrWhiteSpace(jobId)
+            || jobId.Length != CatalogJobIdLength
+            || !jobId.All(Uri.IsHexDigit))
         {
-            throw new ApplicationDomainException("Job identifier is required.");
+            throw new ApplicationDomainException("Job identifier must be a 24-character hexadecimal Catalog identifier.");
         }
 
         return new JobApplication(
             Guid.NewGuid(),
             candidateId,
-            jobId,
+            jobId.ToLowerInvariant(),
             coverLetter,
             submittedAtUtc);
     }
