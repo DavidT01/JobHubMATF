@@ -1,0 +1,61 @@
+@let view = state();
+<section aria-labelledby="applications-heading" [attr.aria-busy]="view.kind === 'loading'">
+  <header>
+    <h1 id="applications-heading">My applications</h1>
+    <p>Track the status of your job applications.</p>
+  </header>
+
+  @if (view.kind === 'loading') {
+    <div role="status">
+      <p>Loading applications...</p>
+      <mat-progress-bar mode="indeterminate" aria-label="Loading applications" />
+    </div>
+  } @else if (view.kind === 'error') {
+    <div role="alert">
+      <p>{{ view.message }}</p>
+      @if (view.canRetry) {
+        <button mat-stroked-button type="button" (click)="retry()">Try again</button>
+      }
+    </div>
+  } @else {
+    @if (view.result.items.length === 0) {
+      <p role="status">
+        {{ view.result.totalCount === 0 ? 'You have not submitted any applications yet.' : 'There are no applications on this page.' }}
+      </p>
+      @if (view.page.pageIndex > 0) {
+        <button mat-stroked-button type="button" (click)="firstPage()">Back to first page</button>
+      }
+    } @else {
+      <p role="status">{{ view.result.totalCount }} {{ view.result.totalCount === 1 ? 'application' : 'applications' }} in total</p>
+      <ul class="applications">
+        @for (application of view.result.items; track application.id) {
+          <li>
+            <mat-card appearance="outlined">
+              <mat-card-header>
+                <mat-card-title><h2>Job ID: {{ application.jobId }}</h2></mat-card-title>
+                <mat-card-subtitle>Status: {{ statusLabel(application.status) }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <dl>
+                  <div><dt>Submitted</dt><dd><time [attr.datetime]="application.submittedAtUtc">{{ application.submittedAtUtc | date:'medium' }}</time></dd></div>
+                  <div><dt>Last updated</dt><dd><time [attr.datetime]="application.updatedAtUtc">{{ application.updatedAtUtc | date:'medium' }}</time></dd></div>
+                </dl>
+              </mat-card-content>
+            </mat-card>
+          </li>
+        }
+      </ul>
+    }
+    @if (view.result.totalCount > 0) {
+      <mat-paginator
+        aria-label="Application pages"
+        [length]="view.result.totalCount"
+        [pageIndex]="view.page.pageIndex"
+        [pageSize]="view.page.pageSize"
+        [pageSizeOptions]="[10, 20, 50]"
+        [showFirstLastButtons]="true"
+        (page)="changePage($event)"
+      />
+    }
+  }
+</section>
