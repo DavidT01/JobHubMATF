@@ -1,0 +1,74 @@
+<div class="chat-layout">
+  <!-- LEVA STRANA: Sidebar sa kontaktima -->
+  <div class="chat-sidebar">
+    <div class="sidebar-header">
+      <h3>Poruke</h3>
+      <span class="my-badge">Vi: <strong>{{ myId }}</strong></span>
+    </div>
+
+    <div class="conversations-list">
+      <div *ngFor="let c of conversations"
+           class="conversation-item"
+           [class.active]="receiverId === c.userId"
+           (click)="selectConversation(c)">
+        <div class="user-avatar">
+          {{ c.userName ? c.userName.charAt(0).toUpperCase() : 'U' }}
+        </div>
+        <div class="user-info">
+          <div class="user-name">{{ c.userName || c.userId }}</div>
+          <div class="last-message">{{ c.lastMessage }}</div>
+        </div>
+        <div class="meta-info">
+          <span class="time" *ngIf="c.lastMessageTime">{{ c.lastMessageTime | date:'HH:mm' }}</span>
+
+          <!-- Prikazujemo bedž čim je unreadCount veći od 0 -->
+          <span class="badge" *ngIf="c.unreadCount && c.unreadCount > 0">
+            {{ c.unreadCount }}
+          </span>
+        </div>
+      </div>
+
+      <div *ngIf="conversations.length === 0" class="no-conversations">
+        Nema aktivnih konverzacija
+      </div>
+    </div>
+  </div>
+
+  <!-- DESNA STRANA: Glavni chat prozor -->
+  <div class="chat-main">
+    <!-- Zaglavlje sa informacijama o sagovorniku -->
+    <div class="chat-header">
+      <h3>Chat sa: <strong>{{ selectedConversation?.userName || receiverId }}</strong></h3>
+    </div>
+
+    <!-- Lista poruka sa skrolom -->
+    <div class="messages-list" #scrollContainer (scroll)="onScroll()">
+      <div *ngFor="let msg of messages"
+           class="message-item"
+           [ngClass]="{'sent': msg.senderId === myId, 'received': msg.senderId !== myId}">
+
+        <span class="message-content">{{ msg.content }}</span>
+        <span class="message-time" *ngIf="msg.timestamp">{{ msg.timestamp | date:'HH:mm' }}</span>
+      </div>
+    </div>
+
+    <!-- Plutajuće dugme za nove poruke -->
+    <div class="new-message-badge"
+         *ngIf="unreadCount > 0"
+         (click)="scrollToBottomManual()">
+      <span>Nova poruka ({{ unreadCount }})</span>
+      <svg viewBox="0 0 24 24">
+        <path d="M11 4v12.17l-5.58-5.59L4 12l8 8 8-8-1.41-1.41L13 16.17V4h-2z" />
+      </svg>
+    </div>
+
+    <!-- Polje za unos poruke -->
+    <div class="chat-input-container">
+      <input type="text"
+             [(ngModel)]="newMessageContent"
+             (keyup.enter)="sendMessage()"
+             placeholder="Ukucajte poruku..." />
+      <button (click)="sendMessage()">Pošalji</button>
+    </div>
+  </div>
+</div>

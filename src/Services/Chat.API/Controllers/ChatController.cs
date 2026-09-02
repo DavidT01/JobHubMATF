@@ -1,0 +1,44 @@
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Chat.API.Services;
+using Chat.API.Models;
+
+namespace Chat.API.Controllers
+{
+    [Authorize]
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ChatController : ControllerBase
+    {
+        private readonly ChatService _chatService;
+
+        public ChatController(ChatService chatService)
+        {
+            _chatService = chatService;
+        }
+
+        // 1. Stari endpoint za dobijanje/kreiranje objekta chata (ostavljen radi kompatibilnosti)
+        [HttpGet("{user1}/{user2}")]
+        public async Task<ActionResult<Models.Chat>> GetChat(string user1, string user2)
+        {
+            var chat = await _chatService.GetOrCreateChatAsync(user1, user2);
+            return Ok(chat);
+        }
+
+        // 2. Endpoint za Sidebar – vraća listu svih aktivnih konverzacija ulogovanog korisnika
+        [HttpGet("conversations")]
+        public async Task<IActionResult> GetConversations()
+        {
+            // Izvlačimo ID trenutno ulogovanog korisnika iz JWT tokena
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                             ?? User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(currentUserId))
+                return Unauthorized();
+
+            var conversations = await _chatService.GetUserConversationsAsync(currentUserId);
+            return Ok(conversations);
+        }
+    }
+}
