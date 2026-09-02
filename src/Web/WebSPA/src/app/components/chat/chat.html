@@ -22,7 +22,8 @@
           <span class="time" *ngIf="c.lastMessageTime">{{ c.lastMessageTime | date:'HH:mm' }}</span>
 
           <!-- Prikazujemo bedž čim je unreadCount veći od 0 -->
-          <span class="badge" *ngIf="c.unreadCount && c.unreadCount > 0">
+          <!-- Prikazuje crveni oblačić ako postoji nepročitana poruka -->
+          <span class="badge" *ngIf="c.hasUnread || (c.unreadCount && c.unreadCount > 0)">
             {{ c.unreadCount }}
           </span>
         </div>

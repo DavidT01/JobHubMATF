@@ -40,5 +40,18 @@ namespace Chat.API.Controllers
             var conversations = await _chatService.GetUserConversationsAsync(currentUserId);
             return Ok(conversations);
         }
+
+        [HttpPost("mark-as-read/{otherUserId}")]
+        public async Task<IActionResult> MarkAsRead(string otherUserId)
+        {
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                             ?? User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(currentUserId))
+                return Unauthorized();
+
+            await _chatService.MarkAsReadAsync(currentUserId, otherUserId);
+            return Ok();
+        }
     }
 }

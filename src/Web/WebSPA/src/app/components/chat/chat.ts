@@ -47,7 +47,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.loadConversations();
 
-    // 1. URL PRETPLATA - Menja aktivnog sagovornika
+    // 1. URL PRETPLATA - Menja aktivnog sagovornika ili reaguje na F5
     this.routeSub = this.route.queryParams.subscribe(params => {
       if (params['to']) {
         this.receiverId = params['to'];
@@ -57,38 +57,55 @@ export class ChatComponent implements OnInit, OnDestroy {
 
       this.isInitialLoad = true;
       this.previousMessagesCount = 0;
+      this.unreadCount = 0;
 
+      this.hideScrollContainer();
       this.chatService.loadHistory(this.receiverId, this.myId);
     });
 
-    // 2. SIGNALR PRETPLATA - Reaguje na sve nove poruke
+    // 2. SIGNALR PRETPLATA - Reaguje na sve poruke
     this.messageSub = this.chatService.messages$.subscribe((allMessages) => {
       this.ngZone.run(() => {
         const myClean = String(this.myId).trim().toLowerCase();
         const recClean = String(this.receiverId).trim().toLowerCase();
 
-        // Provera da li je stigla bilo koja nova poruka na nivou aplikacije
         const isNewGlobalMessage = allMessages.length > this.totalGlobalMessagesCount;
         this.totalGlobalMessagesCount = allMessages.length;
 
-        // Filtriramo poruke samo za trenutno otvoren chat u desnom prozoru
         const filtered = allMessages.filter(m => {
           const s = String(m.senderId || '').trim().toLowerCase();
           const r = String(m.receiverId || '').trim().toLowerCase();
           return (s === myClean && r === recClean) || (s === recClean && r === myClean);
         });
 
-        const isNewMessageInCurrentChat = filtered.length > this.previousMessagesCount;
+        // 1. Inicijalno učitavanje pri otvaranju / osvežavanju (F5)
+        if (this.isInitialLoad) {
+          this.messages = filtered;
+          this.previousMessagesCount = filtered.length;
+          this.cdr.detectChanges();
+
+          // Trenutni skok na dno BEZ animacije pre nego što se prikaže
+          this.forceScrollBottomInstant();
+          this.showScrollContainer();
+
+          // Dodatna provera nakon što pretraživač završi render
+          setTimeout(() => {
+            this.forceScrollBottomInstant();
+            this.isInitialLoad = false;
+          }, 50);
+          return;
+        }
+
+        // 2. Ako stignu NOVE poruke u toku razgovora
+        const newMessagesDelta = filtered.length - this.previousMessagesCount;
         this.messages = filtered;
 
-        // Ažuriranje sidebara ako je stigla nova globalna poruka
         const latestGlobalMsg = allMessages[allMessages.length - 1];
 
         if (latestGlobalMsg && isNewGlobalMessage) {
           const sender = String(latestGlobalMsg.senderId).trim().toLowerCase();
           const receiver = String(latestGlobalMsg.receiverId).trim().toLowerCase();
 
-          // Pronađi koja je to konverzacija
           const otherUser = (sender === myClean) ? receiver : sender;
           const conv = this.conversations.find(c => c.userId.toLowerCase() === otherUser);
 
@@ -96,41 +113,35 @@ export class ChatComponent implements OnInit, OnDestroy {
             conv.lastMessage = latestGlobalMsg.content;
             conv.lastMessageTime = new Date().toISOString();
 
-            // Povećaj bedž samo ako nam šalje neko drugi I nismo u chatu sa njim
             if (sender !== myClean && sender !== recClean) {
+              conv.hasUnread = true;
               conv.unreadCount = Number(conv.unreadCount || 0) + 1;
             }
 
-            // Sortiraj sidebar po najsvežijoj poruci
             this.sortConversations();
           } else {
-            // Ako je skroz nov sagovornik
             this.loadConversations();
           }
         }
 
-        // Desni plutajući bedž (samo za poruke u otvorenim chatu)
-        setTimeout(() => {
-          if (this.isInitialLoad) {
-            this.smartScrollToBottom(true);
-            this.isInitialLoad = false;
-          } else if (isNewMessageInCurrentChat) {
-            const lastMsg = this.messages[this.messages.length - 1];
-            const isFromOther = String(lastMsg?.senderId).trim().toLowerCase() !== myClean;
+        if (newMessagesDelta > 0) {
+          const lastMsg = this.messages[this.messages.length - 1];
+          const isFromOther = String(lastMsg?.senderId).trim().toLowerCase() !== myClean;
 
-            if (isFromOther) {
-              if (this.isUserNearBottom()) {
-                this.smartScrollToBottom(false);
-              } else {
-                this.unreadCount++;
-              }
+          if (isFromOther) {
+            if (this.isUserNearBottom()) {
+              this.animatedScrollToBottom();
+              this.chatService.markAsRead(this.receiverId).subscribe();
             } else {
-              this.smartScrollToBottom(true);
+              this.unreadCount += newMessagesDelta;
             }
+          } else {
+            this.animatedScrollToBottom();
           }
-          this.previousMessagesCount = this.messages.length;
-          this.cdr.detectChanges();
-        }, 0);
+        }
+
+        this.previousMessagesCount = filtered.length;
+        this.cdr.detectChanges();
       });
     });
   }
@@ -145,26 +156,20 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   public loadConversations(): void {
     this.chatService.getConversations().subscribe({
-      next: (data) => {
+      next: (data: any[]) => {
         this.conversations = (data || [])
-          .filter(c => c && c.userId && c.userId.trim() !== '')
-          .map(c => ({
-            ...c,
-            unreadCount: c.unreadCount ?? 0
-          }));
+          .filter(c => c && (c.userId || c.UserId))
+          .map(c => {
+            const count = c.unreadCount ?? c.UnreadCount ?? 0;
+            return {
+              ...c,
+              userId: c.userId || c.UserId,
+              unreadCount: Number(count),
+              hasUnread: c.hasUnread ?? c.HasUnread ?? (count > 0)
+            };
+          });
 
         this.sortConversations();
-
-        if (this.conversations.length > 0) {
-          const found = this.conversations.find(c => c.userId.toLowerCase() === this.receiverId.toLowerCase());
-          if (found) {
-            this.selectedConversation = found;
-          } else if (!this.receiverId || this.receiverId === 'user2') {
-            this.selectedConversation = this.conversations[0];
-            this.receiverId = this.conversations[0].userId;
-          }
-        }
-
         this.cdr.detectChanges();
       },
       error: (err) => console.error('❌ Greška pri učitavanju konverzacija:', err)
@@ -172,25 +177,31 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   public selectConversation(conv: Conversation): void {
-    if (this.receiverId === conv.userId) return;
-
-    // Resetuj bedž SAMO za kliknutu konverzaciju
+    conv.hasUnread = false;
     conv.unreadCount = 0;
 
     this.selectedConversation = conv;
-    this.receiverId = conv.userId;
 
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { to: conv.userId },
-      queryParamsHandling: 'merge'
+    if (this.receiverId !== conv.userId) {
+      this.receiverId = conv.userId;
+
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { to: conv.userId },
+        queryParamsHandling: 'merge'
+      });
+
+      this.isInitialLoad = true;
+      this.unreadCount = 0;
+      this.previousMessagesCount = 0;
+
+      this.hideScrollContainer();
+      this.chatService.loadHistory(this.receiverId, this.myId);
+    }
+
+    this.chatService.markAsRead(conv.userId).subscribe({
+      error: (err) => console.error('Greška pri označavanju poruka kao pročitanih:', err)
     });
-
-    this.isInitialLoad = true;
-    this.unreadCount = 0;
-    this.previousMessagesCount = 0;
-
-    this.chatService.loadHistory(this.receiverId, this.myId);
   }
 
   sendMessage(): void {
@@ -200,27 +211,24 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.chatService.sendMessage(this.receiverId, sentContent, this.myId);
     this.newMessageContent = '';
 
-    this.unreadCount = 0; // Poništava samo desni plutajući bedž
-    this.smartScrollToBottom(true);
+    this.unreadCount = 0;
+    this.animatedScrollToBottom();
 
-    // Ažuriramo lastMessage i vreme SAMO za trenutni chat, bez osvežavanja cele liste sa API-ja
     const recClean = String(this.receiverId).trim().toLowerCase();
     const conv = this.conversations.find(c => c.userId.toLowerCase() === recClean);
 
     if (conv) {
       conv.lastMessage = sentContent;
       conv.lastMessageTime = new Date().toISOString();
-      this.sortConversations(); // Stavlja tvoj aktivni chat na vrh
+      this.sortConversations();
     }
   }
 
   scrollToBottomManual(): void {
     this.unreadCount = 0;
     this.cdr.detectChanges();
-
-    if (this.scrollContainer) {
-      this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
-    }
+    this.animatedScrollToBottom();
+    this.chatService.markAsRead(this.receiverId).subscribe();
   }
 
   onScroll(): void {
@@ -228,6 +236,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       if (this.unreadCount !== 0) {
         this.unreadCount = 0;
         this.cdr.detectChanges();
+        this.chatService.markAsRead(this.receiverId).subscribe();
       }
     }
   }
@@ -240,14 +249,36 @@ export class ChatComponent implements OnInit, OnDestroy {
     return height - position <= threshold;
   }
 
-  private smartScrollToBottom(force: boolean = false): void {
+  // TRENUTNI SKOK BEZ ANIMACIJE
+  private forceScrollBottomInstant(): void {
+    if (this.scrollContainer) {
+      const el = this.scrollContainer.nativeElement;
+      el.style.scrollBehavior = 'auto';
+      el.scrollTop = el.scrollHeight;
+    }
+  }
+
+  // ANIMIRANO SKROLOVANJE SVE SVEŽE PORUKE
+  private animatedScrollToBottom(): void {
     setTimeout(() => {
-      try {
-        if (this.scrollContainer && (force || this.isUserNearBottom())) {
-          this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
-        }
-      } catch (err) { }
+      if (this.scrollContainer) {
+        const el = this.scrollContainer.nativeElement;
+        el.style.scrollBehavior = 'smooth';
+        el.scrollTop = el.scrollHeight;
+      }
     }, 50);
+  }
+
+  private hideScrollContainer(): void {
+    if (this.scrollContainer) {
+      this.scrollContainer.nativeElement.style.visibility = 'hidden';
+    }
+  }
+
+  private showScrollContainer(): void {
+    if (this.scrollContainer) {
+      this.scrollContainer.nativeElement.style.visibility = 'visible';
+    }
   }
 
   ngOnDestroy(): void {

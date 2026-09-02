@@ -19,6 +19,8 @@ namespace Chat.API.Models
 
         public DateTime Timestamp { get; set; }
 
+        public bool IsRead { get; set; } = false;
+
     }
 
 }

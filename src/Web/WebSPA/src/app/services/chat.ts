@@ -17,6 +17,7 @@ export interface Conversation {
   lastMessage: string;
   lastMessageTime: string;
   unreadCount?: number;
+  hasUnread?: boolean;
 }
 
 @Injectable({
@@ -140,5 +141,12 @@ export class ChatService {
       console.error('Greška pri čitanju tokena:', e);
       return 'user1';
     }
+  }
+
+  public markAsRead(otherUserId: string) {
+    const token = localStorage.getItem('jwt_token') || '';
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+
+    return this.http.post(`${this.gatewayUrl}/api/chat/mark-as-read/${otherUserId}`, {}, { headers });
   }
 }
