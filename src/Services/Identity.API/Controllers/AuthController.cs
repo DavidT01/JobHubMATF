@@ -2,6 +2,7 @@ using Identity.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -16,34 +17,42 @@ namespace Identity.API.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _environment;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IWebHostEnvironment environment)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            _environment = environment;
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email!);
-            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password!))
+            if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password!))
             {
-                var userRoles = await _userManager.GetRolesAsync(user);
-                var token = GenerateJwtToken(user, userRoles);
-
-                return Ok(new
-                {
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo
-                });
+                return Unauthorized(new { Message = "Invalid email or password!" });
             }
 
-            return Unauthorized(new { Message = "Invalid email or password!" });
+            if (!await _userManager.IsEmailConfirmedAsync(user))
+            {
+                return Unauthorized(new { Message = "Please confirm your email before signing in." });
+            }
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+            var token = GenerateJwtToken(user, userRoles);
+
+            return Ok(new
+            {
+                token = new JwtSecurityTokenHandler().WriteToken(token),
+                expiration = token.ValidTo
+            });
         }
 
         [HttpPost("register")]
@@ -83,7 +92,105 @@ namespace Identity.API.Controllers
 
             await _userManager.AddToRoleAsync(user, model.Role!);
 
-            return Ok(new { Message = "User created successfully!" });
+            var confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(confirmToken));
+            var frontendBase = _configuration["Frontend:BaseUrl"] ?? "http://localhost:4200";
+            var confirmationUrl =
+                $"{frontendBase}/confirm-email?userId={Uri.EscapeDataString(user.Id)}&token={encodedToken}";
+
+            // No real SMTP in this course project: return the link so the UI can show it.
+            return Ok(new
+            {
+                Message = "User created successfully! Please confirm your email.",
+                UserId = user.Id,
+                ConfirmationUrl = confirmationUrl,
+                EmailToken = ExposeEmailTokens() ? encodedToken : null
+            });
+        }
+
+        [HttpPost("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailDto model)
+        {
+            var user = await _userManager.FindByIdAsync(model.UserId!);
+            if (user == null)
+            {
+                return BadRequest(new { Message = "Invalid confirmation link." });
+            }
+
+            string decodedToken;
+            try
+            {
+                decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Token!));
+            }
+            catch
+            {
+                return BadRequest(new { Message = "Invalid confirmation token." });
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(" ", result.Errors.Select(e => e.Description));
+                return BadRequest(new { Message = errors });
+            }
+
+            return Ok(new { Message = "Email confirmed successfully. You can sign in now." });
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email!);
+
+            // Always return the same message so we do not reveal whether the email exists.
+            const string genericMessage = "If an account with that email exists, a reset link is available.";
+
+            if (user == null)
+            {
+                return Ok(new { Message = genericMessage });
+            }
+
+            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(resetToken));
+            var frontendBase = _configuration["Frontend:BaseUrl"] ?? "http://localhost:4200";
+            var resetUrl =
+                $"{frontendBase}/reset-password?email={Uri.EscapeDataString(user.Email!)}&token={encodedToken}";
+
+            return Ok(new
+            {
+                Message = genericMessage,
+                ResetUrl = ExposeEmailTokens() ? resetUrl : null,
+                EmailToken = ExposeEmailTokens() ? encodedToken : null
+            });
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email!);
+            if (user == null)
+            {
+                return BadRequest(new { Message = "Invalid password reset request." });
+            }
+
+            string decodedToken;
+            try
+            {
+                decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Token!));
+            }
+            catch
+            {
+                return BadRequest(new { Message = "Invalid reset token." });
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, model.NewPassword!);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(" ", result.Errors.Select(e => e.Description));
+                return BadRequest(new { Message = errors });
+            }
+
+            return Ok(new { Message = "Password reset successfully. You can sign in now." });
         }
 
         [Authorize]
@@ -113,6 +220,9 @@ namespace Identity.API.Controllers
                 Roles = roles
             });
         }
+
+        private bool ExposeEmailTokens() =>
+            _environment.IsDevelopment() || _environment.IsEnvironment("Testing");
 
         private JwtSecurityToken GenerateJwtToken(ApplicationUser user, IList<string> userRoles)
         {

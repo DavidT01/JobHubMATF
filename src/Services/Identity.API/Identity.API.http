@@ -12,6 +12,15 @@ Content-Type: application/json
   "role": "Candidate"
 }
 
+### Confirm email (paste userId + token from register)
+POST {{Identity.API_HostAddress}}/api/auth/confirm-email
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "token": "{{emailToken}}"
+}
+
 ### Login
 POST {{Identity.API_HostAddress}}/api/auth/login
 Content-Type: application/json
@@ -19,6 +28,24 @@ Content-Type: application/json
 {
   "email": "ana@example.com",
   "password": "Pass123!"
+}
+
+### Forgot password
+POST {{Identity.API_HostAddress}}/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "ana@example.com"
+}
+
+### Reset password (paste token from forgot-password)
+POST {{Identity.API_HostAddress}}/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "email": "ana@example.com",
+  "token": "{{resetToken}}",
+  "newPassword": "NewPass123!"
 }
 
 ### Current user (paste token from login)
