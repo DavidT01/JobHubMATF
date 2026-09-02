@@ -1,8 +1,6 @@
 ﻿using Chat.API.Models;
 using MongoDB.Driver;
 
-
-
 namespace Chat.API.Services
 {
     public class ChatService
@@ -55,7 +53,6 @@ namespace Chat.API.Services
             // 1. Uzmi ili kreiraj chat
             var chat = await GetOrCreateChatAsync(senderId, receiverId);
 
-            
             // 2. Kreiraj poruku
             var message = new Message
             {
@@ -103,6 +100,40 @@ namespace Chat.API.Services
                 .Find(m => m.ChatId == chatId)
                 .SortBy(m => m.Timestamp)
                 .ToListAsync();
+        }
+
+        // --- NOVA METODA ZA SIDEBAR ---
+        public async Task<List<ConversationDto>> GetUserConversationsAsync(string currentUserId)
+        {
+            // 1. Pronađi sve chatove u kojima je trenutni korisnik ulogovan kao User1Id ili User2Id
+            var userChats = await _chats
+                .Find(c => c.User1Id == currentUserId || c.User2Id == currentUserId)
+                .ToListAsync();
+
+            var conversations = new List<ConversationDto>();
+
+            foreach (var chat in userChats)
+            {
+                // Odredi ko je sagovornik
+                var otherUserId = chat.User1Id == currentUserId ? chat.User2Id : chat.User1Id;
+
+                // Izvlačenje poslednje poruke za ovaj chat iz Messages kolekcije
+                var lastMessage = await _messages
+                    .Find(m => m.ChatId == chat.Id)
+                    .SortByDescending(m => m.Timestamp)
+                    .FirstOrDefaultAsync();
+
+                conversations.Add(new ConversationDto
+                {
+                    UserId = otherUserId,
+                    UserName = otherUserId, // Kasnije se po potrebi ovde gRPC-om / servisom dodaje ime
+                    LastMessage = lastMessage?.Text ?? "Nema poruka",
+                    LastMessageTime = lastMessage?.Timestamp ?? chat.CreatedAt
+                });
+            }
+
+            // Sortiraj konverzacije tako da najnovija ide prva na vrh sidebara
+            return conversations.OrderByDescending(c => c.LastMessageTime).ToList();
         }
     }
 }

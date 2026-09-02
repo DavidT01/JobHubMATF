@@ -11,6 +11,14 @@ export interface ChatMessage {
   timestamp?: Date;
 }
 
+export interface Conversation {
+  userId: string;
+  userName: string;
+  lastMessage: string;
+  lastMessageTime: string;
+  unreadCount?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -65,8 +73,6 @@ export class ChatService {
       this.hubConnection.invoke('SendMessage', receiverId, content)
         .then(() => {
           console.log('🚀 Poruka poslata na server.');
-          // Obrisano je lokalno ručno ubacivanje (localMsg)!
-          // SignalR će je sam dostaviti preko ReceiveMessage i prikazati jednom.
         })
         .catch(err => console.error('❌ Greška pri slanju poruke:', err));
     } else {
@@ -107,6 +113,15 @@ export class ChatService {
       });
   }
 
+  // --- METODA ZA DOWLAČENJE KONVERZACIJA ZA SIDEBAR ---
+  public getConversations(): Observable<Conversation[]> {
+    const token = localStorage.getItem('jwt_token') || '';
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    const url = `${this.gatewayUrl}/api/chat/conversations`;
+
+    return this.http.get<Conversation[]>(url, { headers });
+  }
+
   public getMyUserIdFromToken(): string {
     const token = localStorage.getItem('jwt_token');
     if (!token) return 'user1';
@@ -116,7 +131,6 @@ export class ChatService {
       const decodedJson = atob(payloadBase64);
       const decoded = JSON.parse(decodedJson);
 
-      // Čitamo sub, nameid ili jedinstveni identifikator iz JWT claim-ova
       return decoded.sub ||
         decoded.nameid ||
         decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
