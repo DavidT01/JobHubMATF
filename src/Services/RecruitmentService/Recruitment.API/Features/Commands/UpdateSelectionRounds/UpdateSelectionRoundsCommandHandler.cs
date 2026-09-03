@@ -36,8 +36,9 @@ namespace Recruitment.API.Features.Commands.UpdateSelectionRounds
                 {
                     var newRound = mapper.Map<SelectionRound>(round);
                     newRound.Id = Guid.NewGuid();
+                    newRound.RecruitmentProcessId = process.Id;
                     newRound.CreatedAt = DateTime.UtcNow;
-                    process.Rounds.Add(newRound);
+                    context.Rounds.Add(newRound);
                 }
             }
 
