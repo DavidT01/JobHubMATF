@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Catalog.Clients;
+using Catalog.DTOs;
 using Catalog.Entities;
 using Catalog.Repositories;
 using Catalog.Services;
@@ -69,6 +70,7 @@ public class CatalogController : ControllerBase
         await _repository.CreateJobAsync(job);
         
         await _cache.RemoveAsync("allJobs");
+        await _cache.RemoveAsync("activeJobs");
         
         return CreatedAtAction(nameof(GetById), new { id = job.Id }, job);
     }
@@ -87,6 +89,7 @@ public class CatalogController : ControllerBase
             return NotFound();
         
         await _cache.RemoveAsync("allJobs");
+        await _cache.RemoveAsync("activeJobs");
         
         return Ok(job);
     }
@@ -101,6 +104,7 @@ public class CatalogController : ControllerBase
             return NotFound(null);
         
         await _cache.RemoveAsync("allJobs");
+        await _cache.RemoveAsync("activeJobs");
         
         return Ok();
     }
@@ -125,7 +129,21 @@ public class CatalogController : ControllerBase
     [HttpGet("active")]
     public async Task<ActionResult<IEnumerable<Job>>> GetActiveJobs()
     {
+        const string cacheKey = "activeJobs";
+        var cached = await _cache.GetStringAsync(cacheKey);
+        if (cached != null)
+        {
+            return Ok(JsonSerializer.Deserialize<List<Job>>(cached));
+        }
+        
         var jobs = await _repository.GetActiveJobsAsync();
+
+        await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(jobs),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+        
         return Ok(jobs);
     }
     
@@ -160,8 +178,28 @@ public class CatalogController : ControllerBase
         var job = await _repository.GetByIdAsync(jobId);
         if (job == null)
             return NotFound("Job did not found");
+
+        var candidateCacheKey = $"candidate:{userId}";
+        var cachedCandidate = await _cache.GetStringAsync(candidateCacheKey);
+        CandidateProfileDto? candidate;
         
-        var candidate = await _profileApiClient.GetCandidateByIdAsync(userId);
+        if (cachedCandidate != null)
+        {
+            candidate = JsonSerializer.Deserialize<CandidateProfileDto>(cachedCandidate);    
+        }
+        else
+        {
+            candidate = await _profileApiClient.GetCandidateByIdAsync(userId);
+            if (candidate != null)
+            {
+                await _cache.SetStringAsync(candidateCacheKey, JsonSerializer.Serialize(candidate),
+                    new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+                    });
+            }
+        }
+
         if (candidate == null)
             return NotFound("Candidate did not found");
 
