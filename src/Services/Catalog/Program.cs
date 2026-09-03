@@ -32,6 +32,10 @@ builder.Services.AddHttpClient<IProfileApiClient, ProfileApiClient>(client =>
 
 builder.Services.AddScoped<IMatchingService,MatchingService>();
 builder.Services.AddScoped<IBookmarkRepository,BookmarkRepository>();
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration["RedisSettings:ConnectionString"];
+});
 
 var app = builder.Build();
 

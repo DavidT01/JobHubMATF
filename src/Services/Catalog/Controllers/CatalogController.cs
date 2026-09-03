@@ -1,8 +1,10 @@
+using System.Text.Json;
 using Catalog.Clients;
 using Catalog.Entities;
 using Catalog.Repositories;
 using Catalog.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Catalog.Controllers;
 
@@ -14,21 +16,37 @@ public class CatalogController : ControllerBase
     private readonly IMatchingService _matchingService;
     private readonly IProfileApiClient _profileApiClient;
     private readonly IBookmarkRepository _bookmarkRepository;
+    private readonly IDistributedCache _cache;
     public CatalogController(IJobRepository repository, 
                              IMatchingService matchingService, 
                              IProfileApiClient profileApiClient ,
-                             IBookmarkRepository  bookmarkRepository)
+                             IBookmarkRepository  bookmarkRepository,
+                             IDistributedCache cache)
     {
         _repository = repository;
         _matchingService = matchingService;
         _profileApiClient = profileApiClient;
         _bookmarkRepository = bookmarkRepository;
+        _cache = cache;
     }
     
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Job>>> GetAllJobs()
     {
+        const string cacheKey = "allJobs";
+        var cached = await _cache.GetStringAsync(cacheKey);
+        if (cached != null)
+        {
+            return Ok(JsonSerializer.Deserialize<List<Job>>(cached));
+        }
+        
         var jobs = await _repository.GetAllAsync();
+
+        await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(jobs),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
         
         return Ok(jobs);
     }
@@ -49,6 +67,9 @@ public class CatalogController : ControllerBase
     public async Task<ActionResult<Job>> CreateJob([FromBody] Job job)
     {
         await _repository.CreateJobAsync(job);
+        
+        await _cache.RemoveAsync("allJobs");
+        
         return CreatedAtAction(nameof(GetById), new { id = job.Id }, job);
     }
 
@@ -64,6 +85,9 @@ public class CatalogController : ControllerBase
         var result = await _repository.UpdateJobAsync(job);
         if (!result)
             return NotFound();
+        
+        await _cache.RemoveAsync("allJobs");
+        
         return Ok(job);
     }
 
@@ -75,6 +99,9 @@ public class CatalogController : ControllerBase
         var result = await _repository.DeleteJobAsync(id);
         if (!result)
             return NotFound(null);
+        
+        await _cache.RemoveAsync("allJobs");
+        
         return Ok();
     }
     
@@ -143,7 +170,7 @@ public class CatalogController : ControllerBase
     }
     
     [HttpPost("bookmarks")]
-    public async Task<IActionResult> AddBookmark([FromBody] string userId, [FromBody] string jobId)
+    public async Task<IActionResult> AddBookmark([FromQuery] string userId, [FromQuery] string jobId)
     {
         var alreadyExists = await _bookmarkRepository.IsBookmarkedAsync(userId, jobId);
         if (alreadyExists)
@@ -161,11 +188,12 @@ public class CatalogController : ControllerBase
             return NotFound();
         return Ok();
     }
-
+    
+    [HttpGet("bookmarks/{userId}")]
     public async Task<ActionResult<IEnumerable<Job>>> GetBookmarkedJobs(string userId)
     {
         var bookmarks = await _bookmarkRepository.GetByUserIdAsync(userId);
-        var jobIds = bookmarks.Select(b => b.Id);
+        var jobIds = bookmarks.Select(b => b.JobId);
 
         var jobs = new List<Job>();
         foreach (var jobId in jobIds)
