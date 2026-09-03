@@ -35,6 +35,13 @@
             ]
           },
           "configurations": {
+            "preview": {
+              "browser": "src/main.preview.ts",
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "assets": [{ "glob": "**/*", "input": "src/preview/assets" }]
+            },
             "production": {
               "budgets": [
                 {
@@ -67,6 +74,9 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "configurations": {
+            "preview": {
+              "buildTarget": "WebSPA:build:preview"
+            },
             "production": {
               "buildTarget": "WebSPA:build:production"
             },

@@ -1,0 +1,24 @@
+:host { display: block; }
+
+section {
+  max-width: 64rem;
+  margin-inline: auto;
+  padding: clamp(1rem, 4vw, 2rem);
+}
+
+header { margin-bottom: 1.5rem; }
+h1 { margin-top: 0; }
+h2 { font: inherit; margin: 0; overflow-wrap: anywhere; }
+
+.applications {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+}
+
+mat-card { height: 100%; }
+dl { display: grid; gap: 0.75rem; }
+dd { margin: 0.25rem 0 0; }
+mat-paginator { margin-top: 1rem; }
