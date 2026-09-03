@@ -1,0 +1,35 @@
+name: jobhub-application
+
+services:
+  application-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: jobhub_applications
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - application-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d jobhub_applications"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  application-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__ApplicationDatabase: Host=application-db;Port=5432;Database=jobhub_applications;Username=postgres;Password=postgres
+    ports:
+      - "5020:8080"
+    depends_on:
+      application-db:
+        condition: service_healthy
+
+volumes:
+  application-db-data:

@@ -1,7 +1,12 @@
+using ApplicationService.Infrastructure;
+using ApplicationService.Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddOpenApi();
+builder.Services.AddApplicationInfrastructure();
+builder.Services.AddApplicationPersistence(builder.Configuration);
 
 var app = builder.Build();
 
@@ -10,6 +15,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.MapHealthChecks("/health");
 
 app.UseHttpsRedirection();
 
