@@ -39,6 +39,19 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, HttpCurrentUser>();
         services.AddSingleton(TimeProvider.System);
+        services.AddScoped<JobOwnershipGuard>();
+        services.AddSingleton<ICvLinkResolver, ProfileCvLinkResolver>();
+        services.AddHttpClient<ICompanyProfileReader, CompanyProfileClient>(client =>
+        {
+            var baseUrl = configuration["Services:ProfileBaseUrl"];
+            if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                throw new InvalidOperationException("Services:ProfileBaseUrl must be an absolute HTTP(S) URL.");
+            }
+            client.BaseAddress = new Uri(uri.AbsoluteUri.TrimEnd('/') + "/");
+            client.Timeout = TimeSpan.FromSeconds(10);
+        }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
         services.AddHttpClient<IJobReader, CatalogJobClient>(client =>
         {
             var baseUrl = configuration["Services:CatalogBaseUrl"];

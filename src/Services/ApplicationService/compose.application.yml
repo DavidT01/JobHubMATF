@@ -27,6 +27,7 @@ services:
       ConnectionStrings__ApplicationDatabase: Host=application-db;Port=5432;Database=jobhub_applications;Username=postgres;Password=postgres
       JwtSettings__Secret: ${JWT_SECRET:?Set JWT_SECRET to the Identity signing key}
       Services__ProfileBaseUrl: ${PROFILE_BASE_URL:-http://host.docker.internal:5213}
+      Services__ProfilePublicBaseUrl: ${PROFILE_PUBLIC_BASE_URL:-http://localhost:5213}
       Services__CatalogBaseUrl: ${CATALOG_BASE_URL:-http://host.docker.internal:5246}
     ports:
       - "5020:8080"

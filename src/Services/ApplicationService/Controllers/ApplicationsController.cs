@@ -12,6 +12,21 @@ namespace ApplicationService.Controllers;
 [Route("api/applications")]
 public sealed class ApplicationsController(ISender sender) : ControllerBase
 {
+    [HttpGet("jobs/{jobId}")]
+    [Authorize(Policy = AuthorizationPolicies.Employer)]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType(typeof(PagedResult<EmployerApplicationDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<ActionResult<PagedResult<EmployerApplicationDto>>> GetForJob(
+        string jobId, CancellationToken cancellationToken, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+    {
+        return Ok(await sender.Send(new GetEmployerApplicationsQuery(jobId, pageNumber, pageSize), cancellationToken));
+    }
+
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.Candidate)]
     [ProducesResponseType(typeof(ApplicationListItemDto), StatusCodes.Status201Created)]
