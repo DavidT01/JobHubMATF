@@ -1,0 +1,65 @@
+@let view = state();
+<section aria-labelledby="employer-applications-heading" [attr.aria-busy]="view.kind === 'loading'">
+  <header>
+    <h1 id="employer-applications-heading">Job applications</h1>
+    <p class="identifier">Job ID: {{ jobId() }}</p>
+    <p>CV links show the candidate's current profile CV, not a copy saved with the application.</p>
+  </header>
+  @if (view.kind === 'invalid') {
+    <p role="alert">Select a valid job to view its applications.</p>
+  } @else if (view.kind === 'loading') {
+    <div role="status">
+      <p>Loading applications...</p>
+      <mat-progress-bar mode="indeterminate" aria-label="Loading applications" />
+    </div>
+  } @else if (view.kind === 'error') {
+    <div role="alert">
+      <p>{{ view.message }}</p>
+      @if (view.canRetry) {
+        <button mat-stroked-button type="button" (click)="reload()">Try again</button>
+      }
+    </div>
+  } @else {
+    <button mat-stroked-button type="button" (click)="reload()">Refresh applications</button>
+    @if (view.result.items.length === 0) {
+      <p role="status">{{ view.result.totalCount === 0 ? 'No applications for this job yet.' : 'There are no applications on this page.' }}</p>
+      @if (view.query.pageIndex > 0) {
+        <button mat-stroked-button type="button" (click)="reload(true)">Back to first page</button>
+      }
+    } @else {
+      <p role="status">{{ view.result.totalCount }} {{ view.result.totalCount === 1 ? 'application' : 'applications' }} in total</p>
+      <ul class="applications">
+        @for (application of view.result.items; track application.id) {
+          <li>
+            <mat-card appearance="outlined">
+              <mat-card-header>
+                <mat-card-title><h2>{{ application.candidateName || 'Candidate profile' }}</h2></mat-card-title>
+                <mat-card-subtitle>Status: {{ statusLabel(application.status) }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <dl>
+                  <div><dt>Candidate profile ID</dt><dd class="identifier">{{ application.candidateId }}</dd></div>
+                  <div><dt>Submitted</dt><dd><time [attr.datetime]="application.submittedAtUtc">{{ application.submittedAtUtc | date:'medium' }}</time></dd></div>
+                  <div><dt>Last updated</dt><dd><time [attr.datetime]="application.updatedAtUtc">{{ application.updatedAtUtc | date:'medium' }}</time></dd></div>
+                </dl>
+                <h3>Cover letter</h3>
+                <p class="cover-letter">{{ application.coverLetter || 'No cover letter provided.' }}</p>
+                @if (cvLink(application); as link) {
+                  <a mat-stroked-button [href]="link" target="_blank" rel="noopener noreferrer">Open current CV<span class="visually-hidden"> for {{ application.candidateName || application.candidateId }} (new tab)</span></a>
+                } @else {
+                  <p>{{ cvMessage(application) }}</p>
+                }
+              </mat-card-content>
+            </mat-card>
+          </li>
+        }
+      </ul>
+    }
+    @if (view.result.totalCount > 0) {
+      <mat-paginator aria-label="Job application pages"
+        [length]="view.result.totalCount" [pageIndex]="view.query.pageIndex"
+        [pageSize]="view.query.pageSize" [pageSizeOptions]="[10, 20, 50]"
+        [showFirstLastButtons]="true" (page)="changePage($event)" />
+    }
+  }
+</section>
