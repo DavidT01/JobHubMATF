@@ -7,6 +7,7 @@ public sealed class JobApplication
 {
     public const int MaximumCoverLetterLength = 5_000;
     public const int CatalogJobIdLength = 24;
+    public const int MaximumUserIdLength = 450;
 
     private JobApplication()
     {
@@ -15,12 +16,14 @@ public sealed class JobApplication
     private JobApplication(
         Guid id,
         Guid candidateId,
+        string candidateUserId,
         string jobId,
         string? coverLetter,
         DateTimeOffset submittedAtUtc)
     {
         Id = id;
         CandidateId = candidateId;
+        CandidateUserId = candidateUserId;
         JobId = jobId;
         CoverLetter = NormalizeCoverLetter(coverLetter);
         Status = ApplicationStatus.Submitted;
@@ -31,6 +34,9 @@ public sealed class JobApplication
     public Guid Id { get; private set; }
 
     public Guid CandidateId { get; private set; }
+
+    // Older rows may lack this lookup key; never infer it from the profile ID.
+    public string? CandidateUserId { get; private set; }
 
     public string JobId { get; private set; } = null!;
 
@@ -44,6 +50,7 @@ public sealed class JobApplication
 
     public static JobApplication Create(
         Guid candidateId,
+        string candidateUserId,
         string jobId,
         string? coverLetter,
         DateTimeOffset submittedAtUtc)
@@ -51,6 +58,11 @@ public sealed class JobApplication
         if (candidateId == Guid.Empty)
         {
             throw new ApplicationDomainException("Candidate identifier is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(candidateUserId) || candidateUserId.Length > MaximumUserIdLength)
+        {
+            throw new ApplicationDomainException("A valid candidate user identifier is required.");
         }
 
         if (string.IsNullOrWhiteSpace(jobId)
@@ -63,6 +75,7 @@ public sealed class JobApplication
         return new JobApplication(
             Guid.NewGuid(),
             candidateId,
+            candidateUserId,
             jobId.ToLowerInvariant(),
             coverLetter,
             submittedAtUtc);

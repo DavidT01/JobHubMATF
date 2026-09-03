@@ -4,6 +4,8 @@ using ApplicationService.Application.Authorization;
 using ApplicationService.Infrastructure.Authorization;
 using ApplicationService.Application.Profiles;
 using ApplicationService.Infrastructure.Profiles;
+using ApplicationService.Application.Catalog;
+using ApplicationService.Infrastructure.Catalog;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -36,6 +38,19 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, HttpCurrentUser>();
+        services.AddSingleton(TimeProvider.System);
+        services.AddHttpClient<IJobReader, CatalogJobClient>(client =>
+        {
+            var baseUrl = configuration["Services:CatalogBaseUrl"];
+            if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                throw new InvalidOperationException("Services:CatalogBaseUrl must be an absolute HTTP(S) URL.");
+            }
+
+            client.BaseAddress = new Uri(uri.AbsoluteUri.TrimEnd('/') + "/");
+            client.Timeout = TimeSpan.FromSeconds(10);
+        }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
         services.AddHttpClient<ICandidateProfileReader, CandidateProfileClient>(client =>
         {
             var baseUrl = configuration["Services:ProfileBaseUrl"];
