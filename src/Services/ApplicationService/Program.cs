@@ -9,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddOpenApi();
 builder.Services.AddControllers()
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(
+        new JsonStringEnumConverter(allowIntegerValues: false)));
 builder.Services.AddProblemDetails(options =>
 {
     options.CustomizeProblemDetails = context =>

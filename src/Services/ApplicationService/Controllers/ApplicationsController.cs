@@ -12,6 +12,22 @@ namespace ApplicationService.Controllers;
 [Route("api/applications")]
 public sealed class ApplicationsController(ISender sender) : ControllerBase
 {
+    [HttpPut("{applicationId:guid}/status")]
+    [Authorize(Policy = AuthorizationPolicies.Employer)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> ChangeStatus(
+        Guid applicationId, [FromBody] ChangeApplicationStatusRequest request, CancellationToken cancellationToken)
+    {
+        await sender.Send(new ChangeApplicationStatusCommand(applicationId, request.Status), cancellationToken);
+        return NoContent();
+    }
+
     [HttpGet("jobs/{jobId}")]
     [Authorize(Policy = AuthorizationPolicies.Employer)]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
