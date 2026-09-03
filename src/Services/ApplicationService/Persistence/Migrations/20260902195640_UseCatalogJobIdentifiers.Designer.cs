@@ -3,6 +3,7 @@ using System;
 using ApplicationService.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ApplicationService.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260902195640_UseCatalogJobIdentifiers")]
+    partial class UseCatalogJobIdentifiers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,11 +34,6 @@ namespace ApplicationService.Persistence.Migrations
                     b.Property<Guid>("CandidateId")
                         .HasColumnType("uuid")
                         .HasColumnName("candidate_id");
-
-                    b.Property<string>("CandidateUserId")
-                        .HasMaxLength(450)
-                        .HasColumnType("character varying(450)")
-                        .HasColumnName("candidate_user_id");
 
                     b.Property<string>("CoverLetter")
                         .HasMaxLength(5000)

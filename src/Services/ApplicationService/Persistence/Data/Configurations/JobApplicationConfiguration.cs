@@ -22,7 +22,12 @@ public sealed class JobApplicationConfiguration : IEntityTypeConfiguration<JobAp
 
         builder.Property(application => application.JobId)
             .HasColumnName("job_id")
+            .HasMaxLength(JobApplication.CatalogJobIdLength)
             .IsRequired();
+
+        builder.Property(application => application.CandidateUserId)
+            .HasColumnName("candidate_user_id")
+            .HasMaxLength(JobApplication.MaximumUserIdLength);
 
         builder.Property(application => application.CoverLetter)
             .HasColumnName("cover_letter")
