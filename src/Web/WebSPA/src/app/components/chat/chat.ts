@@ -2,13 +2,13 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef,
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ChatService, ChatMessage, Conversation } from '../../services/chat';
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './chat.html',
   styleUrls: ['./chat.scss']
 })
@@ -285,4 +285,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (this.messageSub) this.messageSub.unsubscribe();
     if (this.routeSub) this.routeSub.unsubscribe();
   }
+
+  public goToDashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }  
 }

@@ -1,14 +1,13 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { ChatComponent } from './components/chat/chat';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ChatComponent],
+  imports: [RouterOutlet], // <-- Dodaj RouterOutlet ovde!
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrls: ['./app.scss']
 })
-export class App {
-  protected readonly title = signal('WebSPA');
+export class AppComponent {
+  title = 'WebSPA';
 }

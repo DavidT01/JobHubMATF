@@ -3,7 +3,7 @@
   <div class="chat-sidebar">
     <div class="sidebar-header">
       <h3>Poruke</h3>
-      <span class="my-badge">Vi: <strong>{{ myId }}</strong></span>
+      <span class="my-badge"><strong>{{ myId }}</strong></span>
     </div>
 
     <div class="conversations-list">
@@ -21,7 +21,6 @@
         <div class="meta-info">
           <span class="time" *ngIf="c.lastMessageTime">{{ c.lastMessageTime | date:'HH:mm' }}</span>
 
-          <!-- Prikazujemo bedž čim je unreadCount veći od 0 -->
           <!-- Prikazuje crveni oblačić ako postoji nepročitana poruka -->
           <span class="badge" *ngIf="c.hasUnread || (c.unreadCount && c.unreadCount > 0)">
             {{ c.unreadCount }}
@@ -37,9 +36,15 @@
 
   <!-- DESNA STRANA: Glavni chat prozor -->
   <div class="chat-main">
-    <!-- Zaglavlje sa informacijama o sagovorniku -->
+    <!-- Sređeno zaglavlje -->
     <div class="chat-header">
-      <h3>Chat sa: <strong>{{ selectedConversation?.userName || receiverId }}</strong></h3>
+      <div class="user-status">
+        <span class="active-user-title">Chat sa:</span>
+        <strong>{{ selectedConversation?.userName || receiverId }}</strong>
+      </div>
+      <button class="back-btn" (click)="goToDashboard()">
+        ← Nazad na Dashboard
+      </button>
     </div>
 
     <!-- Lista poruka sa skrolom -->

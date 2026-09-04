@@ -1,0 +1,136 @@
+<!-- Testni Debug Banner -->
+<div class="debug-bar" style="background: #1e293b; color: #fff; padding: 12px 20px; font-family: monospace; display: flex; gap: 20px; align-items: center; border-bottom: 3px solid #3b82f6;">
+  <span>👤 <strong>Korisnik ID:</strong> {{ currentUserId || 'Nije podešen' }}</span>
+  <span>
+    🎭 <strong>Aktivna Uloga:</strong>
+    <span [ngSwitch]="userRole" style="padding: 2px 8px; border-radius: 4px; font-weight: bold;">
+      <span *ngSwitchCase="'Candidate'" style="background: #10b981; color: white;">Candidate</span>
+      <span *ngSwitchCase="'Employer'" style="background: #f59e0b; color: white;">Employer</span>
+      <span *ngSwitchCase="'Admin'" style="background: #ef4444; color: white;">Admin</span>
+      <span *ngSwitchDefault style="background: #6b7280; color: white;">Nepoznato ({{ userRole }})</span>
+    </span>
+  </span>
+</div>
+
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h2>Dobrodošli nazad, {{ userName }}! 👋</h2>
+    <p class="subtitle">Pregled vaših aktivnosti i sistemskih obaveštenja.</p>
+  </div>
+
+  <!-- 1. DASHBOARD ZA KANDIDATA -->
+  <div *ngIf="userRole === 'Candidate'" class="stats-grid">
+    <div class="stat-card" (click)="navigateTo('/applications')">
+      <div class="icon apps-icon">📋</div>
+      <div class="stat-info">
+        <h3>{{ candidateStats.activeApplications }}</h3>
+        <p>Aktivne prijave</p>
+      </div>
+    </div>
+
+    <div class="stat-card" (click)="navigateTo('/jobs')">
+      <div class="icon jobs-icon">⭐</div>
+      <div class="stat-info">
+        <h3>{{ candidateStats.savedJobs }}</h3>
+        <p>Sačuvani oglasi</p>
+      </div>
+    </div>
+
+    <div class="stat-card" (click)="navigateTo('/chat')">
+      <div class="icon chat-icon">💬</div>
+      <div class="stat-info">
+        <h3>{{ candidateStats.unreadMessages }}</h3>
+        <p>Nepročitane poruke</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="icon calendar-icon">📅</div>
+      <div class="stat-info">
+        <h3>{{ candidateStats.upcomingInterviews }}</h3>
+        <p>Zakazani intervjui</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. DASHBOARD ZA FIRMU -->
+  <div *ngIf="userRole === 'Employer'" class="stats-grid">
+    <div class="stat-card" (click)="navigateTo('/my-ads')">
+      <div class="icon jobs-icon">📢</div>
+      <div class="stat-info">
+        <h3>{{ companyStats.activeAds }}</h3>
+        <p>Aktivni oglasi</p>
+      </div>
+    </div>
+
+    <div class="stat-card" (click)="navigateTo('/applications-received')">
+      <div class="icon apps-icon">📥</div>
+      <div class="stat-info">
+        <h3>{{ companyStats.totalApplications }}</h3>
+        <p>Pristigle prijave</p>
+      </div>
+    </div>
+
+    <div class="stat-card" (click)="navigateTo('/chat')">
+      <div class="icon chat-icon">💬</div>
+      <div class="stat-info">
+        <h3>{{ companyStats.newMessages }}</h3>
+        <p>Nove poruke</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="icon calendar-icon">🗓️</div>
+      <div class="stat-info">
+        <h3>{{ companyStats.scheduledInterviews }}</h3>
+        <p>Intervjui u najavi</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. DASHBOARD ZA ADMINA -->
+  <div *ngIf="userRole === 'Admin'" class="stats-grid">
+    <div class="stat-card">
+      <div class="icon admin-icon">👥</div>
+      <div class="stat-info">
+        <h3>{{ adminStats.totalUsers }}</h3>
+        <p>Registrovani korisnici</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="icon admin-icon">🏢</div>
+      <div class="stat-info">
+        <h3>{{ adminStats.totalCompanies }}</h3>
+        <p>Verifikovane firme</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="icon jobs-icon">📑</div>
+      <div class="stat-info">
+        <h3>{{ adminStats.activeAds }}</h3>
+        <p>Ukupno oglasa</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="icon health-icon">🟢</div>
+      <div class="stat-info">
+        <h3>{{ adminStats.systemHealth }}</h3>
+        <p>Sistem status</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRZE AKCIJE / PREČICE -->
+  <div class="quick-actions">
+    <h3>Brze akcije</h3>
+    <div class="action-buttons">
+      <button *ngIf="userRole === 'Candidate'" (click)="navigateTo('/jobs')" class="btn btn-primary">Pretraži oglase</button>
+      <button *ngIf="userRole === 'Employer'" (click)="navigateTo('/create-ad')" class="btn btn-primary">Postavi nov oglas</button>
+      <button (click)="navigateTo('/chat')" class="btn btn-secondary">Otvori Chat</button>
+      <button (click)="navigateTo('/profile')" class="btn btn-outline">Uredi profil</button>
+    </div>
+  </div>
+</div>

@@ -1,9 +1,11 @@
 ﻿using System.Security.Claims;
 using Chat.API.Services;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Chat.API.Hubs
 {
+    [Authorize(Roles = "Candidate,Employer,Admin")]
     public class ChatHub : Hub
     {
         private readonly ChatService _chatService;
