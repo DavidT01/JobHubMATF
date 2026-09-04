@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+option csharp_namespace = "JobHub.Grpc.Contracts.Profile";
+
+package jobhub.profile.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service CandidateProfileGrpcService {
+  rpc GetCandidateContact (GetCandidateContactRequest) returns (CandidateContactResponse);
+  rpc ValidateCandidateProfile (ValidateCandidateProfileRequest) returns (ValidateCandidateProfileResponse);
+  rpc GetCandidateProfile (GetCandidateProfileRequest) returns (CandidateProfileResponse);
+}
+
+message GetCandidateContactRequest {
+  string profile_id = 1;
+}
+
+message CandidateContactResponse {
+  string profile_id = 1;
+  string email = 2;
+}
+
+message ValidateCandidateProfileRequest {
+  string profile_id = 1;
+}
+
+message ValidateCandidateProfileResponse {
+  string profile_id = 1;
+  bool exists = 2;
+}
+
+message GetCandidateProfileRequest {
+  string profile_id = 1;
+}
+
+message CandidateProfileResponse {
+  string profile_id = 1;
+  string user_id = 2;
+  string first_name = 3;
+  string last_name = 4;
+  string email = 5;
+  string phone_number = 6;
+  string location = 7;
+  repeated Education education = 8;
+  repeated Experience experience = 9;
+  repeated Project projects = 10;
+  repeated string skills = 11;
+  repeated Language languages = 12;
+  string cv_url = 13;
+  optional string picture_url = 14;
+  optional string github_url = 15;
+  optional string gitlab_url = 16;
+  optional string linked_in_url = 17;
+}
+
+message Education {
+  string institution_name = 1;
+  google.protobuf.Timestamp start_date = 2;
+  optional google.protobuf.Timestamp end_date = 3;
+  optional string degree = 4;
+}
+
+message Experience {
+  string company_name = 1;
+  string position = 2;
+  google.protobuf.Timestamp start_date = 3;
+  optional google.protobuf.Timestamp end_date = 4;
+}
+
+message Project {
+  string name = 1;
+  optional string description = 2;
+  optional string repository_url = 3;
+}
+
+message Language {
+  string name = 1;
+  optional string level = 2;
+}
