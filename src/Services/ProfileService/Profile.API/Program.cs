@@ -1,9 +1,11 @@
 using FluentValidation;
+using Grpc.AspNetCore.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Profile.API.Data;
 using Profile.API.Exceptions;
 using Profile.API.Features.Behaviors;
+using Profile.API.Services.GrpcServices;
 using Scalar.AspNetCore;
 using System.Reflection;
 
@@ -12,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
 builder.Services.AddControllers();
+builder.Services.AddGrpc();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -53,5 +56,6 @@ if(!Directory.Exists(app.Environment.WebRootPath))
 app.UseStaticFiles();
 
 app.MapControllers();
+app.MapGrpcService<CandidateProfileGrpcService>();
 
 app.Run();
