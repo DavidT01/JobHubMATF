@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Catalog.DTOs;
 using Catalog.Entities;
 
@@ -9,12 +8,6 @@ public class MatchingService : IMatchingService
     private const double SkillsWeight = 0.7;
     private const double ExperienceWeight = 0.3;
     
-    //private static HashSet<string> ParseSkills(string skills)
-    //{
-      //  return skills.Split(',',StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-        //    .Select(s => s.ToLowerInvariant())
-          //  .ToHashSet(); 
-    //}
     
     private static double CalculateExperienceScore(List<ExperienceDto>  experience, ExperienceLevel jobLevel)
     {
@@ -41,12 +34,6 @@ public class MatchingService : IMatchingService
 
         return (latestEnd - earliestStart).TotalDays / 365.25;
     }
-    /* private static int ExtractYears(string text)
-     {
-         var match = Regex.Match(text, @"(\d+)\s*(godin|year)");
-         return match.Success ? int.Parse(match.Groups[1].Value) : 0;
-     }
-     */
     
     private static ExperienceLevel YearsToLevel(double years) => years switch
     {
