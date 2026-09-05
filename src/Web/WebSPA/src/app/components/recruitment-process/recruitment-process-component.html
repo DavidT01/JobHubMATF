@@ -19,6 +19,7 @@
         <li *ngFor="let round of process()?.rounds">
           <strong>{{ round.orderIndex }}. {{ round.title }}</strong>
           <p *ngIf="round.description">{{ round.description }}</p>
+          <button mat-button color="primary" (click)="viewRoundCandidates(round.id)">View Candidates</button>
         </li>
       </ul>
     </mat-card-content>
