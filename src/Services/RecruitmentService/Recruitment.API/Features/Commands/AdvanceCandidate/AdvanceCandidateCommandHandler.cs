@@ -5,13 +5,16 @@ using Recruitment.API.Data;
 using Recruitment.API.DTOs;
 using Recruitment.API.Exceptions;
 using Recruitment.API.Enums;
+using Recruitment.API.Infrastructure;
 
 namespace Recruitment.API.Features.Commands.AdvanceCandidate
 {
-    public class AdvanceCandidateCommandHandler(RecruitmentContext context, IMapper mapper) : IRequestHandler<AdvanceCandidateCommand, CandidateProgressDto>
+    public class AdvanceCandidateCommandHandler(RecruitmentContext context, IMapper mapper, IProfileServiceClient profileServiceClient)
+        : IRequestHandler<AdvanceCandidateCommand, CandidateProgressDto>
     {
         private readonly RecruitmentContext _context = context;
         private readonly IMapper _mapper = mapper;
+        private readonly IProfileServiceClient _profileServiceClient = profileServiceClient;
 
         public async Task<CandidateProgressDto> Handle(AdvanceCandidateCommand request, CancellationToken cancellationToken)
         {
@@ -19,6 +22,11 @@ namespace Recruitment.API.Features.Commands.AdvanceCandidate
                 .Include(p => p.Rounds)
                 .FirstOrDefaultAsync(p => p.Id == request.RecruitmentProcessId, cancellationToken)
                 ?? throw new RecruitmentValidationException($"Recruitment process {request.RecruitmentProcessId} not found");
+
+            if (!await _profileServiceClient.ValidateCandidateProfileAsync(request.CandidateProfileId, cancellationToken))
+            {
+                throw new RecruitmentValidationException($"Candidate profile {request.CandidateProfileId} not found");
+            }
 
             var progress = await _context.Progresses
                 .FirstOrDefaultAsync(p => p.CandidateProfileId == request.CandidateProfileId && p.RecruitmentProcessId == request.RecruitmentProcessId, cancellationToken);
