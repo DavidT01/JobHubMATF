@@ -1,4 +1,5 @@
 using FluentAssertions;
+using JobHub.Grpc.Contracts.Profile;
 using Moq;
 using Recruitment.API.Entities;
 using Recruitment.API.Exceptions;
@@ -16,7 +17,8 @@ namespace Recruitment.UnitTests.Commands
             using var context = TestHelpers.CreateDbContext();
             var mapper = TestHelpers.CreateMapper();
             var meetingServiceMock = new Mock<IMeetingService>();
-            var handler = new ScheduleInterviewCommandHandler(context, meetingServiceMock.Object, mapper);
+            var profileServiceMock = new Mock<IProfileServiceClient>();
+            var handler = new ScheduleInterviewCommandHandler(context, meetingServiceMock.Object, profileServiceMock.Object, mapper);
 
             var command = new ScheduleInterviewCommand
             {
@@ -42,11 +44,15 @@ namespace Recruitment.UnitTests.Commands
             await context.SaveChangesAsync();
 
             var meetingServiceMock = new Mock<IMeetingService>();
+            var profileServiceMock = new Mock<IProfileServiceClient>();
+            profileServiceMock
+                .Setup(client => client.GetCandidateContactAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new CandidateContactResponse { Email = "candidate@example.com" });
             meetingServiceMock
                 .Setup(m => m.ScheduleMeetingAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string[]>()))
                 .ReturnsAsync(("event-123", "https://meet.google.com/abc-defg-hij"));
 
-            var handler = new ScheduleInterviewCommandHandler(context, meetingServiceMock.Object, mapper);
+            var handler = new ScheduleInterviewCommandHandler(context, meetingServiceMock.Object, profileServiceMock.Object, mapper);
             var command = new ScheduleInterviewCommand
             {
                 SelectionRoundId = round.Id,
@@ -55,14 +61,19 @@ namespace Recruitment.UnitTests.Commands
                 EndTime = DateTime.UtcNow.AddHours(1),
                 Title = "Tech Interview",
                 Description = "First round",
-                AttendeeEmails = ["candidate@example.com"]
+                AttendeeEmails = ["company@example.com", "candidate@example.com"]
             };
 
             var result = await handler.Handle(command, CancellationToken.None);
 
             result.GoogleMeetUrl.Should().Be("https://meet.google.com/abc-defg-hij");
             context.InterviewSchedules.Should().ContainSingle(s => s.EventId == "event-123");
-            meetingServiceMock.Verify(m => m.ScheduleMeetingAsync("Tech Interview", "First round", command.StartTime, command.EndTime, command.AttendeeEmails), Times.Once);
+            meetingServiceMock.Verify(m => m.ScheduleMeetingAsync(
+                "Tech Interview",
+                "First round",
+                command.StartTime,
+                command.EndTime,
+                It.Is<string[]>(emails => emails.SequenceEqual(new[] { "candidate@example.com", "company@example.com" }))), Times.Once);
         }
     }
 }
