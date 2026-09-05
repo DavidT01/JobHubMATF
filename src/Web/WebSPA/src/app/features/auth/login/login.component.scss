@@ -68,7 +68,7 @@ mat-card-header {
   border-top: 1px solid #edf2f7;
 
   p {
-    margin: 0;
+    margin: 0 0 8px;
     color: #718096;
   }
 
@@ -81,4 +81,12 @@ mat-card-header {
       text-decoration: underline;
     }
   }
+}
+
+.status-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
 }

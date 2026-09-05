@@ -15,6 +15,19 @@ export interface MeResponse {
   roles: string[];
 }
 
+export interface RegisterResponse {
+  message: string;
+  userId: string;
+  confirmationUrl: string;
+  emailToken?: string | null;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+  resetUrl?: string | null;
+  emailToken?: string | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -33,8 +46,24 @@ export class AuthService {
     );
   }
 
-  register(model: unknown): Observable<unknown> {
-    return this.http.post(`${this.apiUrl}/register`, model);
+  register(model: unknown): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${this.apiUrl}/register`, model);
+  }
+
+  confirmEmail(model: { userId: string; token: string }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/confirm-email`, model);
+  }
+
+  forgotPassword(email: string): Observable<ForgotPasswordResponse> {
+    return this.http.post<ForgotPasswordResponse>(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(model: {
+    email: string;
+    token: string;
+    newPassword: string;
+  }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/reset-password`, model);
   }
 
   me(): Observable<MeResponse> {

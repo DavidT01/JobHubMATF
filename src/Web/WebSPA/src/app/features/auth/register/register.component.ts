@@ -50,9 +50,15 @@ export class RegisterComponent {
   onSubmit(): void {
     if (this.registerForm.valid) {
       this.authService.register(this.registerForm.value).subscribe({
-        next: () => {
-          this.snackBar.open('Registration successful! You can now sign in.', 'Close', { duration: 5000 });
-          this.router.navigate(['/login']);
+        next: (res) => {
+          this.snackBar.open(res.message || 'Registration successful!', 'Close', { duration: 5000 });
+          const url = new URL(res.confirmationUrl);
+          this.router.navigate(['/confirm-email'], {
+            queryParams: {
+              userId: url.searchParams.get('userId'),
+              token: url.searchParams.get('token')
+            }
+          });
         },
         error: (err) => {
           this.snackBar.open(err.error?.message || 'Registration failed!', 'Close', { duration: 3000 });
