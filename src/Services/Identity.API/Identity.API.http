@@ -51,3 +51,24 @@ Content-Type: application/json
 ### Current user (paste token from login)
 GET {{Identity.API_HostAddress}}/api/auth/me
 Authorization: Bearer {{token}}
+
+### Admin login
+POST {{Identity.API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@jobhub.local",
+  "password": "Admin123!"
+}
+
+### Admin list users
+GET {{Identity.API_HostAddress}}/api/admin/users
+Authorization: Bearer {{token}}
+
+### Notifications
+GET {{Identity.API_HostAddress}}/api/notifications
+Authorization: Bearer {{token}}
+
+### Unread count
+GET {{Identity.API_HostAddress}}/api/notifications/unread-count
+Authorization: Bearer {{token}}

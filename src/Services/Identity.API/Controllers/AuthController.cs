@@ -1,4 +1,5 @@
 using Identity.API.Models;
+using Identity.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,17 +19,20 @@ namespace Identity.API.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _environment;
+        private readonly NotificationService _notifications;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             IConfiguration configuration,
-            IWebHostEnvironment environment)
+            IWebHostEnvironment environment,
+            NotificationService notifications)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
             _environment = environment;
+            _notifications = notifications;
         }
 
         [HttpPost("login")]
@@ -38,6 +42,11 @@ namespace Identity.API.Controllers
             if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password!))
             {
                 return Unauthorized(new { Message = "Invalid email or password!" });
+            }
+
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                return Unauthorized(new { Message = "This account is locked. Contact an administrator." });
             }
 
             if (!await _userManager.IsEmailConfirmedAsync(user))
@@ -98,6 +107,17 @@ namespace Identity.API.Controllers
             var confirmationUrl =
                 $"{frontendBase}/confirm-email?userId={Uri.EscapeDataString(user.Id)}&token={encodedToken}";
 
+            await _notifications.NotifyAsync(
+                user.Id,
+                "Welcome to JobHub",
+                "Your account was created. Please confirm your email to sign in.");
+
+            var adminIds = await _userManager.GetUsersInRoleAsync(AppRoles.Admin);
+            await _notifications.NotifyManyAsync(
+                adminIds.Select(a => a.Id),
+                "New user registered",
+                $"{user.Email} registered as {model.Role}.");
+
             // No real SMTP in this course project: return the link so the UI can show it.
             return Ok(new
             {
@@ -133,6 +153,11 @@ namespace Identity.API.Controllers
                 var errors = string.Join(" ", result.Errors.Select(e => e.Description));
                 return BadRequest(new { Message = errors });
             }
+
+            await _notifications.NotifyAsync(
+                user.Id,
+                "Email confirmed",
+                "Your email is confirmed. You can sign in now.");
 
             return Ok(new { Message = "Email confirmed successfully. You can sign in now." });
         }
@@ -189,6 +214,11 @@ namespace Identity.API.Controllers
                 var errors = string.Join(" ", result.Errors.Select(e => e.Description));
                 return BadRequest(new { Message = errors });
             }
+
+            await _notifications.NotifyAsync(
+                user.Id,
+                "Password changed",
+                "Your password was reset successfully. If this was not you, contact an administrator.");
 
             return Ok(new { Message = "Password reset successfully. You can sign in now." });
         }
