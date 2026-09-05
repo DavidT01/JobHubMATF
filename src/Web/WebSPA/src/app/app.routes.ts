@@ -17,6 +17,11 @@ export const routes: Routes = [
       .then(c => c.RecruitmentProcessComponent)
   },
   {
+    path: 'recruitment-processes/:jobId/rounds/:selectionRoundId',
+    loadComponent: () => import('./components/round-candidates/round-candidates-component')
+      .then(c => c.RoundCandidatesComponent)
+  },
+  {
     path: 'applications/:applicationId',
     loadComponent: () => import('./components/candidate-application-view/candidate-application-view')
       .then(c => c.CandidateApplicationViewComponent)

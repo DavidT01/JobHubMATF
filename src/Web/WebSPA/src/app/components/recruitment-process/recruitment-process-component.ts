@@ -97,4 +97,10 @@ export class RecruitmentProcessComponent implements OnInit {
       }
     });
   }
+
+  viewRoundCandidates(selectionRoundId: string | undefined): void {
+    if (!selectionRoundId) return;
+
+    this.router.navigate(['recruitment-processes', this.jobId, 'rounds', selectionRoundId]);
+  }
 }
