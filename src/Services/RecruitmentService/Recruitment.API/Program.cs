@@ -3,6 +3,7 @@ using Recruitment.API.Data;
 using Scalar.AspNetCore;
 using MediatR;
 using FluentValidation;
+using JobHub.Grpc.Contracts.Profile;
 using Recruitment.API.Features.Behaviors;
 using System.Reflection;
 using Recruitment.API.Infrastructure;
@@ -19,6 +20,13 @@ builder.Services.AddDbContext<RecruitmentContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("RecruitmentDatabase")));
 
 builder.Services.AddScoped<IMeetingService, GoogleMeetingService>();
+builder.Services.AddGrpcClient<CandidateProfileGrpcService.CandidateProfileGrpcServiceClient>(options =>
+{
+    var profileAddress = builder.Configuration["GrpcServices:ProfileApi"]
+        ?? throw new InvalidOperationException("gRPC Profile API address is not configured.");
+    options.Address = new Uri(profileAddress);
+});
+builder.Services.AddScoped<IProfileServiceClient, ProfileServiceClient>();
 
 builder.Services.AddMediatR(cfg =>
 {
