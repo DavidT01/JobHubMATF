@@ -41,10 +41,15 @@
     </div>
 
     <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Attendee Emails (comma separated)</mat-label>
-      <input matInput formControlName="attendeeEmails" placeholder="candidate@example.com, hr@example.com">
+      <mat-label>Additional Attendee Emails (optional, comma separated)</mat-label>
+      <input matInput formControlName="attendeeEmails" placeholder="hr@example.com, panel@example.com">
+      <mat-hint>The candidate's email is added automatically.</mat-hint>
     </mat-form-field>
   </form>
+
+  @if (error(); as message) {
+    <p class="error-message">{{ message }}</p>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

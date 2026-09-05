@@ -1,10 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { finalize } from 'rxjs';
 import { RecruitmentProcessService } from '../../core/services/recruitment-process/recruitment-process-service';
 import { EvaluateCandidateCommand } from '../../core/models/evaluate-candidate-command';
 import { MatSliderModule } from '@angular/material/slider';
@@ -32,6 +34,7 @@ export class CandidateEvaluationDialogComponent {
 
   form!: FormGroup;
   loading = signal<boolean>(false);
+  error = signal<string | null>(null);
 
   constructor() {
     this.form = this.fb.group({
@@ -43,6 +46,7 @@ export class CandidateEvaluationDialogComponent {
   save() {
     if (this.form.invalid) return;
     this.loading.set(true);
+    this.error.set(null);
 
     const formValue = this.form.value;
 
@@ -53,6 +57,21 @@ export class CandidateEvaluationDialogComponent {
       notes: formValue.notes
     };
 
-    // TODO: Call this.recruitmentService.evaluateCandidate(command), close the dialog, and display errors.
+    this.recruitmentService.evaluateCandidate(command).pipe(
+      finalize(() => this.loading.set(false))
+    ).subscribe({
+      next: result => this.dialogRef.close(result),
+      error: (error: unknown) => this.error.set(this.resolveErrorMessage(error))
+    });
+  }
+
+  private resolveErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      switch (error.status) {
+        case 400: return 'The candidate profile or selection round could not be found.';
+        case 0: return 'We could not confirm whether the evaluation was saved. Please check before retrying.';
+      }
+    }
+    return 'Could not save the evaluation. Please try again.';
   }
 }

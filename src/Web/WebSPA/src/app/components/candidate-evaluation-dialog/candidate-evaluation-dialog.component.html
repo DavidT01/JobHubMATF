@@ -15,6 +15,10 @@
     </mat-form-field>
 
   </form>
+
+  @if (error(); as message) {
+    <p class="error-message">{{ message }}</p>
+  }
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close [disabled]="loading()">Cancel</button>
