@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="Recruitment.API/Recruitment.API.csproj" />
   <Project Path="Recruitment.UnitTests/Recruitment.UnitTests.csproj" />
+  <Project Path="../../BuildingBlocks/JobHub.Grpc.Contracts/JobHub.Grpc.Contracts.csproj" />
 </Solution>
