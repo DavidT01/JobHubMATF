@@ -12,12 +12,12 @@ public class ProfileApiClient : IProfileApiClient
 
     public async Task<CandidateProfileDto?> GetCandidateByIdAsync(string candidateId)
     {
-        var response = _httpClient.GetAsync($"/api/candidates/{candidateId}");
-        if (!response.IsCompletedSuccessfully)
+        var response = await _httpClient.GetAsync($"/api/candidate-profiles/{candidateId}");
+        if (!response.IsSuccessStatusCode)
         {
             return null;
         }
         
-        return await response.Result.Content.ReadFromJsonAsync<CandidateProfileDto>();
+        return await response.Content.ReadFromJsonAsync<CandidateProfileDto>();
     }
 }
