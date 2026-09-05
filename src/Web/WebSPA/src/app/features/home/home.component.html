@@ -11,7 +11,16 @@
         <p><strong>Roles:</strong> {{ profile.roles.join(', ') }}</p>
       }
     </mat-card-content>
-    <mat-card-actions>
+    <mat-card-actions class="actions">
+      <a mat-stroked-button routerLink="/notifications">
+        Notifications
+        @if (unreadCount() > 0) {
+          ({{ unreadCount() }})
+        }
+      </a>
+      @if (isAdmin()) {
+        <a mat-stroked-button routerLink="/admin">Admin</a>
+      }
       <button mat-flat-button color="primary" type="button" (click)="logout()">Sign out</button>
     </mat-card-actions>
   </mat-card>
