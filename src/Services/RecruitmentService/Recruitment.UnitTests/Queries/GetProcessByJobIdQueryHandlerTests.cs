@@ -39,7 +39,7 @@ namespace Recruitment.UnitTests.Queries
             result.Should().NotBeNull();
             result.JobId.Should().Be(jobId);
             result.Rounds.Should().HaveCount(2);
-            result.Rounds.Select(r => r.Index).Should().BeEquivalentTo([0, 1]);
+            result.Rounds.Select(r => r.OrderIndex).Should().BeEquivalentTo([0, 1]);
         }
     }
 }

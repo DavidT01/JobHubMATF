@@ -12,7 +12,8 @@ namespace Recruitment.API.Mapping
     {
         public RecruitmentMappingProfile()
         {
-            CreateMap<SelectionRound, SelectionRoundDto>();
+            CreateMap<SelectionRound, SelectionRoundDto>()
+                .ForMember(dest => dest.OrderIndex, opt => opt.MapFrom(src => src.Index));
             CreateMap<RecruitmentProcess, RecruitmentProcessDto>();
             CreateMap<CreateRecruitmentProcessCommand, RecruitmentProcess>();
             CreateMap<SelectionRoundDto, SelectionRound>().ForMember(dest => dest.Index, opt => opt.MapFrom(src => src.OrderIndex));
