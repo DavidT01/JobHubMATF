@@ -8,16 +8,26 @@ using Recruitment.API.Infrastructure;
 
 namespace Recruitment.API.Features.Commands.ScheduleInterview
 {
-    public class ScheduleInterviewCommandHandler(RecruitmentContext context, IMeetingService meetingService, IMapper mapper) : IRequestHandler<ScheduleInterviewCommand, InterviewScheduleDto>
+    public class ScheduleInterviewCommandHandler(RecruitmentContext context, IMeetingService meetingService,
+        IProfileServiceClient profileServiceClient, IMapper mapper) : IRequestHandler<ScheduleInterviewCommand, InterviewScheduleDto>
     {
         private readonly RecruitmentContext _context = context;
         private readonly IMeetingService _meetingService = meetingService;
+        private readonly IProfileServiceClient _profileServiceClient = profileServiceClient;
         private readonly IMapper _mapper = mapper;
 
         public async Task<InterviewScheduleDto> Handle(ScheduleInterviewCommand request, CancellationToken cancellationToken)
         {
-            var round = await _context.Rounds.FindAsync([request.SelectionRoundId], cancellationToken) ?? throw new RecruitmentValidationException($"Selection round {request.SelectionRoundId} not found");
-            var (eventId, url) = await _meetingService.ScheduleMeetingAsync(request.Title, request.Description, request.StartTime, request.EndTime, request.AttendeeEmails);
+            var round = await _context.Rounds.FindAsync([request.SelectionRoundId], cancellationToken) ??
+                throw new RecruitmentValidationException($"Selection round {request.SelectionRoundId} not found");
+
+            var candidateContact = await _profileServiceClient.GetCandidateContactAsync(request.CandidateProfileId, cancellationToken);
+            var attendeeEmails = new[] { candidateContact.Email }
+                .Concat(request.AttendeeEmails)
+                .Where(email => !string.IsNullOrWhiteSpace(email))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+            var (eventId, url) = await _meetingService.ScheduleMeetingAsync(request.Title, request.Description, request.StartTime, request.EndTime, attendeeEmails);
 
             var schedule = _mapper.Map<InterviewSchedule>(request);
             schedule.EventId = eventId;

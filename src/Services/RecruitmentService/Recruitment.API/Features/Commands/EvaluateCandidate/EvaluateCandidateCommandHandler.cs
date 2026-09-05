@@ -5,18 +5,26 @@ using Recruitment.API.Data;
 using Recruitment.API.DTOs;
 using Recruitment.API.Entities;
 using Recruitment.API.Exceptions;
+using Recruitment.API.Infrastructure;
 
 namespace Recruitment.API.Features.Commands.EvaluateCandidate
 {
-    public class EvaluateCandidateCommandHandler(RecruitmentContext context, IMapper mapper) : IRequestHandler<EvaluateCandidateCommand, CandidateEvaluationDto>
+    public class EvaluateCandidateCommandHandler(RecruitmentContext context, IMapper mapper, IProfileServiceClient profileServiceClient)
+        : IRequestHandler<EvaluateCandidateCommand, CandidateEvaluationDto>
     {
         private readonly RecruitmentContext _context = context;
         private readonly IMapper _mapper = mapper;
+        private readonly IProfileServiceClient _profileServiceClient = profileServiceClient;
 
         public async Task<CandidateEvaluationDto> Handle(EvaluateCandidateCommand request, CancellationToken cancellationToken)
         {
             var round = await _context.Rounds.FindAsync([request.SelectionRoundId], cancellationToken) 
                 ?? throw new RecruitmentValidationException($"Selection round {request.SelectionRoundId} not found");
+
+            if (!await _profileServiceClient.ValidateCandidateProfileAsync(request.CandidateProfileId, cancellationToken))
+            {
+                throw new RecruitmentValidationException($"Candidate profile {request.CandidateProfileId} not found");
+            }
 
             var existingEvaluation = await _context.Evaluations
                 .FirstOrDefaultAsync(e => e.CandidateProfileId == request.CandidateProfileId && e.SelectionRoundId == request.SelectionRoundId, cancellationToken);
