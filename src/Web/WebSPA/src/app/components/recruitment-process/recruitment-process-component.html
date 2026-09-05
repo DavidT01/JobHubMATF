@@ -1,4 +1,12 @@
-<div class="profile-container" *ngIf="process(); else noProcess">
+<div class="profile-container" *ngIf="error()">
+  <p class="error-message">{{ error() }}</p>
+</div>
+
+<div class="profile-container" *ngIf="loading()">
+  <p>Loading recruitment process...</p>
+</div>
+
+<div class="profile-container" *ngIf="!loading() && process(); else noProcess">
   <mat-card>
     <mat-card-header>
       <mat-card-title>Recruitment Process Details</mat-card-title>
@@ -21,7 +29,7 @@
 </div>
 
 <ng-template #noProcess>
-  <div class="profile-container">
+  <div class="profile-container" *ngIf="!loading()">
     <div class="empty-state">
       <p>No active recruitment process found for this job.</p>
       <button mat-raised-button color="accent" (click)="initializeProcess()">Initialize Process</button>

@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -7,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
+import { finalize } from 'rxjs';
 import { RecruitmentProcessService } from '../../core/services/recruitment-process/recruitment-process-service';
 import { ScheduleInterviewCommand } from '../../core/models/schedule-interview-command';
 
@@ -35,6 +37,7 @@ export class ScheduleInterviewDialogComponent {
 
   form!: FormGroup;
   loading = signal<boolean>(false);
+  error = signal<string | null>(null);
 
   constructor() {
     this.form = this.fb.group({
@@ -44,7 +47,7 @@ export class ScheduleInterviewDialogComponent {
       startTime: [null, Validators.required],
       endDate: [null, Validators.required],
       endTime: [null, Validators.required],
-      attendeeEmails: ['', Validators.required]
+      attendeeEmails: ['']
     });
   }
 
@@ -59,9 +62,13 @@ export class ScheduleInterviewDialogComponent {
   save() {
     if (this.form.invalid) return;
     this.loading.set(true);
+    this.error.set(null);
 
     const formValue = this.form.value;
-    const emails = formValue.attendeeEmails.split(',').map((e: string) => e.trim()).filter((e: string) => e);
+    const emails: string[] = (formValue.attendeeEmails ?? '')
+      .split(',')
+      .map((e: string) => e.trim())
+      .filter((e: string) => e);
 
     const startDateTime = this.parseDateTime(formValue.startDate, formValue.startTime);
     const endDateTime = this.parseDateTime(formValue.endDate, formValue.endTime);
@@ -76,6 +83,22 @@ export class ScheduleInterviewDialogComponent {
       attendeeEmails: emails
     };
 
-    // TODO: Call this.recruitmentService.scheduleInterview(command), close the dialog, and display errors.
+    this.recruitmentService.scheduleInterview(command).pipe(
+      finalize(() => this.loading.set(false))
+    ).subscribe({
+      next: result => this.dialogRef.close(result),
+      error: (error: unknown) => this.error.set(this.resolveErrorMessage(error))
+    });
+  }
+
+  private resolveErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      switch (error.status) {
+        case 400: return 'The candidate profile could not be found, or the request is invalid.';
+        case 404: return 'The selection round could not be found.';
+        case 0: return 'We could not confirm whether the interview was scheduled. Please check before retrying.';
+      }
+    }
+    return 'Could not schedule the interview. Please try again.';
   }
 }
