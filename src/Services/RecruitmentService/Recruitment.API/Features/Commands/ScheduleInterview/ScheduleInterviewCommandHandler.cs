@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Recruitment.API.Data;
 using Recruitment.API.DTOs;
 using Recruitment.API.Entities;
@@ -20,6 +21,16 @@ namespace Recruitment.API.Features.Commands.ScheduleInterview
         {
             var round = await _context.Rounds.FindAsync([request.SelectionRoundId], cancellationToken) ??
                 throw new RecruitmentValidationException($"Selection round {request.SelectionRoundId} not found");
+
+            var hasConflict = await _context.InterviewSchedules.AnyAsync(schedule =>
+                schedule.CandidateProfileId == request.CandidateProfileId
+                && request.StartTime < schedule.EndTime
+                && request.EndTime > schedule.StartTime,
+                cancellationToken);
+            if (hasConflict)
+            {
+                throw new RecruitmentValidationException("The candidate already has an interview during this time.");
+            }
 
             var candidateContact = await _profileServiceClient.GetCandidateContactAsync(request.CandidateProfileId, cancellationToken);
             var attendeeEmails = new[] { candidateContact.Email }
