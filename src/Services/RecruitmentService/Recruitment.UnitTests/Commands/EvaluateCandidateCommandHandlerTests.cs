@@ -1,7 +1,9 @@
 using FluentAssertions;
+using Moq;
 using Recruitment.API.Entities;
 using Recruitment.API.Exceptions;
 using Recruitment.API.Features.Commands.EvaluateCandidate;
+using Recruitment.API.Infrastructure;
 using Recruitment.UnitTests.Common;
 
 namespace Recruitment.UnitTests.Commands
@@ -13,7 +15,8 @@ namespace Recruitment.UnitTests.Commands
         {
             using var context = TestHelpers.CreateDbContext();
             var mapper = TestHelpers.CreateMapper();
-            var handler = new EvaluateCandidateCommandHandler(context, mapper);
+            var profileServiceMock = new Mock<IProfileServiceClient>();
+            var handler = new EvaluateCandidateCommandHandler(context, mapper, profileServiceMock.Object);
 
             var command = new EvaluateCandidateCommand
             {
@@ -36,8 +39,12 @@ namespace Recruitment.UnitTests.Commands
             context.Rounds.Add(round);
             await context.SaveChangesAsync();
 
-            var handler = new EvaluateCandidateCommandHandler(context, mapper);
             var candidateId = Guid.NewGuid();
+            var profileServiceMock = new Mock<IProfileServiceClient>();
+            profileServiceMock
+                .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+            var handler = new EvaluateCandidateCommandHandler(context, mapper, profileServiceMock.Object);
             var command = new EvaluateCandidateCommand
             {
                 CandidateProfileId = candidateId,
@@ -67,7 +74,6 @@ namespace Recruitment.UnitTests.Commands
             context.Evaluations.Add(existing);
             await context.SaveChangesAsync();
 
-            var handler = new EvaluateCandidateCommandHandler(context, mapper);
             var command = new EvaluateCandidateCommand
             {
                 CandidateProfileId = candidateId,
@@ -75,6 +81,11 @@ namespace Recruitment.UnitTests.Commands
                 Score = 10,
                 Notes = "Updated"
             };
+            var profileServiceMock = new Mock<IProfileServiceClient>();
+            profileServiceMock
+                .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+            var handler = new EvaluateCandidateCommandHandler(context, mapper, profileServiceMock.Object);
 
             var result = await handler.Handle(command, CancellationToken.None);
 
