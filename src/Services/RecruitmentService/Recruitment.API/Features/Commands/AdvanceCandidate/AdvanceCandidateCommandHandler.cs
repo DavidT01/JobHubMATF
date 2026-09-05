@@ -9,7 +9,7 @@ using Recruitment.API.Infrastructure;
 
 namespace Recruitment.API.Features.Commands.AdvanceCandidate
 {
-    public class AdvanceCandidateCommandHandler(RecruitmentContext context, IMapper mapper, IProfileServiceClient profileServiceClient)
+    public class AdvanceCandidateCommandHandler(RecruitmentContext context, IMapper mapper, IProfileServiceClient profileServiceClient, ILogger<AdvanceCandidateCommandHandler> logger)
         : IRequestHandler<AdvanceCandidateCommand, CandidateProgressDto>
     {
         private readonly RecruitmentContext _context = context;
@@ -20,11 +20,16 @@ namespace Recruitment.API.Features.Commands.AdvanceCandidate
         {
             var process = await _context.Processes
                 .Include(p => p.Rounds)
-                .FirstOrDefaultAsync(p => p.Id == request.RecruitmentProcessId, cancellationToken)
-                ?? throw new RecruitmentValidationException($"Recruitment process {request.RecruitmentProcessId} not found");
+                .FirstOrDefaultAsync(p => p.Id == request.RecruitmentProcessId, cancellationToken);
+            if (process is null)
+            {
+                logger.LogWarning("Recruitment process {RecruitmentProcessId} not found.", request.RecruitmentProcessId);
+                throw new RecruitmentValidationException($"Recruitment process {request.RecruitmentProcessId} not found");
+            }
 
             if (!await _profileServiceClient.ValidateCandidateProfileAsync(request.CandidateProfileId, cancellationToken))
             {
+                logger.LogWarning("Candidate profile {CandidateProfileId} not found while advancing candidate.", request.CandidateProfileId);
                 throw new RecruitmentValidationException($"Candidate profile {request.CandidateProfileId} not found");
             }
 
@@ -66,6 +71,7 @@ namespace Recruitment.API.Features.Commands.AdvanceCandidate
             }
 
             await _context.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("Successfully advanced candidate {CandidateProfileId} in process {RecruitmentProcessId} to status {Status}", request.CandidateProfileId, request.RecruitmentProcessId, progress.Status);
             return _mapper.Map<CandidateProgressDto>(progress);
         }
     }

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Recruitment.API.Entities;
 using Recruitment.API.Enums;
@@ -17,7 +18,7 @@ namespace Recruitment.UnitTests.Commands
             using var context = TestHelpers.CreateDbContext();
             var mapper = TestHelpers.CreateMapper();
             var profileServiceMock = new Mock<IProfileServiceClient>();
-            var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object);
+            var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object, NullLogger<AdvanceCandidateCommandHandler>.Instance);
 
             var command = new AdvanceCandidateCommand { CandidateProfileId = Guid.NewGuid(), RecruitmentProcessId = Guid.NewGuid() };
 
@@ -44,7 +45,7 @@ namespace Recruitment.UnitTests.Commands
             profileServiceMock
                 .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
-            var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object);
+            var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object, NullLogger<AdvanceCandidateCommandHandler>.Instance);
             var command = new AdvanceCandidateCommand { CandidateProfileId = candidateId, RecruitmentProcessId = process.Id };
 
             var result = await handler.Handle(command, CancellationToken.None);
@@ -82,7 +83,7 @@ namespace Recruitment.UnitTests.Commands
             profileServiceMock
                 .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
-            var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object);
+            var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object, NullLogger<AdvanceCandidateCommandHandler>.Instance);
 
             var result = await handler.Handle(command, CancellationToken.None);
 
@@ -117,7 +118,7 @@ namespace Recruitment.UnitTests.Commands
             profileServiceMock
                 .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
-            var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object);
+            var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object, NullLogger<AdvanceCandidateCommandHandler>.Instance);
 
             var result = await handler.Handle(command, CancellationToken.None);
 
@@ -148,7 +149,7 @@ namespace Recruitment.UnitTests.Commands
             profileServiceMock
                 .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
-            var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object);
+            var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object, NullLogger<AdvanceCandidateCommandHandler>.Instance);
 
             var act = () => handler.Handle(command, CancellationToken.None);
 

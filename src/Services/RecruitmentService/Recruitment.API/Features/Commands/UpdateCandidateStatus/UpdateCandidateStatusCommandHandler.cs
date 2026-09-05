@@ -12,7 +12,8 @@ namespace Recruitment.API.Features.Commands.UpdateCandidateStatus;
 public class UpdateCandidateStatusCommandHandler(
     RecruitmentContext context,
     IMapper mapper,
-    IProfileServiceClient profileServiceClient) : IRequestHandler<UpdateCandidateStatusCommand, CandidateProgressDto>
+    IProfileServiceClient profileServiceClient,
+    ILogger<UpdateCandidateStatusCommandHandler> logger) : IRequestHandler<UpdateCandidateStatusCommand, CandidateProgressDto>
 {
     public async Task<CandidateProgressDto> Handle(UpdateCandidateStatusCommand request, CancellationToken cancellationToken)
     {
@@ -23,18 +24,24 @@ public class UpdateCandidateStatusCommandHandler(
 
         if (!await profileServiceClient.ValidateCandidateProfileAsync(request.CandidateProfileId, cancellationToken))
         {
+            logger.LogWarning("Candidate profile {CandidateProfileId} not found while updating candidate status.", request.CandidateProfileId);
             throw new RecruitmentValidationException($"Candidate profile {request.CandidateProfileId} not found");
         }
 
         var progress = await context.Progresses.FirstOrDefaultAsync(
             progress => progress.CandidateProfileId == request.CandidateProfileId
                 && progress.RecruitmentProcessId == request.RecruitmentProcessId,
-            cancellationToken)
-            ?? throw new RecruitmentValidationException("Progress for the given candidate and process not found.");
+            cancellationToken);
+        if (progress is null)
+        {
+            logger.LogWarning("Progress for candidate {CandidateProfileId} in process {RecruitmentProcessId} was not found.", request.CandidateProfileId, request.RecruitmentProcessId);
+            throw new RecruitmentValidationException("Progress for the given candidate and process not found.");
+        }
 
         progress.Status = request.Status;
         progress.ModifiedAt = DateTime.UtcNow;
         await context.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("Successfully updated candidate {CandidateProfileId} to status {Status} in process {RecruitmentProcessId}", request.CandidateProfileId, request.Status, request.RecruitmentProcessId);
 
         return mapper.Map<CandidateProgressDto>(progress);
     }

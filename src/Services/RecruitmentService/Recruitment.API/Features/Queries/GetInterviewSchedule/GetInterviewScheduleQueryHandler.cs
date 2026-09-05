@@ -6,7 +6,7 @@ using Recruitment.API.DTOs;
 
 namespace Recruitment.API.Features.Queries.GetInterviewSchedule;
 
-public class GetInterviewScheduleQueryHandler(RecruitmentContext context, IMapper mapper)
+public class GetInterviewScheduleQueryHandler(RecruitmentContext context, IMapper mapper, ILogger<GetInterviewScheduleQueryHandler> logger)
     : IRequestHandler<GetInterviewScheduleQuery, InterviewScheduleDto?>
 {
     public async Task<InterviewScheduleDto?> Handle(GetInterviewScheduleQuery request, CancellationToken cancellationToken)
@@ -16,6 +16,13 @@ public class GetInterviewScheduleQueryHandler(RecruitmentContext context, IMappe
                 && interview.SelectionRoundId == request.SelectionRoundId,
             cancellationToken);
 
-        return schedule is null ? null : mapper.Map<InterviewScheduleDto>(schedule);
+        if (schedule is null)
+        {
+            logger.LogWarning("Interview schedule for candidate {CandidateProfileId} in round {SelectionRoundId} was not found.", request.CandidateProfileId, request.SelectionRoundId);
+            return null;
+        }
+
+        logger.LogInformation("Retrieved interview schedule {InterviewScheduleId} for candidate {CandidateProfileId}", schedule.Id, request.CandidateProfileId);
+        return mapper.Map<InterviewScheduleDto>(schedule);
     }
 }
