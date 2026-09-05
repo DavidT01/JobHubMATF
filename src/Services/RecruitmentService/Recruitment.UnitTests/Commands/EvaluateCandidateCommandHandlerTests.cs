@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Recruitment.API.Entities;
 using Recruitment.API.Exceptions;
@@ -16,7 +17,7 @@ namespace Recruitment.UnitTests.Commands
             using var context = TestHelpers.CreateDbContext();
             var mapper = TestHelpers.CreateMapper();
             var profileServiceMock = new Mock<IProfileServiceClient>();
-            var handler = new EvaluateCandidateCommandHandler(context, mapper, profileServiceMock.Object);
+            var handler = new EvaluateCandidateCommandHandler(context, mapper, profileServiceMock.Object, NullLogger<EvaluateCandidateCommandHandler>.Instance);
 
             var command = new EvaluateCandidateCommand
             {
@@ -44,7 +45,7 @@ namespace Recruitment.UnitTests.Commands
             profileServiceMock
                 .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
-            var handler = new EvaluateCandidateCommandHandler(context, mapper, profileServiceMock.Object);
+            var handler = new EvaluateCandidateCommandHandler(context, mapper, profileServiceMock.Object, NullLogger<EvaluateCandidateCommandHandler>.Instance);
             var command = new EvaluateCandidateCommand
             {
                 CandidateProfileId = candidateId,
@@ -85,7 +86,7 @@ namespace Recruitment.UnitTests.Commands
             profileServiceMock
                 .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
-            var handler = new EvaluateCandidateCommandHandler(context, mapper, profileServiceMock.Object);
+            var handler = new EvaluateCandidateCommandHandler(context, mapper, profileServiceMock.Object, NullLogger<EvaluateCandidateCommandHandler>.Instance);
 
             var result = await handler.Handle(command, CancellationToken.None);
 
