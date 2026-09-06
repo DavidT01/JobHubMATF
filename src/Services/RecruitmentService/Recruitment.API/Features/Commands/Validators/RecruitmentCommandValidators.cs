@@ -2,6 +2,7 @@ using FluentValidation;
 using Recruitment.API.DTOs;
 using Recruitment.API.Features.Commands.EvaluateCandidate;
 using Recruitment.API.Features.Commands.ScheduleInterview;
+using Recruitment.API.Features.Commands.UpdateInterviewSchedule;
 using Recruitment.API.Features.Commands.UpdateSelectionRounds;
 using System.Net.Mail;
 
@@ -26,6 +27,31 @@ public class ScheduleInterviewCommandValidator : AbstractValidator<ScheduleInter
         RuleFor(command => command.Title).NotEmpty().MaximumLength(200);
         RuleFor(command => command.StartTime).LessThan(command => command.EndTime);
         RuleForEach(command => command.AttendeeEmails).Must(BeValidEmail)
+            .WithMessage("Each attendee email must be valid.");
+    }
+
+    private static bool BeValidEmail(string email)
+    {
+        try
+        {
+            _ = new MailAddress(email);
+            return true;
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+    }
+}
+
+public class UpdateInterviewScheduleCommandValidator : AbstractValidator<UpdateInterviewScheduleCommand>
+{
+    public UpdateInterviewScheduleCommandValidator()
+    {
+        RuleFor(command => command.InterviewScheduleId).NotEmpty();
+        RuleFor(command => command.Title).NotEmpty().MaximumLength(200);
+        RuleFor(command => command.StartTime).LessThan(command => command.EndTime);
+        RuleForEach(command => command.AdditionalAttendeeEmails).Must(BeValidEmail)
             .WithMessage("Each attendee email must be valid.");
     }
 
