@@ -14,6 +14,7 @@ import { CandidateProgressDto } from '../../models/candidate-progress-dto';
 import { AdvanceCandidateCommand } from '../../models/advance-candidate-command';
 import { UpdateCandidateStatusCommand } from '../../models/update-candidate-status-command';
 import { GetInterviewScheduleQuery } from '../../models/get-interview-schedule-query';
+import { UpdateInterviewScheduleCommand } from '../../models/update-interview-schedule-command';
 
 @Injectable({
   providedIn: 'root',
@@ -39,6 +40,14 @@ export class RecruitmentProcessService {
 
   scheduleInterview(command: ScheduleInterviewCommand): Observable<InterviewScheduleDto> {
     return this.http.post<InterviewScheduleDto>(`${this.interviewUrl}/schedule`, command);
+  }
+
+  updateInterviewSchedule(command: UpdateInterviewScheduleCommand): Observable<InterviewScheduleDto> {
+    return this.http.put<InterviewScheduleDto>(`${this.interviewUrl}/${command.interviewScheduleId}`, command);
+  }
+
+  cancelInterviewSchedule(interviewScheduleId: string): Observable<void> {
+    return this.http.delete<void>(`${this.interviewUrl}/${interviewScheduleId}`);
   }
 
   evaluateCandidate(command: EvaluateCandidateCommand): Observable<CandidateEvaluationDto> {
