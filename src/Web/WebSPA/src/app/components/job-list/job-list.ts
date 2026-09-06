@@ -5,12 +5,13 @@ import { JobService } from '../../services/job.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
 
 
 @Component({
   selector: 'app-job-list',
-  imports: [CommonModule , MatCardModule , MatChipsModule , MatProgressSpinnerModule],
+  imports: [CommonModule , MatCardModule , MatChipsModule , MatProgressSpinnerModule , MatButtonModule],
   templateUrl: './job-list.html',
   styleUrl: './job-list.scss',
 })
@@ -39,5 +40,9 @@ export class JobList implements OnInit {
 
   openDetails(id: string): void {
     this.router.navigate(['/jobs', id]);
+  }
+
+  openCreate(): void {
+    this.router.navigate(['/jobs/new']);
   }
 }
