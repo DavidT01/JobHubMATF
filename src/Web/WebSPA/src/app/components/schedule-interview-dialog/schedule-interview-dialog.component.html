@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Schedule Interview</h2>
+<h2 mat-dialog-title>{{ data.schedule ? 'Edit Interview' : 'Schedule Interview' }}</h2>
 
 <mat-dialog-content>
   <form [formGroup]="form" class="schedule-form">
@@ -55,6 +55,6 @@
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close [disabled]="loading()">Cancel</button>
   <button mat-raised-button color="primary" (click)="save()" [disabled]="form.invalid || loading()">
-    {{ loading() ? 'Saving...' : 'Save' }}
+    {{ loading() ? 'Saving...' : (data.schedule ? 'Save Changes' : 'Schedule') }}
   </button>
 </mat-dialog-actions>
