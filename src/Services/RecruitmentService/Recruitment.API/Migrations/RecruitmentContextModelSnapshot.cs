@@ -92,8 +92,16 @@ namespace Recruitment.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.PrimitiveCollection<string[]>("AdditionalAttendeeEmails")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
                     b.Property<Guid>("CandidateProfileId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("timestamp with time zone");
@@ -104,11 +112,18 @@ namespace Recruitment.API.Migrations
                     b.Property<string>("GoogleMeetUrl")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("SelectionRoundId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

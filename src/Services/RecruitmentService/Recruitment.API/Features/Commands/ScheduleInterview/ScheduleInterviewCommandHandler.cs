@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Recruitment.API.Data;
 using Recruitment.API.DTOs;
 using Recruitment.API.Entities;
@@ -9,7 +10,7 @@ using Recruitment.API.Infrastructure;
 namespace Recruitment.API.Features.Commands.ScheduleInterview
 {
     public class ScheduleInterviewCommandHandler(RecruitmentContext context, IMeetingService meetingService,
-        IProfileServiceClient profileServiceClient, IMapper mapper) : IRequestHandler<ScheduleInterviewCommand, InterviewScheduleDto>
+        IProfileServiceClient profileServiceClient, IMapper mapper, ILogger<ScheduleInterviewCommandHandler> logger) : IRequestHandler<ScheduleInterviewCommand, InterviewScheduleDto>
     {
         private readonly RecruitmentContext _context = context;
         private readonly IMeetingService _meetingService = meetingService;
@@ -18,8 +19,23 @@ namespace Recruitment.API.Features.Commands.ScheduleInterview
 
         public async Task<InterviewScheduleDto> Handle(ScheduleInterviewCommand request, CancellationToken cancellationToken)
         {
-            var round = await _context.Rounds.FindAsync([request.SelectionRoundId], cancellationToken) ??
+            var round = await _context.Rounds.FindAsync([request.SelectionRoundId], cancellationToken);
+            if (round is null)
+            {
+                logger.LogWarning("Selection round {SelectionRoundId} not found.", request.SelectionRoundId);
                 throw new RecruitmentValidationException($"Selection round {request.SelectionRoundId} not found");
+            }
+
+            var hasConflict = await _context.InterviewSchedules.AnyAsync(schedule =>
+                schedule.CandidateProfileId == request.CandidateProfileId
+                && request.StartTime < schedule.EndTime
+                && request.EndTime > schedule.StartTime,
+                cancellationToken);
+            if (hasConflict)
+            {
+                logger.LogWarning("Candidate {CandidateProfileId} already has an interview during the requested time.", request.CandidateProfileId);
+                throw new RecruitmentValidationException("The candidate already has an interview during this time.");
+            }
 
             var candidateContact = await _profileServiceClient.GetCandidateContactAsync(request.CandidateProfileId, cancellationToken);
             var attendeeEmails = new[] { candidateContact.Email }
@@ -36,6 +52,7 @@ namespace Recruitment.API.Features.Commands.ScheduleInterview
             _context.InterviewSchedules.Add(schedule);
             await _context.SaveChangesAsync(cancellationToken);
 
+            logger.LogInformation("Successfully scheduled interview {InterviewScheduleId} for candidate {CandidateProfileId} in round {SelectionRoundId}", schedule.Id, request.CandidateProfileId, request.SelectionRoundId);
             return _mapper.Map<InterviewScheduleDto>(schedule);
         }
     }

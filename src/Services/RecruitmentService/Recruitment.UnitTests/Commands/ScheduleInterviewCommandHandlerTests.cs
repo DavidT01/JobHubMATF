@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using JobHub.Grpc.Contracts.Profile;
 using Moq;
 using Recruitment.API.Entities;
@@ -18,7 +19,7 @@ namespace Recruitment.UnitTests.Commands
             var mapper = TestHelpers.CreateMapper();
             var meetingServiceMock = new Mock<IMeetingService>();
             var profileServiceMock = new Mock<IProfileServiceClient>();
-            var handler = new ScheduleInterviewCommandHandler(context, meetingServiceMock.Object, profileServiceMock.Object, mapper);
+            var handler = new ScheduleInterviewCommandHandler(context, meetingServiceMock.Object, profileServiceMock.Object, mapper, NullLogger<ScheduleInterviewCommandHandler>.Instance);
 
             var command = new ScheduleInterviewCommand
             {
@@ -52,7 +53,7 @@ namespace Recruitment.UnitTests.Commands
                 .Setup(m => m.ScheduleMeetingAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string[]>()))
                 .ReturnsAsync(("event-123", "https://meet.google.com/abc-defg-hij"));
 
-            var handler = new ScheduleInterviewCommandHandler(context, meetingServiceMock.Object, profileServiceMock.Object, mapper);
+            var handler = new ScheduleInterviewCommandHandler(context, meetingServiceMock.Object, profileServiceMock.Object, mapper, NullLogger<ScheduleInterviewCommandHandler>.Instance);
             var command = new ScheduleInterviewCommand
             {
                 SelectionRoundId = round.Id,

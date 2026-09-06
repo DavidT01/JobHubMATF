@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Recruitment.API.Entities;
 using Recruitment.API.Enums;
 using Recruitment.API.Exceptions;
@@ -14,7 +15,7 @@ namespace Recruitment.UnitTests.Queries
         {
             using var context = TestHelpers.CreateDbContext();
             var mapper = TestHelpers.CreateMapper();
-            var handler = new GetCandidateProgressQueryHandler(context, mapper);
+            var handler = new GetCandidateProgressQueryHandler(context, mapper, NullLogger<GetCandidateProgressQueryHandler>.Instance);
 
             var act = () => handler.Handle(new GetCandidateProgressQuery(Guid.NewGuid(), Guid.NewGuid()), CancellationToken.None);
 
@@ -36,7 +37,7 @@ namespace Recruitment.UnitTests.Queries
             });
             await context.SaveChangesAsync();
 
-            var handler = new GetCandidateProgressQueryHandler(context, mapper);
+            var handler = new GetCandidateProgressQueryHandler(context, mapper, NullLogger<GetCandidateProgressQueryHandler>.Instance);
 
             var result = await handler.Handle(new GetCandidateProgressQuery(candidateId, processId), CancellationToken.None);
 

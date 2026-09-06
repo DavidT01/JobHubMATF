@@ -1,0 +1,38 @@
+<section class="round-candidates">
+  <h1>Candidates in This Round</h1>
+
+  @if (loading()) {
+    <p>Loading candidates...</p>
+  } @else if (error(); as message) {
+    <p class="error-message">{{ message }}</p>
+  } @else if (candidates().length === 0) {
+    <p>No candidates are currently in this round.</p>
+  } @else {
+    <div class="candidate-list">
+      @for (candidate of candidates(); track candidate.id) {
+        <mat-card>
+          <mat-card-content>
+            <p>Candidate profile: {{ candidate.candidateProfileId }}</p>
+            <p>Status: {{ candidate.status }}</p>
+            @if (schedules()[candidate.candidateProfileId]; as schedule) {
+              <p>Interview: {{ schedule.startTime | date:'medium' }}</p>
+              @if (schedule.googleMeetUrl) {
+                <a [href]="schedule.googleMeetUrl" target="_blank" rel="noopener">Open Google Meet</a>
+              }
+            }
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button mat-button (click)="openScheduleInterview(candidate.candidateProfileId)">Schedule Interview</button>
+            @if (schedules()[candidate.candidateProfileId]; as schedule) {
+              <button mat-button (click)="editInterview(candidate.candidateProfileId, schedule)">Edit Interview</button>
+              <button mat-button color="warn" (click)="cancelInterview(candidate.candidateProfileId, schedule.id)">Cancel Interview</button>
+            }
+            <button mat-flat-button color="primary" (click)="openCandidateEvaluation(candidate.candidateProfileId)">Evaluate</button>
+            <button mat-button color="warn" (click)="rejectCandidate(candidate)">Reject</button>
+            <button mat-flat-button color="accent" (click)="hireCandidate(candidate)">Hire</button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</section>

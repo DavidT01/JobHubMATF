@@ -12,19 +12,7 @@ namespace Recruitment.API.Infrastructure
 
         public async Task<(string EventId, string MeetUrl)> ScheduleMeetingAsync(string title, string description, DateTime start, DateTime end, string[] attendeeEmails)
         {
-            var credentialPath = _configuration["Google:CredentialsPath"];
-            if (string.IsNullOrEmpty(credentialPath) || !File.Exists(credentialPath))
-            {
-                throw new Exception("Google calendar credentials not configured or file not found.");
-            }
-
-            var credential = GoogleCredential.FromFile(credentialPath).CreateScoped(CalendarService.ScopeConstants.CalendarEvents);
-
-            var service = new CalendarService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "JobHub"
-            });
+            var service = CreateCalendarService();
 
             var newEvent = new Event()
             {
@@ -51,6 +39,41 @@ namespace Recruitment.API.Infrastructure
             var meetUrl = createdEvent.ConferenceData?.EntryPoints?.FirstOrDefault(e => e.EntryPointType == "video")?.Uri;
 
             return (createdEvent.Id, meetUrl ?? string.Empty);
+        }
+
+        public async Task UpdateMeetingAsync(string eventId, string title, string description, DateTime start, DateTime end, string[] attendeeEmails)
+        {
+            var service = CreateCalendarService();
+            var existingEvent = await service.Events.Get("primary", eventId).ExecuteAsync();
+            existingEvent.Summary = title;
+            existingEvent.Description = description;
+            existingEvent.Start = new EventDateTime { DateTimeDateTimeOffset = start };
+            existingEvent.End = new EventDateTime { DateTimeDateTimeOffset = end };
+            existingEvent.Attendees = [.. attendeeEmails.Select(email => new EventAttendee { Email = email })];
+
+            await service.Events.Update(existingEvent, "primary", eventId).ExecuteAsync();
+        }
+
+        public async Task DeleteMeetingAsync(string eventId)
+        {
+            var service = CreateCalendarService();
+            await service.Events.Delete("primary", eventId).ExecuteAsync();
+        }
+
+        private CalendarService CreateCalendarService()
+        {
+            var credentialPath = _configuration["Google:CredentialsPath"];
+            if (string.IsNullOrEmpty(credentialPath) || !File.Exists(credentialPath))
+            {
+                throw new InvalidOperationException("Google calendar credentials are not configured or the file was not found.");
+            }
+
+            var credential = GoogleCredential.FromFile(credentialPath).CreateScoped(CalendarService.ScopeConstants.CalendarEvents);
+            return new CalendarService(new BaseClientService.Initializer
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "JobHub"
+            });
         }
     }
 }

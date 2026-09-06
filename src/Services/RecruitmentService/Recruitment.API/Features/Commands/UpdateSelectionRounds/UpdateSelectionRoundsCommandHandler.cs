@@ -15,7 +15,10 @@ namespace Recruitment.API.Features.Commands.UpdateSelectionRounds
                 .FirstOrDefaultAsync(p => p.Id == request.ProcessId, cancellationToken);
 
             if (process == null)
+            {
+                logger.LogWarning("Recruitment process {ProcessId} was not found while updating selection rounds.", request.ProcessId);
                 return false;
+            }
 
             var requestIds = request.Rounds.Where(r => r.Id.HasValue).Select(r => r.Id!.Value).ToList();
             var toRemove = process.Rounds.Where(r => !requestIds.Contains(r.Id)).ToList();

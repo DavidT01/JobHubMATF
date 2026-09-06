@@ -9,7 +9,7 @@ using Recruitment.API.Infrastructure;
 
 namespace Recruitment.API.Features.Commands.EvaluateCandidate
 {
-    public class EvaluateCandidateCommandHandler(RecruitmentContext context, IMapper mapper, IProfileServiceClient profileServiceClient)
+    public class EvaluateCandidateCommandHandler(RecruitmentContext context, IMapper mapper, IProfileServiceClient profileServiceClient, ILogger<EvaluateCandidateCommandHandler> logger)
         : IRequestHandler<EvaluateCandidateCommand, CandidateEvaluationDto>
     {
         private readonly RecruitmentContext _context = context;
@@ -18,11 +18,16 @@ namespace Recruitment.API.Features.Commands.EvaluateCandidate
 
         public async Task<CandidateEvaluationDto> Handle(EvaluateCandidateCommand request, CancellationToken cancellationToken)
         {
-            var round = await _context.Rounds.FindAsync([request.SelectionRoundId], cancellationToken) 
-                ?? throw new RecruitmentValidationException($"Selection round {request.SelectionRoundId} not found");
+            var round = await _context.Rounds.FindAsync([request.SelectionRoundId], cancellationToken);
+            if (round is null)
+            {
+                logger.LogWarning("Selection round {SelectionRoundId} not found.", request.SelectionRoundId);
+                throw new RecruitmentValidationException($"Selection round {request.SelectionRoundId} not found");
+            }
 
             if (!await _profileServiceClient.ValidateCandidateProfileAsync(request.CandidateProfileId, cancellationToken))
             {
+                logger.LogWarning("Candidate profile {CandidateProfileId} not found while evaluating candidate.", request.CandidateProfileId);
                 throw new RecruitmentValidationException($"Candidate profile {request.CandidateProfileId} not found");
             }
 
@@ -45,6 +50,7 @@ namespace Recruitment.API.Features.Commands.EvaluateCandidate
             }
 
             await _context.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("Successfully saved evaluation for candidate {CandidateProfileId} in round {SelectionRoundId}", request.CandidateProfileId, request.SelectionRoundId);
             return _mapper.Map<CandidateEvaluationDto>(evaluation);
         }
     }

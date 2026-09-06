@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Recruitment.API.Entities;
 using Recruitment.API.Features.Queries.GetCandidateEvaluations;
 using Recruitment.UnitTests.Common;
@@ -12,7 +13,7 @@ namespace Recruitment.UnitTests.Queries
         {
             using var context = TestHelpers.CreateDbContext();
             var mapper = TestHelpers.CreateMapper();
-            var handler = new GetCandidateEvaluationsQueryHandler(context, mapper);
+            var handler = new GetCandidateEvaluationsQueryHandler(context, mapper, NullLogger<GetCandidateEvaluationsQueryHandler>.Instance);
 
             var result = await handler.Handle(new GetCandidateEvaluationsQuery(Guid.NewGuid()), CancellationToken.None);
 
@@ -31,7 +32,7 @@ namespace Recruitment.UnitTests.Queries
                 new CandidateEvaluation { CandidateProfileId = Guid.NewGuid(), SelectionRoundId = Guid.NewGuid(), Score = 5 });
             await context.SaveChangesAsync();
 
-            var handler = new GetCandidateEvaluationsQueryHandler(context, mapper);
+            var handler = new GetCandidateEvaluationsQueryHandler(context, mapper, NullLogger<GetCandidateEvaluationsQueryHandler>.Instance);
 
             var result = await handler.Handle(new GetCandidateEvaluationsQuery(candidateId), CancellationToken.None);
 

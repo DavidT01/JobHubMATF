@@ -6,7 +6,7 @@ using Recruitment.API.DTOs;
 
 namespace Recruitment.API.Features.Queries.GetCandidateEvaluations
 {
-    public class GetCandidateEvaluationsQueryHandler(RecruitmentContext context, IMapper mapper) : IRequestHandler<GetCandidateEvaluationsQuery, List<CandidateEvaluationDto>>
+    public class GetCandidateEvaluationsQueryHandler(RecruitmentContext context, IMapper mapper, ILogger<GetCandidateEvaluationsQueryHandler> logger) : IRequestHandler<GetCandidateEvaluationsQuery, List<CandidateEvaluationDto>>
     {
         private readonly RecruitmentContext _context = context;
         private readonly IMapper _mapper = mapper;
@@ -17,6 +17,7 @@ namespace Recruitment.API.Features.Queries.GetCandidateEvaluations
                 .Where(e => e.CandidateProfileId == request.CandidateProfileId)
                 .ToListAsync(cancellationToken);
 
+            logger.LogInformation("Retrieved {EvaluationCount} evaluations for candidate {CandidateProfileId}", evaluations.Count, request.CandidateProfileId);
             return _mapper.Map<List<CandidateEvaluationDto>>(evaluations);
         }
     }
