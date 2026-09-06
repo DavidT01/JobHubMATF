@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Job } from '../../models/job.model';
+import { MatchResult } from '../../models/match-result.model';
 import { JobService } from '../../services/job.service';
 import { CurrentUser } from '../../core/current-user';
 
@@ -33,6 +34,10 @@ export class JobDetails implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   bookmarked = signal(false);
+
+  matchResult = signal<MatchResult | null>(null);
+  matchLoading = signal(false);
+  matchError = signal<string | null>(null);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -80,5 +85,26 @@ export class JobDetails implements OnInit {
         error: (err) => console.error(err),
       });
     }
+  }
+
+  checkMatch(): void {
+    const job = this.job();
+    if (!job) return;
+
+    this.matchLoading.set(true);
+    this.matchError.set(null);
+    this.matchResult.set(null);
+
+    this.jobService.getMatch(job.id, this.currentUser.getUserId()).subscribe({
+      next: (result) => {
+        this.matchResult.set(result);
+        this.matchLoading.set(false);
+      },
+      error: (err) => {
+        this.matchError.set('Podaci o profilu trenutno nisu dostupni.');
+        this.matchLoading.set(false);
+        console.error(err);
+      },
+    });
   }
 }

@@ -56,6 +56,37 @@
       @if (job()!.contactEmail) {
         <p><strong>Kontakt:</strong> {{ job()!.contactEmail }}</p>
       }
+
+      @if (matchLoading()) {
+        <div class="match-section">
+          <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+        </div>
+      } @else if (matchError()) {
+        <p class="match-section error">{{ matchError() }}</p>
+      } @else if (matchResult()) {
+        <div class="match-section">
+          <h3>Poklapanje sa tvojim profilom</h3>
+          <p class="match-score">{{ matchResult()!.score }}%</p>
+
+          @if (matchResult()!.matchedSkills.length) {
+            <p><strong>Poklopljene veštine:</strong></p>
+            <div class="chips">
+              @for (skill of matchResult()!.matchedSkills; track skill) {
+                <mat-chip class="chip-primary">{{ skill }}</mat-chip>
+              }
+            </div>
+          }
+
+          @if (matchResult()!.missingSkills.length) {
+            <p><strong>Nedostajuće veštine:</strong></p>
+            <div class="chips">
+              @for (skill of matchResult()!.missingSkills; track skill) {
+                <mat-chip>{{ skill }}</mat-chip>
+              }
+            </div>
+          }
+        </div>
+      }
     </mat-card-content>
 
     <mat-card-actions>
@@ -65,6 +96,9 @@
       <button mat-stroked-button (click)="toggleBookmark()">
         <mat-icon>{{ bookmarked() ? 'bookmark' : 'bookmark_border' }}</mat-icon>
         {{ bookmarked() ? 'Sačuvano' : 'Sačuvaj' }}
+      </button>
+      <button mat-stroked-button (click)="checkMatch()" [disabled]="matchLoading()">
+        Proveri poklapanje
       </button>
       <a routerLink="/" mat-stroked-button>Nazad na listu</a>
     </mat-card-actions>

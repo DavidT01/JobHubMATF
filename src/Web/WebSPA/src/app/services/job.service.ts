@@ -2,6 +2,7 @@ import { Injectable , inject } from "@angular/core";
 import { HttpClient , HttpParams } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { JobType , Job , ExperienceLevel , WorkMode } from "../models/job.model";
+import { MatchResult } from "../models/match-result.model";
 import { environment } from "../../environments/environment";
 
 @Injectable({ providedIn: 'root'})
@@ -90,6 +91,10 @@ export class JobService {
 
     getBookmarks(userId: string): Observable<Job[]> {
         return this.http.get<Job[]>(`${this.baseUrl}/bookmarks/${userId}`);
+    }
+
+    getMatch(jobId: string, userId: string): Observable<MatchResult> {
+        return this.http.get<MatchResult>(`${this.baseUrl}/match/${jobId}/${userId}`);
     }
 }
 

@@ -45,3 +45,16 @@ mat-card-actions {
   gap: 8px;
   padding: 16px;
 }
+
+.match-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.match-score {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--mat-sys-primary);
+  margin: 4px 0 12px;
+}
