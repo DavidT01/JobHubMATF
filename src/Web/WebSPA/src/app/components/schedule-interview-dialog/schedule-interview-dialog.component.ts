@@ -11,6 +11,8 @@ import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material
 import { finalize } from 'rxjs';
 import { RecruitmentProcessService } from '../../core/services/recruitment-process/recruitment-process-service';
 import { ScheduleInterviewCommand } from '../../core/models/schedule-interview-command';
+import { InterviewScheduleDto } from '../../core/models/interview-schedule-dto';
+import { UpdateInterviewScheduleCommand } from '../../core/models/update-interview-schedule-command';
 
 @Component({
   selector: 'app-schedule-interview-dialog',
@@ -33,7 +35,7 @@ export class ScheduleInterviewDialogComponent {
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<ScheduleInterviewDialogComponent>);
   private recruitmentService = inject(RecruitmentProcessService);
-  public data: { selectionRoundId: string, candidateProfileId: string } = inject(MAT_DIALOG_DATA);
+  public data: { selectionRoundId: string, candidateProfileId: string, schedule?: InterviewScheduleDto } = inject(MAT_DIALOG_DATA);
 
   form!: FormGroup;
   loading = signal<boolean>(false);
@@ -41,13 +43,13 @@ export class ScheduleInterviewDialogComponent {
 
   constructor() {
     this.form = this.fb.group({
-      title: ['', Validators.required],
-      description: [''],
-      startDate: [null, Validators.required],
-      startTime: [null, Validators.required],
-      endDate: [null, Validators.required],
-      endTime: [null, Validators.required],
-      attendeeEmails: ['']
+      title: [this.data.schedule?.title ?? '', Validators.required],
+      description: [this.data.schedule?.description ?? ''],
+      startDate: [this.data.schedule ? new Date(this.data.schedule.startTime) : null, Validators.required],
+      startTime: [this.data.schedule ? this.toTimeInput(this.data.schedule.startTime) : null, Validators.required],
+      endDate: [this.data.schedule ? new Date(this.data.schedule.endTime) : null, Validators.required],
+      endTime: [this.data.schedule ? this.toTimeInput(this.data.schedule.endTime) : null, Validators.required],
+      attendeeEmails: [this.data.schedule?.additionalAttendeeEmails.join(', ') ?? '']
     });
   }
 
@@ -57,6 +59,11 @@ export class ScheduleInterviewDialogComponent {
     const [hours, minutes] = timeStr.split(':');
     d.setHours(parseInt(hours, 10), parseInt(minutes, 10));
     return d;
+  }
+
+  private toTimeInput(value: Date): string {
+    const date = new Date(value);
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   }
 
   save() {
@@ -83,12 +90,27 @@ export class ScheduleInterviewDialogComponent {
       attendeeEmails: emails
     };
 
-    this.recruitmentService.scheduleInterview(command).pipe(
+    const request = this.data.schedule
+      ? this.recruitmentService.updateInterviewSchedule(this.toUpdateCommand(command))
+      : this.recruitmentService.scheduleInterview(command);
+
+    request.pipe(
       finalize(() => this.loading.set(false))
     ).subscribe({
       next: result => this.dialogRef.close(result),
       error: (error: unknown) => this.error.set(this.resolveErrorMessage(error))
     });
+  }
+
+  private toUpdateCommand(command: ScheduleInterviewCommand): UpdateInterviewScheduleCommand {
+    return {
+      interviewScheduleId: this.data.schedule!.id,
+      startTime: command.startTime,
+      endTime: command.endTime,
+      title: command.title,
+      description: command.description,
+      additionalAttendeeEmails: command.attendeeEmails
+    };
   }
 
   private resolveErrorMessage(error: unknown): string {

@@ -9,6 +9,7 @@ import { finalize } from 'rxjs';
 
 import { CandidateEvaluationDialogComponent } from '../candidate-evaluation-dialog/candidate-evaluation-dialog.component';
 import { ScheduleInterviewDialogComponent } from '../schedule-interview-dialog/schedule-interview-dialog.component';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog-component';
 import { CandidateProgressDto } from '../../core/models/candidate-progress-dto';
 import { InterviewScheduleDto } from '../../core/models/interview-schedule-dto';
 import { RecruitmentProcessService } from '../../core/services/recruitment-process/recruitment-process-service';
@@ -50,6 +51,35 @@ export class RoundCandidatesComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) this.loadInterviewSchedule(candidateProfileId);
+    });
+  }
+
+  editInterview(candidateProfileId: string, schedule: InterviewScheduleDto): void {
+    const dialogRef = this.dialog.open(ScheduleInterviewDialogComponent, {
+      width: '600px',
+      data: { selectionRoundId: this.selectionRoundId, candidateProfileId, schedule }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) this.loadInterviewSchedule(candidateProfileId);
+    });
+  }
+
+  cancelInterview(candidateProfileId: string, interviewScheduleId: string): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: { message: 'Cancel this interview and remove its Google Calendar event?' }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+
+      this.recruitmentService.cancelInterviewSchedule(interviewScheduleId).subscribe({
+        next: () => this.schedules.update(schedules => {
+          const { [candidateProfileId]: _, ...remainingSchedules } = schedules;
+          return remainingSchedules;
+        }),
+        error: () => this.error.set('Could not cancel the interview.')
+      });
     });
   }
 
