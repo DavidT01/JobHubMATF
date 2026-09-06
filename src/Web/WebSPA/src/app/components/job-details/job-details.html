@@ -1,0 +1,68 @@
+@if (loading()) {
+  <div class="loading-container">
+    <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+  </div>
+} @else if (error()) {
+  <p class="error">{{ error() }}</p>
+  <a routerLink="/" mat-stroked-button>Nazad na listu</a>
+} @else if (job()) {
+  <mat-card class="details-card">
+    <mat-card-header>
+      <mat-card-title>{{ job()!.title }}</mat-card-title>
+      <mat-card-subtitle>{{ job()!.companyName }} — {{ job()!.city }}, {{ job()!.country }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="chips">
+        <mat-chip class="chip-primary">{{ job()!.jobType }}</mat-chip>
+        <mat-chip class="chip-tertiary">{{ job()!.experienceLevel }}</mat-chip>
+        <mat-chip class="chip-primary">{{ job()!.workMode }}</mat-chip>
+      </div>
+
+      @if (job()!.salaryMin && job()!.salaryMax) {
+        <p class="salary">{{ job()!.salaryMin }} - {{ job()!.salaryMax }} {{ job()!.currency }}</p>
+      }
+
+      <h3>Opis</h3>
+      <p>{{ job()!.description }}</p>
+
+      @if (job()!.requirements?.length) {
+        <h3>Zahtevi</h3>
+        <ul>
+          @for (req of job()!.requirements; track req) {
+            <li>{{ req }}</li>
+          }
+        </ul>
+      }
+
+      @if (job()!.responsibilities?.length) {
+        <h3>Odgovornosti</h3>
+        <ul>
+          @for (resp of job()!.responsibilities; track resp) {
+            <li>{{ resp }}</li>
+          }
+        </ul>
+      }
+
+      @if (job()!.skills?.length) {
+        <h3>Veštine</h3>
+        <div class="chips">
+          @for (skill of job()!.skills; track skill) {
+            <mat-chip>{{ skill }}</mat-chip>
+          }
+        </div>
+      }
+
+      @if (job()!.contactEmail) {
+        <p><strong>Kontakt:</strong> {{ job()!.contactEmail }}</p>
+      }
+    </mat-card-content>
+
+    <mat-card-actions>
+      @if (job()!.applyUrl) {
+        <a [href]="job()!.applyUrl" target="_blank" mat-raised-button color="primary">Prijavi se</a>
+      }
+      <a routerLink="/" mat-stroked-button>Nazad na listu</a>
+    </mat-card-actions>
+  </mat-card>
+}

@@ -1,0 +1,30 @@
+@if (loading()) {
+  <div class="loading-container">
+    <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+  </div>
+} @else if (error()) {
+  <p class="error">{{ error() }}</p>
+} @else if (jobs().length === 0) {
+  <p>Trenutno nema oglasa.</p>
+} @else {
+  <div class="job-grid">
+    @for (job of jobs(); track job.id) {
+      <mat-card class="job-card" (click)="openDetails(job.id)">
+        <mat-card-header>
+          <mat-card-title>{{ job.title }}</mat-card-title>
+          <mat-card-subtitle>{{ job.companyName }} — {{ job.city }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chips">
+            <mat-chip class="chip-primary">{{ job.jobType }}</mat-chip>
+            <mat-chip class="chip-tertiary">{{ job.experienceLevel }}</mat-chip>
+            <mat-chip class="chip-primary">{{ job.workMode }}</mat-chip>
+          </div>
+          @if (job.salaryMin && job.salaryMax) {
+            <p class="salary">{{ job.salaryMin }} - {{ job.salaryMax }} {{ job.currency }}</p>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+}
