@@ -1,11 +1,3 @@
-<div class="job-list-toolbar">
-  <a routerLink="/bookmarks" mat-stroked-button>
-    <mat-icon>bookmark</mat-icon>
-    Sačuvani oglasi
-  </a>
-  <button mat-raised-button color="primary" (click)="openCreate()">Kreiraj oglas</button>
-</div>
-
 @if (loading()) {
   <div class="loading-container">
     <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
@@ -13,7 +5,7 @@
 } @else if (error()) {
   <p class="error">{{ error() }}</p>
 } @else if (jobs().length === 0) {
-  <p>Trenutno nema oglasa.</p>
+  <p>Nemaš sačuvanih oglasa.</p>
 } @else {
   <div class="job-grid">
     @for (job of jobs(); track job.id) {
@@ -24,10 +16,10 @@
           <button
             mat-icon-button
             class="bookmark-btn"
-            (click)="toggleBookmark($event, job.id)"
-            [attr.aria-label]="isBookmarked(job.id) ? 'Ukloni iz sačuvanih' : 'Sačuvaj oglas'"
+            (click)="removeBookmark($event, job.id)"
+            aria-label="Ukloni iz sačuvanih"
           >
-            <mat-icon>{{ isBookmarked(job.id) ? 'bookmark' : 'bookmark_border' }}</mat-icon>
+            <mat-icon>bookmark</mat-icon>
           </button>
         </mat-card-header>
         <mat-card-content>

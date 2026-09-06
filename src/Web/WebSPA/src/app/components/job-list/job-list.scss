@@ -8,6 +8,19 @@
 .job-card {
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+.bookmark-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.job-list-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 16px 0;
 }
 
 .chips {

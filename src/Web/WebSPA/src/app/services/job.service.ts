@@ -77,5 +77,19 @@ export class JobService {
         const params = new HttpParams().set('ascending', ascending);
         return this.http.get<Job[]>(`${this.baseUrl}/sorted/salary`, { params });
     }
+
+    addBookmark(userId: string, jobId: string): Observable<void> {
+        const params = new HttpParams().set('userId', userId).set('jobId', jobId);
+        return this.http.post<void>(`${this.baseUrl}/bookmarks`, null, { params });
+    }
+
+    removeBookmark(userId: string, jobId: string): Observable<void> {
+        const params = new HttpParams().set('userId', userId).set('jobId', jobId);
+        return this.http.delete<void>(`${this.baseUrl}/bookmarks`, { params });
+    }
+
+    getBookmarks(userId: string): Observable<Job[]> {
+        return this.http.get<Job[]>(`${this.baseUrl}/bookmarks/${userId}`);
+    }
 }
 

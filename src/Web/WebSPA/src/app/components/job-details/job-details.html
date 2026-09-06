@@ -62,6 +62,10 @@
       @if (job()!.applyUrl) {
         <a [href]="job()!.applyUrl" target="_blank" mat-raised-button color="primary">Prijavi se</a>
       }
+      <button mat-stroked-button (click)="toggleBookmark()">
+        <mat-icon>{{ bookmarked() ? 'bookmark' : 'bookmark_border' }}</mat-icon>
+        {{ bookmarked() ? 'Sačuvano' : 'Sačuvaj' }}
+      </button>
       <a routerLink="/" mat-stroked-button>Nazad na listu</a>
     </mat-card-actions>
   </mat-card>
