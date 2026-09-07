@@ -4,12 +4,26 @@ import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ChatService } from '../../services/chat';
 
+// --- Angular Material Imports ---
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+
 export type UserRole = 'Candidate' | 'Employer' | 'Admin';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    // Material Moduli
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule
+  ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
 })

@@ -5,10 +5,31 @@ import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ChatService, ChatMessage, Conversation } from '../../services/chat';
 
+// --- Angular Material Imports ---
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatBadgeModule } from '@angular/material/badge';
+
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    // Material Moduli
+    MatSidenavModule,
+    MatListModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatBadgeModule
+  ],
   templateUrl: './chat.html',
   styleUrls: ['./chat.scss']
 })
@@ -47,7 +68,6 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.loadConversations();
 
-    // 1. URL PRETPLATA - Menja aktivnog sagovornika ili reaguje na F5
     this.routeSub = this.route.queryParams.subscribe(params => {
       if (params['to']) {
         this.receiverId = params['to'];
@@ -63,7 +83,6 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.chatService.loadHistory(this.receiverId, this.myId);
     });
 
-    // 2. SIGNALR PRETPLATA - Reaguje na sve poruke
     this.messageSub = this.chatService.messages$.subscribe((allMessages) => {
       this.ngZone.run(() => {
         const myClean = String(this.myId).trim().toLowerCase();
@@ -78,17 +97,14 @@ export class ChatComponent implements OnInit, OnDestroy {
           return (s === myClean && r === recClean) || (s === recClean && r === myClean);
         });
 
-        // 1. Inicijalno učitavanje pri otvaranju / osvežavanju (F5)
         if (this.isInitialLoad) {
           this.messages = filtered;
           this.previousMessagesCount = filtered.length;
           this.cdr.detectChanges();
 
-          // Trenutni skok na dno BEZ animacije pre nego što se prikaže
           this.forceScrollBottomInstant();
           this.showScrollContainer();
 
-          // Dodatna provera nakon što pretraživač završi render
           setTimeout(() => {
             this.forceScrollBottomInstant();
             this.isInitialLoad = false;
@@ -96,7 +112,6 @@ export class ChatComponent implements OnInit, OnDestroy {
           return;
         }
 
-        // 2. Ako stignu NOVE poruke u toku razgovora
         const newMessagesDelta = filtered.length - this.previousMessagesCount;
         this.messages = filtered;
 
@@ -249,7 +264,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     return height - position <= threshold;
   }
 
-  // TRENUTNI SKOK BEZ ANIMACIJE
   private forceScrollBottomInstant(): void {
     if (this.scrollContainer) {
       const el = this.scrollContainer.nativeElement;
@@ -258,7 +272,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ANIMIRANO SKROLOVANJE SVE SVEŽE PORUKE
   private animatedScrollToBottom(): void {
     setTimeout(() => {
       if (this.scrollContainer) {
@@ -288,5 +301,5 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   public goToDashboard(): void {
     this.router.navigate(['/dashboard']);
-  }  
+  }
 }

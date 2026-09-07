@@ -1,13 +1,15 @@
-<!-- Testni Debug Banner -->
-<div class="debug-bar" style="background: #1e293b; color: #fff; padding: 12px 20px; font-family: monospace; display: flex; gap: 20px; align-items: center; border-bottom: 3px solid #3b82f6;">
-  <span>👤 <strong>Korisnik ID:</strong> {{ currentUserId || 'Nije podešen' }}</span>
-  <span>
-    🎭 <strong>Aktivna Uloga:</strong>
-    <span [ngSwitch]="userRole" style="padding: 2px 8px; border-radius: 4px; font-weight: bold;">
-      <span *ngSwitchCase="'Candidate'" style="background: #10b981; color: white;">Candidate</span>
-      <span *ngSwitchCase="'Employer'" style="background: #f59e0b; color: white;">Employer</span>
-      <span *ngSwitchCase="'Admin'" style="background: #ef4444; color: white;">Admin</span>
-      <span *ngSwitchDefault style="background: #6b7280; color: white;">Nepoznato ({{ userRole }})</span>
+<!-- Debug Banner u Material stilu -->
+<div class="debug-bar">
+  <span class="debug-item">
+    <mat-icon inline>person</mat-icon> <strong>Korisnik ID:</strong> {{ currentUserId || 'Nije podešen' }}
+  </span>
+  <span class="debug-item">
+    <mat-icon inline>admin_panel_settings</mat-icon> <strong>Aktivna Uloga:</strong>
+    <span [ngSwitch]="userRole" class="role-chip">
+      <mat-chip *ngSwitchCase="'Candidate'" class="chip-candidate" highlighted>Candidate</mat-chip>
+      <mat-chip *ngSwitchCase="'Employer'" class="chip-employer" highlighted>Employer</mat-chip>
+      <mat-chip *ngSwitchCase="'Admin'" class="chip-admin" highlighted>Admin</mat-chip>
+      <mat-chip *ngSwitchDefault class="chip-default" highlighted>Nepoznato ({{ userRole }})</mat-chip>
     </span>
   </span>
 </div>
@@ -20,117 +22,163 @@
 
   <!-- 1. DASHBOARD ZA KANDIDATA -->
   <div *ngIf="userRole === 'Candidate'" class="stats-grid">
-    <div class="stat-card" (click)="navigateTo('/applications')">
-      <div class="icon apps-icon">📋</div>
+    <mat-card class="stat-card" (click)="navigateTo('/applications')">
+      <div class="card-icon cyan-bg">
+        <mat-icon>assignment</mat-icon>
+      </div>
       <div class="stat-info">
         <h3>{{ candidateStats.activeApplications }}</h3>
         <p>Aktivne prijave</p>
       </div>
-    </div>
+    </mat-card>
 
-    <div class="stat-card" (click)="navigateTo('/jobs')">
-      <div class="icon jobs-icon">⭐</div>
+    <mat-card class="stat-card" (click)="navigateTo('/jobs')">
+      <div class="card-icon orange-bg">
+        <mat-icon>star</mat-icon>
+      </div>
       <div class="stat-info">
         <h3>{{ candidateStats.savedJobs }}</h3>
         <p>Sačuvani oglasi</p>
       </div>
-    </div>
+    </mat-card>
 
-    <div class="stat-card" (click)="navigateTo('/chat')">
-      <div class="icon chat-icon">💬</div>
+    <mat-card class="stat-card" (click)="navigateTo('/chat')">
+      <div class="card-icon cyan-bg">
+        <mat-icon>chat</mat-icon>
+      </div>
       <div class="stat-info">
         <h3>{{ candidateStats.unreadMessages }}</h3>
         <p>Nepročitane poruke</p>
       </div>
-    </div>
+    </mat-card>
 
-    <div class="stat-card">
-      <div class="icon calendar-icon">📅</div>
+    <mat-card class="stat-card">
+      <div class="card-icon orange-bg">
+        <mat-icon>event</mat-icon>
+      </div>
       <div class="stat-info">
         <h3>{{ candidateStats.upcomingInterviews }}</h3>
         <p>Zakazani intervjui</p>
       </div>
-    </div>
+    </mat-card>
   </div>
 
   <!-- 2. DASHBOARD ZA FIRMU -->
   <div *ngIf="userRole === 'Employer'" class="stats-grid">
-    <div class="stat-card" (click)="navigateTo('/my-ads')">
-      <div class="icon jobs-icon">📢</div>
+    <mat-card class="stat-card" (click)="navigateTo('/my-ads')">
+      <div class="card-icon cyan-bg">
+        <mat-icon>campaign</mat-icon>
+      </div>
       <div class="stat-info">
         <h3>{{ companyStats.activeAds }}</h3>
         <p>Aktivni oglasi</p>
       </div>
-    </div>
+    </mat-card>
 
-    <div class="stat-card" (click)="navigateTo('/applications-received')">
-      <div class="icon apps-icon">📥</div>
+    <mat-card class="stat-card" (click)="navigateTo('/applications-received')">
+      <div class="card-icon orange-bg">
+        <mat-icon>move_to_inbox</mat-icon>
+      </div>
       <div class="stat-info">
         <h3>{{ companyStats.totalApplications }}</h3>
         <p>Pristigle prijave</p>
       </div>
-    </div>
+    </mat-card>
 
-    <div class="stat-card" (click)="navigateTo('/chat')">
-      <div class="icon chat-icon">💬</div>
+    <mat-card class="stat-card" (click)="navigateTo('/chat')">
+      <div class="card-icon cyan-bg">
+        <mat-icon>chat</mat-icon>
+      </div>
       <div class="stat-info">
         <h3>{{ companyStats.newMessages }}</h3>
         <p>Nove poruke</p>
       </div>
-    </div>
+    </mat-card>
 
-    <div class="stat-card">
-      <div class="icon calendar-icon">🗓️</div>
+    <mat-card class="stat-card">
+      <div class="card-icon orange-bg">
+        <mat-icon>calendar_month</mat-icon>
+      </div>
       <div class="stat-info">
         <h3>{{ companyStats.scheduledInterviews }}</h3>
         <p>Intervjui u najavi</p>
       </div>
-    </div>
+    </mat-card>
   </div>
 
   <!-- 3. DASHBOARD ZA ADMINA -->
   <div *ngIf="userRole === 'Admin'" class="stats-grid">
-    <div class="stat-card">
-      <div class="icon admin-icon">👥</div>
+    <mat-card class="stat-card">
+      <div class="card-icon cyan-bg">
+        <mat-icon>group</mat-icon>
+      </div>
       <div class="stat-info">
         <h3>{{ adminStats.totalUsers }}</h3>
         <p>Registrovani korisnici</p>
       </div>
-    </div>
+    </mat-card>
 
-    <div class="stat-card">
-      <div class="icon admin-icon">🏢</div>
+    <mat-card class="stat-card">
+      <div class="card-icon orange-bg">
+        <mat-icon>business</mat-icon>
+      </div>
       <div class="stat-info">
         <h3>{{ adminStats.totalCompanies }}</h3>
         <p>Verifikovane firme</p>
       </div>
-    </div>
+    </mat-card>
 
-    <div class="stat-card">
-      <div class="icon jobs-icon">📑</div>
+    <mat-card class="stat-card">
+      <div class="card-icon cyan-bg">
+        <mat-icon>description</mat-icon>
+      </div>
       <div class="stat-info">
         <h3>{{ adminStats.activeAds }}</h3>
         <p>Ukupno oglasa</p>
       </div>
-    </div>
+    </mat-card>
 
-    <div class="stat-card">
-      <div class="icon health-icon">🟢</div>
+    <mat-card class="stat-card">
+      <div class="card-icon status-green">
+        <mat-icon>check_circle</mat-icon>
+      </div>
       <div class="stat-info">
         <h3>{{ adminStats.systemHealth }}</h3>
         <p>Sistem status</p>
       </div>
-    </div>
+    </mat-card>
   </div>
 
   <!-- BRZE AKCIJE / PREČICE -->
-  <div class="quick-actions">
-    <h3>Brze akcije</h3>
-    <div class="action-buttons">
-      <button *ngIf="userRole === 'Candidate'" (click)="navigateTo('/jobs')" class="btn btn-primary">Pretraži oglase</button>
-      <button *ngIf="userRole === 'Employer'" (click)="navigateTo('/create-ad')" class="btn btn-primary">Postavi nov oglas</button>
-      <button (click)="navigateTo('/chat')" class="btn btn-secondary">Otvori Chat</button>
-      <button (click)="navigateTo('/profile')" class="btn btn-outline">Uredi profil</button>
-    </div>
-  </div>
+  <mat-card class="quick-actions-card">
+    <mat-card-header>
+      <mat-card-title>Brze akcije</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="action-buttons">
+      <button mat-raised-button
+              color="primary"
+              *ngIf="userRole === 'Candidate'"
+              (click)="navigateTo('/jobs')">
+        <mat-icon>search</mat-icon> Pretraži oglase
+      </button>
+
+      <button mat-raised-button
+              color="primary"
+              *ngIf="userRole === 'Employer'"
+              (click)="navigateTo('/create-ad')">
+        <mat-icon>add</mat-icon> Postavi nov oglas
+      </button>
+
+      <button mat-raised-button
+              color="accent"
+              (click)="navigateTo('/chat')">
+        <mat-icon>chat</mat-icon> Otvori Chat
+      </button>
+
+      <button mat-stroked-button
+              (click)="navigateTo('/profile')">
+        <mat-icon>edit</mat-icon> Uredi profil
+      </button>
+    </mat-card-content>
+  </mat-card>
 </div>

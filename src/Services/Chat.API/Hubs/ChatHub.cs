@@ -2,6 +2,7 @@
 using Chat.API.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
+using System.Collections.Concurrent;
 
 namespace Chat.API.Hubs
 {
@@ -9,7 +10,7 @@ namespace Chat.API.Hubs
     public class ChatHub : Hub
     {
         private readonly ChatService _chatService;
-        private static readonly Dictionary<string, string> _connections = new();
+        private static readonly ConcurrentDictionary<string, string> _connections = new();
 
         public ChatHub(ChatService chatService)
         {
@@ -62,12 +63,10 @@ namespace Chat.API.Hubs
                       ?? Context.User?.FindFirst("nameid")?.Value
                       ?? Context.GetHttpContext()?.Request.Query["userId"].ToString();
 
-            if (string.IsNullOrEmpty(userId))
+            if (!string.IsNullOrEmpty(userId))
             {
-                userId = "user1"; // Default za test
+                _connections.AddOrUpdate(userId, Context.ConnectionId, (key, oldValue) => Context.ConnectionId);
             }
-
-            _connections[userId] = Context.ConnectionId;
 
             return base.OnConnectedAsync();
         }
@@ -78,7 +77,7 @@ namespace Chat.API.Hubs
 
             if (!string.IsNullOrEmpty(item.Key))
             {
-                _connections.Remove(item.Key);
+                _connections.TryRemove(item.Key, out _);
             }
 
             return base.OnDisconnectedAsync(exception);

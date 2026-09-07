@@ -1,5 +1,4 @@
 .chat-layout {
-  display: flex;
   height: calc(100vh - 40px);
   max-width: 1200px;
   margin: 20px auto;
@@ -31,8 +30,8 @@
 
       .my-badge {
         font-size: 0.85rem;
-        color: #64748b;
-        background-color: #e2e8f0;
+        color: #0891b2; /* Cyan tamniji ton */
+        background-color: #e0f2fe;
         padding: 4px 8px;
         border-radius: 6px;
       }
@@ -41,11 +40,9 @@
     .conversations-list {
       flex: 1;
       overflow-y: auto;
+      padding-top: 0;
 
       .conversation-item {
-        display: flex;
-        align-items: center;
-        padding: 12px 16px;
         cursor: pointer;
         transition: background 0.2s;
         border-bottom: 1px solid #f1f5f9;
@@ -55,60 +52,61 @@
         }
 
         &.active {
-          background-color: #eff6ff;
-          border-left: 4px solid #2563eb;
+          background-color: #ecfeff; /* Cyan svetla pozadina */
+          border-left: 4px solid #06b6d4; /* Cyan primarna akcenat linija */
         }
 
         .user-avatar {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background-color: #2563eb;
+          background-color: #0891b2; /* Cyan avatar */
           color: white;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: bold;
-          margin-right: 12px;
         }
 
-        .user-info {
-          flex: 1;
-          min-width: 0;
-
-          .user-name {
-            font-weight: 600;
-            color: #1e293b;
-            font-size: 0.95rem;
-          }
-
-          .last-message {
-            font-size: 0.85rem;
-            color: #64748b;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
+        .user-name {
+          font-weight: 600;
+          color: #1e293b;
+          font-size: 0.95rem;
         }
 
+        .last-message {
+          font-size: 0.85rem;
+          color: #64748b;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        /* POZICIONIRANJE VREMENA I BEDŽA BEZ POREMEĆAJA TIPA/VISINE */
         .meta-info {
           display: flex;
           flex-direction: column;
           align-items: flex-end;
           gap: 4px;
+          position: relative;
+          padding-right: 18px; /* Omogućava da bedž stoji tačno pored vremena */
 
           .time {
             font-size: 0.75rem;
             color: #94a3b8;
           }
-
-          .badge {
+          /* Pozicionira Angular Material Badge tik uz desnu ivicu teksta vremena */
+          ::ng-deep .mat-badge-content {
+            position: absolute !important;
+            top: 50% !important;
+            right: 0 !important;
+            transform: translateY(-50%) !important;
             background-color: #ef4444;
             color: white;
-            font-size: 0.75rem;
-            padding: 2px 6px;
-            border-radius: 10px;
+            font-size: 10px;
             font-weight: bold;
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
           }
         }
       }
@@ -122,7 +120,6 @@
   }
 
   .chat-main {
-    flex: 1;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -145,25 +142,17 @@
         }
 
         strong {
-          color: #0f172a;
+          color: #0891b2;
           font-weight: 600;
         }
       }
 
       .back-btn {
-        background-color: #f1f5f9;
+        border-color: #cbd5e1;
         color: #334155;
-        border: 1px solid #cbd5e1;
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
 
         &:hover {
-          background-color: #e2e8f0;
-          color: #0f172a;
+          background-color: #f1f5f9;
         }
       }
     }
@@ -192,20 +181,21 @@
           font-size: 0.7rem;
           margin-top: 4px;
           align-self: flex-end;
-          opacity: 0.7;
+          opacity: 0.8;
         }
 
         &.sent {
           align-self: flex-end;
-          background-color: #2563eb;
+          background-color: #0891b2; /* Cyan za poslate poruke */
           color: white;
           border-bottom-right-radius: 2px;
         }
 
         &.received {
           align-self: flex-start;
-          background-color: #f1f5f9;
-          color: #1e293b;
+          background-color: #fff7ed; /* Narandžasta vrlo svetla pozadina */
+          border: 1px solid #ffedd5;
+          color: #9a3412; /* Narandžasti tamni tekst */
           border-bottom-left-radius: 2px;
         }
       }
@@ -213,57 +203,27 @@
 
     .new-message-badge {
       position: absolute;
-      bottom: 80px;
+      bottom: 90px;
       left: 50%;
       transform: translateX(-50%);
-      background-color: #2563eb;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-
-      svg {
-        width: 16px;
-        height: 16px;
-        fill: white;
-      }
+      background-color: #f97316 !important; /* Orange dugme za nove poruke */
+      color: white !important;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
     }
 
     .chat-input-container {
-      padding: 16px 24px;
+      padding: 12px 24px;
       border-top: 1px solid #e2e8f0;
-      display: flex;
-      gap: 12px;
 
-      input {
-        flex: 1;
-        padding: 10px 16px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        outline: none;
-        font-size: 0.95rem;
+      .chat-input-field {
+        width: 100%;
 
-        &:focus {
-          border-color: #2563eb;
-        }
-      }
+        .send-btn {
+          color: #f97316; /* Orange dugme za slanje */
 
-      button {
-        padding: 10px 20px;
-        background-color: #2563eb;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s;
-
-        &:hover {
-          background-color: #1d4ed8;
+          &[disabled] {
+            color: #cbd5e1;
+          }
         }
       }
     }

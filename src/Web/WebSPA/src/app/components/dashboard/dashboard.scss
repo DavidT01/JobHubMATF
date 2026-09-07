@@ -1,3 +1,52 @@
+/* Debug traka */
+.debug-bar {
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 10px 24px;
+  font-family: monospace;
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  border-bottom: 3px solid #0891b2; /* Cyan akcenat */
+
+  .debug-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .role-chip {
+    margin-left: 6px;
+
+    mat-chip {
+      font-size: 0.75rem;
+      min-height: 24px;
+      padding: 2px 8px;
+
+      &.chip-candidate {
+        background-color: #10b981 !important;
+        color: #ffffff !important;
+      }
+
+      &.chip-employer {
+        background-color: #f97316 !important; /* Orange */
+        color: #ffffff !important;
+      }
+
+      &.chip-admin {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+      }
+
+      &.chip-default {
+        background-color: #64748b !important;
+        color: #ffffff !important;
+      }
+    }
+  }
+}
+
+/* Kontejner Dashboard-a */
 .dashboard-container {
   padding: 24px;
   max-width: 1200px;
@@ -8,16 +57,18 @@
 
     h2 {
       font-size: 1.8rem;
-      color: #1e293b;
+      color: #0f172a;
       margin-bottom: 4px;
+      font-weight: 600;
     }
 
     .subtitle {
       color: #64748b;
       font-size: 0.95rem;
+      margin: 0;
     }
   }
-
+  /* Grid kartica sa statistikama */
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -25,26 +76,52 @@
     margin-bottom: 32px;
 
     .stat-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 20px;
+      padding: 16px 20px;
       display: flex;
+      flex-direction: row;
       align-items: center;
       gap: 16px;
       cursor: pointer;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background-color: #ffffff;
 
       &:hover {
         transform: translateY(-3px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 15px -3px rgba(8, 145, 178, 0.12);
+        border-color: #a5f3fc;
       }
 
-      .icon {
-        font-size: 2rem;
-        padding: 12px;
-        background: #f1f5f9;
+      .card-icon {
+        width: 48px;
+        height: 48px;
         border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+        }
+
+        &.cyan-bg {
+          background-color: #ecfeff;
+          color: #0891b2; /* Cyan */
+        }
+
+        &.orange-bg {
+          background-color: #fff7ed;
+          color: #f97316; /* Orange */
+        }
+
+        &.status-green {
+          background-color: #ecfdf5;
+          color: #10b981;
+        }
       }
 
       .stat-info {
@@ -52,6 +129,7 @@
           font-size: 1.6rem;
           margin: 0;
           color: #0f172a;
+          font-weight: 700;
         }
 
         p {
@@ -62,59 +140,45 @@
       }
     }
   }
-
-  .quick-actions {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+  /* Brze akcije kartica */
+  .quick-actions-card {
     border-radius: 12px;
-    padding: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    padding: 12px;
 
-    h3 {
-      margin-top: 0;
-      margin-bottom: 16px;
+    mat-card-title {
       font-size: 1.1rem;
-      color: #1e293b;
+      color: #0f172a;
+      font-weight: 600;
+      margin-bottom: 16px;
     }
 
     .action-buttons {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
+      padding: 0;
 
-      .btn {
-        padding: 10px 18px;
-        border-radius: 8px;
-        font-weight: 500;
-        cursor: pointer;
-        border: none;
-        transition: background 0.2s;
+      button {
+        display: flex;
+        align-items: center;
+        gap: 6px;
 
-        &-primary {
-          background: #2563eb;
-          color: #fff;
-
-          &:hover {
-            background: #1d4ed8;
-          }
+        &[color="primary"] {
+          background-color: #0891b2 !important; /* Cyan primarno dugme */
+          color: white !important;
         }
 
-        &-secondary {
-          background: #0f172a;
-          color: #fff;
-
-          &:hover {
-            background: #1e293b;
-          }
+        &[color="accent"] {
+          background-color: #f97316 !important; /* Orange akcenat dugme */
+          color: white !important;
         }
 
-        &-outline {
-          background: transparent;
-          border: 1px solid #cbd5e1;
-          color: #334155;
-
-          &:hover {
-            background: #f8fafc;
-          }
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
         }
       }
     }
