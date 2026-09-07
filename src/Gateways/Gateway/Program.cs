@@ -1,18 +1,54 @@
-using System.Text;
-using Chat.API.Hubs;
-using Chat.API.Services;
+using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Scalar.AspNetCore;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Dodavanje servisa
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
-builder.Services.AddSignalR();
+// 1. Učitavanje ocelot.json konfiguracionog fajla
+builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 
-// 2. CORS Politika (Dozvoljava Angular + WebSockets + JWT)
+// 2. Registracija JWT Autentifikacije
+var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "SuperSecretKeyForJobHubIdentityApiThatIsAtLeast32BytesLong!";
+var key = Encoding.UTF8.GetBytes(jwtSecret);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer("Bearer", options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+
+    // Podrška za SignalR WebSockets (prihvata token iz Query stringa)
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
+});
+
+// 3. Podešavanje CORS-a za Angular frontend
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
@@ -24,72 +60,17 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 3. JWT Autentifikacija - Čita tačan Secret iz appsettings.json
-var jwtSecret = builder.Configuration["JwtSettings:Secret"];
-if (string.IsNullOrEmpty(jwtSecret))
-{
-    throw new Exception("JWT Secret nije definisan u appsettings.json!");
-}
-
-var key = Encoding.UTF8.GetBytes(jwtSecret);
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ClockSkew = TimeSpan.Zero
-    };
-
-    // Preuzimanje tokena iz query string-a za SignalR
-    options.Events = new JwtBearerEvents
-    {
-        OnMessageReceived = context =>
-        {
-            var accessToken = context.Request.Query["access_token"];
-            var path = context.HttpContext.Request.Path;
-
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
-            {
-                context.Token = accessToken;
-            }
-
-            return Task.CompletedTask;
-        }
-    };
-});
-
-builder.Services.AddAuthorization();
-
-// 4. Registracija pravog ChatService-a (uklanja crvenu liniju)
-builder.Services.AddSingleton<ChatService>();
+// 4. Registracija Ocelot servisa
+builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
 
-// 5. Middleware Pipeline
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
-
 app.UseCors("AllowAngular");
 
+// 5. Aktivacija autentifikacije pre Ocelota
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 6. Mapiranje Endpointera
-app.MapControllers();
-app.MapHub<ChatHub>("/chatHub");
+await app.UseOcelot();
 
 app.Run();

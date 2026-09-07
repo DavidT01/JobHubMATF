@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="src/Gateways/Gateway/Gateway.csproj" Id="322af715-bbd3-4aad-a3ae-9dbe95645483" />
   <Project Path="src/Services/Chat.API/Chat.API.csproj" />
   <Project Path="src/Web/" Type="Website" DisplayName="Web" Id="8ae733e2-87db-b11e-fdff-4762e944013d">
     <BuildType Project="Debug" />

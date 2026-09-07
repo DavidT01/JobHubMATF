@@ -1,8 +1,6 @@
 ﻿using Chat.API.Models;
 using MongoDB.Driver;
 
-
-
 namespace Chat.API.Services
 {
     public class ChatService
@@ -52,21 +50,18 @@ namespace Chat.API.Services
 
         public async Task<Message> SendMessageAsync(string senderId, string receiverId, string text)
         {
-            // 1. Uzmi ili kreiraj chat
             var chat = await GetOrCreateChatAsync(senderId, receiverId);
 
-            // 2. Kreiraj poruku
             var message = new Message
             {
                 ChatId = chat.Id,
                 SenderId = senderId,
                 Text = text,
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.UtcNow,
+                IsRead = false
             };
 
-            // 3. Sačuvaj u bazu
             await _messages.InsertOneAsync(message);
-
             return message;
         }
 
@@ -94,6 +89,67 @@ namespace Chat.API.Services
                 .ToListAsync();
 
             return messages;
+        }
+
+        public async Task<List<Message>> GetMessagesByChatIdAsync(string chatId)
+        {
+            return await _messages
+                .Find(m => m.ChatId == chatId)
+                .SortBy(m => m.Timestamp)
+                .ToListAsync();
+        }
+
+        public async Task<List<ConversationDto>> GetUserConversationsAsync(string currentUserId)
+        {
+            var userChats = await _chats
+                .Find(c => c.User1Id == currentUserId || c.User2Id == currentUserId)
+                .ToListAsync();
+
+            var conversations = new List<ConversationDto>();
+
+            foreach (var chat in userChats)
+            {
+                var otherUserId = chat.User1Id == currentUserId ? chat.User2Id : chat.User1Id;
+
+                var lastMessage = await _messages
+                    .Find(m => m.ChatId == chat.Id)
+                    .SortByDescending(m => m.Timestamp)
+                    .FirstOrDefaultAsync();
+
+                // Brojimo sve poruke iz chata koje JE POSLAO SAGOVORNIK a NISU pročitane (IsRead != true hvata false, null i nepostojeće polje)
+                var unreadCount = (int)await _messages
+                    .CountDocumentsAsync(m => m.ChatId == chat.Id
+                                           && m.SenderId == otherUserId
+                                           && m.IsRead != true);
+
+                conversations.Add(new ConversationDto
+                {
+                    UserId = otherUserId,
+                    UserName = otherUserId,
+                    LastMessage = lastMessage?.Text ?? "Nema poruka",
+                    LastMessageTime = lastMessage?.Timestamp ?? chat.CreatedAt,
+                    UnreadCount = unreadCount,
+                    HasUnread = unreadCount > 0
+                });
+            }
+
+            return conversations.OrderByDescending(c => c.LastMessageTime).ToList();
+        }
+
+        public async Task MarkAsReadAsync(string currentUserId, string otherUserId)
+        {
+            var chat = await GetOrCreateChatAsync(currentUserId, otherUserId);
+
+            // Označavamo sve nepročitane poruke sagovornika kao pročitane
+            var filter = Builders<Message>.Filter.And(
+                Builders<Message>.Filter.Eq(m => m.ChatId, chat.Id),
+                Builders<Message>.Filter.Eq(m => m.SenderId, otherUserId),
+                Builders<Message>.Filter.Ne(m => m.IsRead, true)
+            );
+
+            var update = Builders<Message>.Update.Set(m => m.IsRead, true);
+
+            await _messages.UpdateManyAsync(filter, update);
         }
     }
 }
