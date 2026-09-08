@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Catalog.Data;
 using Catalog.Entities;
 using MongoDB.Bson;
@@ -31,7 +32,7 @@ public class JobRepository : IJobRepository
     public async Task<bool> UpdateJobAsync(Job job)
     {
         var updateJob = await _context.Jobs.ReplaceOneAsync(j => j.Id == job.Id, job);
-        return updateJob.ModifiedCount > 0;
+        return updateJob.MatchedCount > 0;
     }
 
     public async Task<bool> DeleteJobAsync(string id)
@@ -41,22 +42,35 @@ public class JobRepository : IJobRepository
     }
     
     public async Task<IEnumerable<Job>> SearchJobAsync(string query)
-    { 
+    {
+        const int maxQueryLength = 100;
+        
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return new List<Job>();
+        }
+
+        if (query.Length > maxQueryLength)
+        {
+            query = query.Substring(0, maxQueryLength);
+        }
+        
+        var escapedQuery = Regex.Escape(query);
         var filter =
             Builders<Job>.Filter.Or(
                 Builders<Job>.Filter.Regex(
                     j => j.Title,
-                    new MongoDB.Bson.BsonRegularExpression(query, "i")
+                    new MongoDB.Bson.BsonRegularExpression(escapedQuery, "i")
                 ),
 
                 Builders<Job>.Filter.Regex(
                     j => j.Description,
-                    new MongoDB.Bson.BsonRegularExpression(query, "i")
+                    new MongoDB.Bson.BsonRegularExpression(escapedQuery, "i")
                 ),
 
                 Builders<Job>.Filter.Regex(
                     j => j.CompanyName,
-                    new MongoDB.Bson.BsonRegularExpression(query, "i")
+                    new MongoDB.Bson.BsonRegularExpression(escapedQuery, "i")
                 )
             );
 
@@ -102,9 +116,10 @@ public class JobRepository : IJobRepository
 
         if (!string.IsNullOrWhiteSpace(city))
         {
+            var escapedCity = Regex.Escape(city);
             filters.Add(
                 filterBuilder.Regex(
-                    j => j.City, new BsonRegularExpression($"^{city}$", "i")
+                    j => j.City, new BsonRegularExpression($"^{escapedCity}$", "i")
                     )
                 );
         }
