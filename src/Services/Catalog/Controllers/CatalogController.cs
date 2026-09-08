@@ -97,6 +97,11 @@ public class CatalogController : ControllerBase
         [FromQuery] decimal? minSalary,
         [FromQuery] decimal? maxSalary)
     {
+        if (minSalary.HasValue && maxSalary.HasValue && minSalary > maxSalary)
+        {
+            return BadRequest("Min salary must be less than Max salary.");
+        }
+
         var jobs = await _repository.FilterBySalaryAsync(minSalary, maxSalary);
         return Ok(jobs);
     }
