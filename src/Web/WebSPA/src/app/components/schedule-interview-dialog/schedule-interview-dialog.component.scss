@@ -1,0 +1,21 @@
+.schedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.error-message {
+  color: #b3261e;
+  margin: 8px 0 0;
+}
