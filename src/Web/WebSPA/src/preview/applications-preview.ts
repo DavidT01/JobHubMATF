@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ApplicationFormComponent } from '../app/components/application-form/application-form-component';
+import { ApplicationStatisticsComponent } from '../app/components/application-statistics/application-statistics-component';
 import { CandidateApplicationsComponent } from '../app/components/candidate-applications/candidate-applications-component';
 import { EmployerApplicationsComponent } from '../app/components/employer-applications/employer-applications-component';
 import { PREVIEW_APPLY_JOB_ID, PREVIEW_JOB_ID } from './preview-applications-service';
 
 @Component({
   selector: 'app-root',
-  imports: [MatButtonModule, ApplicationFormComponent, CandidateApplicationsComponent, EmployerApplicationsComponent],
+  imports: [MatButtonModule, ApplicationFormComponent, ApplicationStatisticsComponent,
+    CandidateApplicationsComponent, EmployerApplicationsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
     :host { display: block; }
@@ -24,6 +26,7 @@ import { PREVIEW_APPLY_JOB_ID, PREVIEW_JOB_ID } from './preview-applications-ser
         <button mat-stroked-button (click)="screen.set('employer')" [attr.aria-pressed]="screen() === 'employer'">Company view</button>
         <button mat-stroked-button (click)="screen.set('candidate')" [attr.aria-pressed]="screen() === 'candidate'">My applications</button>
         <button mat-stroked-button (click)="screen.set('apply')" [attr.aria-pressed]="screen() === 'apply'">Apply to a job</button>
+        <button mat-stroked-button (click)="screen.set('statistics')" [attr.aria-pressed]="screen() === 'statistics'">Admin statistics</button>
         <button mat-stroked-button (click)="narrow.set(!narrow())" [attr.aria-pressed]="narrow()">Narrow layout</button>
       </nav>
       @if (screen() === 'employer') {
@@ -38,6 +41,7 @@ import { PREVIEW_APPLY_JOB_ID, PREVIEW_JOB_ID } from './preview-applications-ser
         @case ('employer') { <app-employer-applications [jobId]="job()" /> }
         @case ('candidate') { <app-candidate-applications /> }
         @case ('apply') { <app-application-form [jobId]="applyJob" /> }
+        @case ('statistics') { <app-application-statistics /> }
       }
     </main>
   `,
@@ -46,6 +50,6 @@ export class ApplicationsPreview {
   protected readonly sampleJob = PREVIEW_JOB_ID;
   protected readonly applyJob = PREVIEW_APPLY_JOB_ID;
   protected readonly job = signal(PREVIEW_JOB_ID);
-  protected readonly screen = signal<'employer' | 'candidate' | 'apply'>('employer');
+  protected readonly screen = signal<'employer' | 'candidate' | 'apply' | 'statistics'>('employer');
   protected readonly narrow = signal(false);
 }
