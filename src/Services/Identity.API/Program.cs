@@ -1,5 +1,6 @@
 using Identity.API.Data;
 using Identity.API.Models;
+using Identity.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,11 +13,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var testingDbName = $"IdentityTests-{Guid.NewGuid():N}";
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     if (builder.Environment.IsEnvironment("Testing"))
     {
-        options.UseInMemoryDatabase("IdentityTests");
+        options.UseInMemoryDatabase(testingDbName);
         return;
     }
 
@@ -53,7 +56,8 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]!))
+            Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]!)),
+        RoleClaimType = System.Security.Claims.ClaimTypes.Role
     };
 });
 
@@ -66,6 +70,13 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(corsOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod());
+});
+
+builder.Services.AddScoped<NotificationService>();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Lockout.AllowedForNewUsers = true;
 });
 
 var app = builder.Build();
@@ -83,6 +94,8 @@ using (var scope = app.Services.CreateScope())
     {
         db.Database.Migrate();
     }
+
+    await IdentitySeed.SeedAsync(scope.ServiceProvider, app.Configuration);
 }
 
 if (app.Environment.IsDevelopment())
