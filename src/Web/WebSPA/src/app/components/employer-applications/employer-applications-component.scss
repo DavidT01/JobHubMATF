@@ -13,5 +13,9 @@ dt { font-weight: 500; }
 dd { margin: .25rem 0 0; }
 .identifier, .cover-letter { overflow-wrap: anywhere; }
 .cover-letter { white-space: pre-wrap; }
+.status-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+.terminal-status { color: var(--mat-sys-on-surface-variant); margin: 1rem 0 0; }
+.status-error { color: var(--mat-sys-error); margin-bottom: 0; }
+.status-actions + mat-progress-bar { margin-top: .75rem; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 mat-paginator { margin-top: 1rem; }

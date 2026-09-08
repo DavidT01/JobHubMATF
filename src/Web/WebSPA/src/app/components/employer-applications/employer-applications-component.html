@@ -31,7 +31,7 @@
       <ul class="applications">
         @for (application of view.result.items; track application.id) {
           <li>
-            <mat-card appearance="outlined">
+            <mat-card appearance="outlined" [attr.aria-busy]="isUpdating(application.id)">
               <mat-card-header>
                 <mat-card-title><h2>{{ application.candidateName || 'Candidate profile' }}</h2></mat-card-title>
                 <mat-card-subtitle>Status: {{ statusLabel(application.status) }}</mat-card-subtitle>
@@ -48,6 +48,22 @@
                   <a mat-stroked-button [href]="link" target="_blank" rel="noopener noreferrer">Open current CV<span class="visually-hidden"> for {{ application.candidateName || application.candidateId }} (new tab)</span></a>
                 } @else {
                   <p>{{ cvMessage(application) }}</p>
+                }
+                @if (statusActions(application.status).length > 0) {
+                  <div class="status-actions" role="group" [attr.aria-label]="'Change status for ' + (application.candidateName || application.candidateId)">
+                    @for (status of statusActions(application.status); track status) {
+                      <button mat-stroked-button type="button" [disabled]="isUpdating(application.id)"
+                        (click)="changeStatus(application, status)">{{ statusActionLabel(status) }}</button>
+                    }
+                  </div>
+                } @else {
+                  <p class="terminal-status">This application has reached a final status.</p>
+                }
+                @if (isUpdating(application.id)) {
+                  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'Changing status for ' + (application.candidateName || application.candidateId)" />
+                }
+                @if (updateError(application.id); as message) {
+                  <p class="status-error" role="alert">{{ message }}</p>
                 }
               </mat-card-content>
             </mat-card>

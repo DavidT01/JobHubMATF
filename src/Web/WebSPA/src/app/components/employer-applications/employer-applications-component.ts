@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, input, OnChanges } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, OnChanges, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -19,6 +19,14 @@ type ViewState =
   | { kind: 'loaded'; query: Query; result: PagedResult<EmployerApplicationDto> }
   | { kind: 'error'; query: Query; message: string; canRetry: boolean };
 
+const STATUS_TRANSITIONS: Readonly<Record<ApplicationStatus, readonly ApplicationStatus[]>> = {
+  Submitted: ['InReview', 'Rejected'],
+  InReview: ['Interview', 'Accepted', 'Rejected'],
+  Interview: ['Accepted', 'Rejected'],
+  Rejected: [],
+  Accepted: [],
+};
+
 @Component({
   selector: 'app-employer-applications',
   imports: [DatePipe, MatButtonModule, MatCardModule, MatPaginatorModule, MatProgressBarModule],
@@ -29,7 +37,10 @@ type ViewState =
 export class EmployerApplicationsComponent implements OnChanges {
   readonly jobId = input.required<string>();
   private readonly applications = inject(ApplicationsService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly queries = new BehaviorSubject<Query | null>(null);
+  private readonly updating = signal<Readonly<Record<string, boolean>>>({});
+  private readonly updateErrors = signal<Readonly<Record<string, string>>>({});
 
   protected readonly state = toSignal(this.queries.pipe(
     switchMap(query => query === null ? of<ViewState>({ kind: 'invalid' }) :
@@ -78,6 +89,76 @@ export class EmployerApplicationsComponent implements OnChanges {
   protected statusLabel(status: ApplicationStatus): string {
     return ({ Submitted: 'Submitted', InReview: 'In review', Interview: 'Interview',
       Rejected: 'Rejected', Accepted: 'Accepted' } as Record<ApplicationStatus, string>)[status] ?? 'Unknown status';
+  }
+
+  protected statusActions(status: ApplicationStatus): readonly ApplicationStatus[] {
+    return STATUS_TRANSITIONS[status] ?? [];
+  }
+
+  protected statusActionLabel(status: ApplicationStatus): string {
+    return ({ InReview: 'Move to review', Interview: 'Move to interview',
+      Rejected: 'Reject', Accepted: 'Accept' } as Partial<Record<ApplicationStatus, string>>)[status]
+      ?? status;
+  }
+
+  protected isUpdating(applicationId: string): boolean {
+    return this.updating()[applicationId] === true;
+  }
+
+  protected updateError(applicationId: string): string | null {
+    return this.updateErrors()[applicationId] ?? null;
+  }
+
+  protected changeStatus(application: EmployerApplicationDto, status: ApplicationStatus): void {
+    if (this.isUpdating(application.id) || !this.statusActions(application.status).includes(status)) return;
+
+    this.setUpdating(application.id, true);
+    this.setUpdateError(application.id, null);
+    this.applications.changeStatus(application.id, status).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: () => {
+        this.setUpdating(application.id, false);
+        if (this.queries.value?.jobId === application.jobId) this.reload();
+      },
+      error: error => {
+        this.setUpdating(application.id, false);
+        this.setUpdateError(application.id, this.statusChangeErrorMessage(error));
+      },
+    });
+  }
+
+  private setUpdating(applicationId: string, value: boolean): void {
+    this.updating.update(current => {
+      const next = { ...current };
+      if (value) next[applicationId] = true;
+      else delete next[applicationId];
+      return next;
+    });
+  }
+
+  private setUpdateError(applicationId: string, message: string | null): void {
+    this.updateErrors.update(current => {
+      const next = { ...current };
+      if (message) next[applicationId] = message;
+      else delete next[applicationId];
+      return next;
+    });
+  }
+
+  private statusChangeErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      switch (error.status) {
+        case 400: return 'That status change is not valid.';
+        case 401: return 'Please sign in again before changing the status.';
+        case 403: return 'You do not have permission to change this application.';
+        case 404: return 'The application or job could not be found.';
+        case 409: return 'This application changed. Refresh the list and try again.';
+        case 0: return 'Unable to connect. Check your connection and try again.';
+        case 503: return 'Status changes are temporarily unavailable. Try again later.';
+      }
+    }
+    return 'The application status could not be changed. Try again.';
   }
 
   private errorMessage(error: unknown): string {
