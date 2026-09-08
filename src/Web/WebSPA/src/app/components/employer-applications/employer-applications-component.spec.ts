@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatSelect } from '@angular/material/select';
 import { By } from '@angular/platform-browser';
 import { EmployerApplicationDto } from '../../core/models/employer-application-dto';
 import { EmployerApplicationsComponent } from './employer-applications-component';
@@ -28,6 +29,11 @@ describe('EmployerApplicationsComponent', () => {
     expect(button).toBeDefined();
     button!.click(); fixture.detectChanges();
   };
+  const changeSelect = (index: number, value: string) => {
+    const select = fixture.debugElement.queryAll(By.directive(MatSelect))[index];
+    select.triggerEventHandler('selectionChange', { value });
+    fixture.detectChanges();
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -53,6 +59,61 @@ describe('EmployerApplicationsComponent', () => {
     expect(link.target).toBe('_blank');
     expect(link.rel).toBe('noopener noreferrer');
     expect(fixture.nativeElement.querySelector('mat-card mat-select')).toBeNull();
+    expect(content()).toContain('Move to interview');
+    expect(content()).toContain('Accept');
+    expect(content()).toContain('Reject');
+    expect(content()).not.toContain('Move to review');
+  });
+
+  it('offers only valid first and terminal status transitions', () => {
+    respond([
+      item({ id: 'submitted', status: 'Submitted' }),
+      item({ id: 'accepted', status: 'Accepted' }),
+    ]);
+    const cards = Array.from(fixture.nativeElement.querySelectorAll('mat-card')) as HTMLElement[];
+    expect(cards[0].textContent).toContain('Move to review');
+    expect(cards[0].textContent).toContain('Reject');
+    expect(cards[0].textContent).not.toContain('Accept');
+    expect(cards[1].textContent).toContain('reached a final status');
+    expect(cards[1].querySelector('button')).toBeNull();
+  });
+
+  it('prevents duplicate changes and reloads the current job after success', () => {
+    respond([item({ status: 'Submitted' })]);
+    click('Move to review');
+    const request = http.expectOne('/api/applications/application-1/status');
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual({ status: 'InReview' });
+    const action = (Array.from(
+      fixture.nativeElement.querySelectorAll('button'),
+    ) as HTMLButtonElement[]).find(button => button.textContent?.trim() === 'Move to review')!;
+    expect(action.disabled).toBe(true);
+    expect(fixture.nativeElement.querySelector('mat-card mat-progress-bar')).not.toBeNull();
+    action.click();
+    http.expectNone('/api/applications/application-1/status');
+
+    request.flush(null, { status: 204, statusText: 'No Content' });
+    fixture.detectChanges();
+    expect(content()).toContain('Loading applications');
+    respond([item({ status: 'InReview' })]);
+    expect(content()).toContain('Status: In review');
+  });
+
+  it('shows a safe status error and allows a deliberate retry', () => {
+    respond([item({ status: 'Interview' })]);
+    click('Accept');
+    http.expectOne('/api/applications/application-1/status').flush(
+      { detail: 'PRIVATE SERVER DETAIL' }, { status: 409, statusText: 'Conflict' },
+    );
+    fixture.detectChanges();
+    expect(content()).toContain('changed. Refresh the list and try again');
+    expect(content()).not.toContain('PRIVATE SERVER DETAIL');
+    click('Accept');
+    http.expectOne('/api/applications/application-1/status').flush(
+      null, { status: 204, statusText: 'No Content' },
+    );
+    respond([item({ status: 'Accepted' })]);
+    expect(content()).toContain('reached a final status');
   });
 
   it('renders all CV absence states and null details without fabricated links', () => {
@@ -119,6 +180,28 @@ describe('EmployerApplicationsComponent', () => {
     respond([], 1, url(job, 2));
     expect(content()).toContain('no applications on this page');
     click('Back to first page'); respond();
+  });
+
+  it('filters, sorts, resets pagination and cancels stale requests', () => {
+    respond([item()], 100);
+    const paginator = fixture.debugElement.query(By.directive(MatPaginator)).componentInstance as MatPaginator;
+    paginator.page.emit({ pageIndex: 1, pageSize: 20, length: 100 });
+    const oldPage = http.expectOne(url(job, 2));
+
+    changeSelect(0, 'Interview');
+    expect(oldPage.cancelled).toBe(true);
+    const oldFilter = http.expectOne(`${url()}&status=Interview`);
+    changeSelect(1, 'UpdatedAtUtc');
+    expect(oldFilter.cancelled).toBe(true);
+    const oldSort = http.expectOne(`${url()}&status=Interview&sortBy=UpdatedAtUtc`);
+    changeSelect(2, 'Asc');
+    expect(oldSort.cancelled).toBe(true);
+    http.expectOne(`${url()}&status=Interview&sortBy=UpdatedAtUtc&sortDirection=Asc`).flush({
+      items: [], totalCount: 0, pageNumber: 1, pageSize: 20,
+    });
+    fixture.detectChanges();
+    expect(content()).toContain('No applications match this status.');
+    expect(content()).not.toContain('No applications for this job yet.');
   });
 
   it('resets pagination and cancels the previous job when the input changes', () => {

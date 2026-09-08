@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatSelect } from '@angular/material/select';
 
 import { ApplicationListItemDto, ApplicationStatus } from '../../core/models/application-list-item-dto';
 import { CandidateApplicationsComponent } from './candidate-applications-component';
@@ -21,6 +22,11 @@ describe('CandidateApplicationsComponent', () => {
     const button = buttons.find(button => button.textContent?.trim() === label);
     expect(button).toBeDefined();
     button!.click();
+    fixture.detectChanges();
+  };
+  const changeSelect = (index: number, value: string) => {
+    const select = fixture.debugElement.queryAll(By.directive(MatSelect))[index];
+    select.triggerEventHandler('selectionChange', { value });
     fixture.detectChanges();
   };
 
@@ -53,7 +59,7 @@ describe('CandidateApplicationsComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('mat-card').length).toBe(5);
     expect(fixture.nativeElement.querySelector('time').getAttribute('datetime')).toBe(item().submittedAtUtc);
     expect(fixture.nativeElement.querySelector('section').getAttribute('aria-busy')).toBe('false');
-    expect(fixture.nativeElement.querySelector('select')).toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('.filters mat-select').length).toBe(3);
   });
 
   it('distinguishes no applications from an error', () => {
@@ -127,6 +133,33 @@ describe('CandidateApplicationsComponent', () => {
     const current = fixture.debugElement.query(By.directive(MatPaginator)).componentInstance as MatPaginator;
     expect(current.pageSize).toBe(50);
     expect(current.pageIndex).toBe(0);
+  });
+
+  it('filters, sorts, resets pagination and cancels stale requests', () => {
+    http.expectOne(firstUrl).flush({ items: [item()], totalCount: 100, pageNumber: 1, pageSize: 20 });
+    fixture.detectChanges();
+    const paginator = fixture.debugElement.query(By.directive(MatPaginator)).componentInstance as MatPaginator;
+    paginator.page.emit({ pageIndex: 1, pageSize: 20, length: 100 });
+    const oldPage = http.expectOne('/api/applications/me?pageNumber=2&pageSize=20');
+
+    changeSelect(0, 'Rejected');
+    expect(oldPage.cancelled).toBe(true);
+    const oldFilter = http.expectOne(
+      '/api/applications/me?pageNumber=1&pageSize=20&status=Rejected',
+    );
+    changeSelect(1, 'UpdatedAtUtc');
+    expect(oldFilter.cancelled).toBe(true);
+    const oldSort = http.expectOne(
+      '/api/applications/me?pageNumber=1&pageSize=20&status=Rejected&sortBy=UpdatedAtUtc',
+    );
+    changeSelect(2, 'Asc');
+    expect(oldSort.cancelled).toBe(true);
+    http.expectOne(
+      '/api/applications/me?pageNumber=1&pageSize=20&status=Rejected&sortBy=UpdatedAtUtc&sortDirection=Asc',
+    ).flush({ items: [], totalCount: 0, pageNumber: 1, pageSize: 20 });
+    fixture.detectChanges();
+    expect(content()).toContain('No applications match this status.');
+    expect(content()).not.toContain('You have not submitted any applications yet.');
   });
 
   it('cancels pending HTTP work when destroyed', () => {

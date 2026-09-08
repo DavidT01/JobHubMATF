@@ -1,6 +1,8 @@
 :host { display: block; }
 section { max-width: 76rem; margin: 0 auto; padding: 1.5rem; }
 header { margin-bottom: 1.5rem; }
+.filters { display: flex; flex-wrap: wrap; gap: 1rem; align-items: start; }
+.filters mat-form-field { flex: 1 1 12rem; }
 .applications { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: 1rem; }
 li, mat-card { min-width: 0; }
 mat-card { height: 100%; }
@@ -13,5 +15,9 @@ dt { font-weight: 500; }
 dd { margin: .25rem 0 0; }
 .identifier, .cover-letter { overflow-wrap: anywhere; }
 .cover-letter { white-space: pre-wrap; }
+.status-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+.terminal-status { color: var(--mat-sys-on-surface-variant); margin: 1rem 0 0; }
+.status-error { color: var(--mat-sys-error); margin-bottom: 0; }
+.status-actions + mat-progress-bar { margin-top: .75rem; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 mat-paginator { margin-top: 1rem; }

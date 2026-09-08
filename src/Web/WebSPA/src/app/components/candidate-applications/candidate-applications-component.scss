@@ -9,6 +9,8 @@ section {
 header { margin-bottom: 1.5rem; }
 h1 { margin-top: 0; }
 h2 { font: inherit; margin: 0; overflow-wrap: anywhere; }
+.filters { display: flex; flex-wrap: wrap; gap: 1rem; align-items: start; }
+.filters mat-form-field { flex: 1 1 12rem; }
 
 .applications {
   display: grid;

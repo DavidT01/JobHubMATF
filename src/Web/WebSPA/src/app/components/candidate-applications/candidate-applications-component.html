@@ -5,6 +5,32 @@
     <p>Track the status of your job applications.</p>
   </header>
 
+  <div class="filters" role="group" aria-label="Application filters and sorting">
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select [value]="currentPage().status ?? ''" (selectionChange)="changeStatusFilter($event.value)">
+        <mat-option value="">All statuses</mat-option>
+        @for (status of statuses; track status) {
+          <mat-option [value]="status">{{ statusLabel(status) }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Sort by</mat-label>
+      <mat-select [value]="currentPage().sortBy ?? 'SubmittedAtUtc'" (selectionChange)="changeSortBy($event.value)">
+        <mat-option value="SubmittedAtUtc">Submitted date</mat-option>
+        <mat-option value="UpdatedAtUtc">Last updated</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Direction</mat-label>
+      <mat-select [value]="currentPage().sortDirection ?? 'Desc'" (selectionChange)="changeSortDirection($event.value)">
+        <mat-option value="Desc">Newest first</mat-option>
+        <mat-option value="Asc">Oldest first</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
   @if (view.kind === 'loading') {
     <div role="status">
       <p>Loading applications...</p>
@@ -20,7 +46,9 @@
   } @else {
     @if (view.result.items.length === 0) {
       <p role="status">
-        {{ view.result.totalCount === 0 ? 'You have not submitted any applications yet.' : 'There are no applications on this page.' }}
+        {{ view.result.totalCount === 0
+          ? (hasStatusFilter(view.page) ? 'No applications match this status.' : 'You have not submitted any applications yet.')
+          : 'There are no applications on this page.' }}
       </p>
       @if (view.page.pageIndex > 0) {
         <button mat-stroked-button type="button" (click)="firstPage()">Back to first page</button>

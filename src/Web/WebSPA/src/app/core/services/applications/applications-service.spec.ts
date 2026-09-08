@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { ApplicationListItemDto, PagedResult } from '../../models/application-list-item-dto';
+import { ApplicationStatisticsDto } from '../../models/application-management-dto';
 import { CurrentCvStatus, EmployerApplicationDto } from '../../models/employer-application-dto';
 import { APPLICATIONS_API_URL, ApplicationsService } from './applications-service';
 
@@ -141,6 +142,54 @@ describe('ApplicationsService', () => {
     service.getMyApplications(4, 10).subscribe(result => actual = result);
 
     http.expectOne('/api/applications/me?pageNumber=4&pageSize=10').flush(response);
+    expect(actual).toEqual(response);
+  });
+
+  it('passes whitelisted application filters and sorting to list endpoints', () => {
+    const options = { status: 'InReview', sortBy: 'UpdatedAtUtc', sortDirection: 'Asc' } as const;
+    service.getForJob('aaaaaaaaaaaaaaaaaaaaaaaa', 2, 10, options).subscribe();
+    http.expectOne(request => request.url === '/api/applications/jobs/aaaaaaaaaaaaaaaaaaaaaaaa'
+      && request.params.get('pageNumber') === '2'
+      && request.params.get('pageSize') === '10'
+      && request.params.get('status') === 'InReview'
+      && request.params.get('sortBy') === 'UpdatedAtUtc'
+      && request.params.get('sortDirection') === 'Asc').flush({});
+
+    service.getMyApplications(3, 5, options).subscribe();
+    http.expectOne(request => request.url === '/api/applications/me'
+      && request.params.get('pageNumber') === '3'
+      && request.params.get('pageSize') === '5'
+      && request.params.get('status') === 'InReview'
+      && request.params.get('sortBy') === 'UpdatedAtUtc'
+      && request.params.get('sortDirection') === 'Asc').flush({});
+  });
+
+  it('changes one application status without supplying company identity', () => {
+    service.changeStatus('application/id?', 'Interview').subscribe();
+
+    const request = http.expectOne('/api/applications/application%2Fid%3F/status');
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual({ status: 'Interview' });
+    request.flush(null, { status: 204, statusText: 'No Content' });
+  });
+
+  it('requests admin statistics with an optional inclusive period', () => {
+    const response: ApplicationStatisticsDto = {
+      totalCount: 2,
+      from: '2026-09-01',
+      to: '2026-09-02',
+      byStatus: [{ status: 'Submitted', count: 2, ratePercent: 100 }],
+      dailyTrend: [{ date: '2026-09-01', count: 2 }],
+    };
+    let actual: ApplicationStatisticsDto | undefined;
+    service.getStatistics({ from: '2026-09-01', to: '2026-09-02' })
+      .subscribe(result => actual = result);
+
+    const request = http.expectOne(
+      '/api/applications/statistics?from=2026-09-01&to=2026-09-02',
+    );
+    expect(request.request.method).toBe('GET');
+    request.flush(response);
     expect(actual).toEqual(response);
   });
 

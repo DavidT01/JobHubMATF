@@ -2,7 +2,16 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable, InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { ApplicationListItemDto, PagedResult } from '../../models/application-list-item-dto';
+import {
+  ApplicationListItemDto,
+  ApplicationStatus,
+  PagedResult,
+} from '../../models/application-list-item-dto';
+import {
+  ApplicationListOptions,
+  ApplicationStatisticsDto,
+  ApplicationStatisticsPeriod,
+} from '../../models/application-management-dto';
 import { EmployerApplicationDto } from '../../models/employer-application-dto';
 import { SubmitApplicationRequest } from '../../models/submit-application-request';
 
@@ -29,8 +38,9 @@ export class ApplicationsService {
     jobId: string,
     pageNumber = 1,
     pageSize = 20,
+    options: ApplicationListOptions = {},
   ): Observable<PagedResult<EmployerApplicationDto>> {
-    const params = new HttpParams().set('pageNumber', pageNumber).set('pageSize', pageSize);
+    const params = this.listParams(pageNumber, pageSize, options);
 
     return this.http.get<PagedResult<EmployerApplicationDto>>(
       `${this.api}/jobs/${encodeURIComponent(jobId)}`, { params },
@@ -40,9 +50,34 @@ export class ApplicationsService {
   getMyApplications(
     pageNumber = 1,
     pageSize = 20,
+    options: ApplicationListOptions = {},
   ): Observable<PagedResult<ApplicationListItemDto>> {
-    const params = new HttpParams().set('pageNumber', pageNumber).set('pageSize', pageSize);
+    const params = this.listParams(pageNumber, pageSize, options);
 
     return this.http.get<PagedResult<ApplicationListItemDto>>(`${this.api}/me`, { params });
+  }
+
+  changeStatus(applicationId: string, status: ApplicationStatus): Observable<void> {
+    return this.http.put<void>(`${this.api}/${encodeURIComponent(applicationId)}/status`, { status });
+  }
+
+  getStatistics(period: ApplicationStatisticsPeriod = {}): Observable<ApplicationStatisticsDto> {
+    let params = new HttpParams();
+    if (period.from) params = params.set('from', period.from);
+    if (period.to) params = params.set('to', period.to);
+
+    return this.http.get<ApplicationStatisticsDto>(`${this.api}/statistics`, { params });
+  }
+
+  private listParams(
+    pageNumber: number,
+    pageSize: number,
+    options: ApplicationListOptions,
+  ): HttpParams {
+    let params = new HttpParams().set('pageNumber', pageNumber).set('pageSize', pageSize);
+    if (options.status) params = params.set('status', options.status);
+    if (options.sortBy) params = params.set('sortBy', options.sortBy);
+    if (options.sortDirection) params = params.set('sortDirection', options.sortDirection);
+    return params;
   }
 }
