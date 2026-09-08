@@ -1,6 +1,8 @@
 using Catalog.Data;
 using Catalog.Repositories;
 using System.Text.Json.Serialization;
+using Catalog.Clients;
+using Catalog.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,18 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(builder.Configuration["Cors:AllowedOrigin"]!)
         .AllowAnyHeader()
         .AllowAnyMethod());
+});
+
+builder.Services.AddHttpClient<IProfileApiClient, ProfileApiClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProfileApi"]!);
+});
+
+builder.Services.AddScoped<IMatchingService,MatchingService>();
+builder.Services.AddScoped<IBookmarkRepository,BookmarkRepository>();
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration["RedisSettings:ConnectionString"];
 });
 
 var app = builder.Build();

@@ -5,5 +5,6 @@ namespace Catalog.Data;
 
 public interface ICatalogContext
 {
-    IMongoCollection<Job> Jobs { get; }   
+    IMongoCollection<Job> Jobs { get; }
+    IMongoCollection<Bookmark>  Bookmarks { get; }
 }
