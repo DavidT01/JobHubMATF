@@ -111,7 +111,9 @@ public static class DependencyInjection
             .AddPolicy(AuthorizationPolicies.Candidate,
                 policy => policy.RequireAuthenticatedUser().RequireRole(JobHubRoles.Candidate))
             .AddPolicy(AuthorizationPolicies.Employer,
-                policy => policy.RequireAuthenticatedUser().RequireRole(JobHubRoles.Employer));
+                policy => policy.RequireAuthenticatedUser().RequireRole(JobHubRoles.Employer))
+            .AddPolicy(AuthorizationPolicies.Admin,
+                policy => policy.RequireAuthenticatedUser().RequireRole(JobHubRoles.Admin));
 
         return services;
     }

@@ -2,6 +2,7 @@ using ApplicationService.Application.DTOs;
 using ApplicationService.Application.Commands;
 using ApplicationService.Application.Queries;
 using ApplicationService.Infrastructure.Authorization;
+using ApplicationService.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,21 @@ namespace ApplicationService.Controllers;
 [Route("api/applications")]
 public sealed class ApplicationsController(ISender sender) : ControllerBase
 {
+    [HttpGet("statistics")]
+    [Authorize(Policy = AuthorizationPolicies.Admin)]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType(typeof(ApplicationStatisticsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<ApplicationStatisticsDto>> GetStatistics(
+        CancellationToken cancellationToken,
+        [FromQuery] DateOnly? from = null,
+        [FromQuery] DateOnly? to = null)
+    {
+        return Ok(await sender.Send(new GetApplicationStatisticsQuery(from, to), cancellationToken));
+    }
+
     [HttpPut("{applicationId:guid}/status")]
     [Authorize(Policy = AuthorizationPolicies.Employer)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -38,9 +54,17 @@ public sealed class ApplicationsController(ISender sender) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
     public async Task<ActionResult<PagedResult<EmployerApplicationDto>>> GetForJob(
-        string jobId, CancellationToken cancellationToken, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+        string jobId,
+        CancellationToken cancellationToken,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] ApplicationStatus? status = null,
+        [FromQuery] ApplicationSortBy sortBy = ApplicationSortBy.SubmittedAtUtc,
+        [FromQuery] SortDirection sortDirection = SortDirection.Desc)
     {
-        return Ok(await sender.Send(new GetEmployerApplicationsQuery(jobId, pageNumber, pageSize), cancellationToken));
+        return Ok(await sender.Send(
+            new GetEmployerApplicationsQuery(jobId, pageNumber, pageSize, status, sortBy, sortDirection),
+            cancellationToken));
     }
 
     [HttpPost]
@@ -67,8 +91,15 @@ public sealed class ApplicationsController(ISender sender) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
     public async Task<ActionResult<PagedResult<ApplicationListItemDto>>> GetMyApplications(
-        CancellationToken cancellationToken, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+        CancellationToken cancellationToken,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] ApplicationStatus? status = null,
+        [FromQuery] ApplicationSortBy sortBy = ApplicationSortBy.SubmittedAtUtc,
+        [FromQuery] SortDirection sortDirection = SortDirection.Desc)
     {
-        return Ok(await sender.Send(new GetCandidateApplicationsQuery(pageNumber, pageSize), cancellationToken));
+        return Ok(await sender.Send(
+            new GetCandidateApplicationsQuery(pageNumber, pageSize, status, sortBy, sortDirection),
+            cancellationToken));
     }
 }

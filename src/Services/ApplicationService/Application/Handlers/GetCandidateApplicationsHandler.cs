@@ -40,6 +40,8 @@ public sealed class GetCandidateApplicationsHandler(
             throw new RequestValidationException(errors);
         }
 
+        ApplicationQueryOptions.Validate(request.Status, request.SortBy, request.SortDirection);
+
         var userId = currentUser.UserId;
         if (!currentUser.IsAuthenticated || string.IsNullOrWhiteSpace(userId))
         {
@@ -51,10 +53,14 @@ public sealed class GetCandidateApplicationsHandler(
 
         var applications = dbContext.JobApplications.AsNoTracking()
             .Where(application => application.CandidateId == profile.Id);
+        if (request.Status.HasValue)
+        {
+            applications = applications.Where(application => application.Status == request.Status.Value);
+        }
+
         var totalCount = await applications.CountAsync(cancellationToken);
-        var items = await applications
-            .OrderByDescending(application => application.SubmittedAtUtc)
-            .ThenBy(application => application.Id)
+        var items = await ApplicationQueryOptions.ApplyOrdering(
+                applications, request.SortBy, request.SortDirection)
             .Skip((int)offset)
             .Take(request.PageSize)
             .Select(application => new ApplicationListItemDto(

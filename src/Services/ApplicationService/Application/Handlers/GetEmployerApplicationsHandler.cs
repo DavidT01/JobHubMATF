@@ -29,14 +29,20 @@ public sealed class GetEmployerApplicationsHandler(
         var offset = ((long)request.PageNumber - 1) * request.PageSize;
         if (offset > int.MaxValue) errors["pageNumber"] = ["Requested page is too large."];
         if (errors.Count > 0) throw new RequestValidationException(errors);
+        ApplicationQueryOptions.Validate(request.Status, request.SortBy, request.SortDirection);
 
         var jobId = request.JobId.ToLowerInvariant();
         // No applications or candidate profiles are read until company ownership is established.
         await ownership.EnsureOwnedAsync(jobId, cancellationToken);
         var query = dbContext.JobApplications.AsNoTracking().Where(application => application.JobId == jobId);
+        if (request.Status.HasValue)
+        {
+            query = query.Where(application => application.Status == request.Status.Value);
+        }
+
         var total = await query.CountAsync(cancellationToken);
-        var rows = await query.OrderByDescending(application => application.SubmittedAtUtc)
-            .ThenBy(application => application.Id).Skip((int)offset).Take(request.PageSize)
+        var rows = await ApplicationQueryOptions.ApplyOrdering(query, request.SortBy, request.SortDirection)
+            .Skip((int)offset).Take(request.PageSize)
             .ToListAsync(cancellationToken);
         var items = new EmployerApplicationDto[rows.Count];
         await Parallel.ForEachAsync(Enumerable.Range(0, rows.Count),
