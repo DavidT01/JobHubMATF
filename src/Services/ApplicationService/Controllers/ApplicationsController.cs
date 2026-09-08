@@ -13,6 +13,21 @@ namespace ApplicationService.Controllers;
 [Route("api/applications")]
 public sealed class ApplicationsController(ISender sender) : ControllerBase
 {
+    [HttpGet("statistics")]
+    [Authorize(Policy = AuthorizationPolicies.Admin)]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType(typeof(ApplicationStatisticsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<ApplicationStatisticsDto>> GetStatistics(
+        CancellationToken cancellationToken,
+        [FromQuery] DateOnly? from = null,
+        [FromQuery] DateOnly? to = null)
+    {
+        return Ok(await sender.Send(new GetApplicationStatisticsQuery(from, to), cancellationToken));
+    }
+
     [HttpPut("{applicationId:guid}/status")]
     [Authorize(Policy = AuthorizationPolicies.Employer)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
