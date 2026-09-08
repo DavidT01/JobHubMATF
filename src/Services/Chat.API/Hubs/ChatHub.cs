@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 
 namespace Chat.API.Hubs
 {
-    [Authorize(Roles = "Candidate,Employer,Admin")]
+    [Authorize]
     public class ChatHub : Hub
     {
         private readonly ChatService _chatService;
@@ -17,24 +17,33 @@ namespace Chat.API.Hubs
             _chatService = chatService;
         }
 
+        private string? GetUserIdFromClaims()
+        {
+            var user = Context.User;
+            if (user == null) return null;
+
+            // Proveravamo sve standardne claim-ove koji mogu nositi korisnički ID
+            return user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? user.FindFirst("sub")?.Value
+                ?? user.FindFirst("id")?.Value
+                ?? user.FindFirst("userId")?.Value
+                ?? user.FindFirst(ClaimTypes.Name)?.Value;
+        }
+
         public async Task SendMessage(string reciverId, string message)
         {
-            // 1. Izvlačenje senderId iz JWT tokena ili Query-ja
-            var senderId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                        ?? Context.User?.FindFirst("sub")?.Value
-                        ?? Context.User?.FindFirst("nameid")?.Value
-                        ?? Context.GetHttpContext()?.Request.Query["userId"].ToString();
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+
+            var senderId = GetUserIdFromClaims();
 
             if (string.IsNullOrEmpty(senderId))
             {
-                // Fallback na default vrednost za testiranje ako nema tokena
-                senderId = "user1";
+                throw new HubException("Korisnik nije autentifikovan.");
             }
 
-            // 2. Čuvanje u MongoDB bazi preko ChatService-a
             var savedMessage = await _chatService.SendMessageAsync(senderId, reciverId, message);
 
-            // 3. Slanje primaocu (ako je povezan)
             if (_connections.TryGetValue(reciverId, out var receiverConnection))
             {
                 await Clients.Client(receiverConnection).SendAsync("ReceiveMessage",
@@ -44,7 +53,6 @@ namespace Chat.API.Hubs
                     savedMessage.Timestamp);
             }
 
-            // 4. Slanje nazad pošiljaocu za potvrdu
             if (_connections.TryGetValue(senderId, out var senderConnection) && senderConnection != receiverConnection)
             {
                 await Clients.Client(senderConnection).SendAsync("ReceiveMessage",
@@ -57,11 +65,7 @@ namespace Chat.API.Hubs
 
         public override Task OnConnectedAsync()
         {
-            // Detekcija ID-ja iz JWT tokena ili query string-a pri spajanju
-            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                      ?? Context.User?.FindFirst("sub")?.Value
-                      ?? Context.User?.FindFirst("nameid")?.Value
-                      ?? Context.GetHttpContext()?.Request.Query["userId"].ToString();
+            var userId = GetUserIdFromClaims();
 
             if (!string.IsNullOrEmpty(userId))
             {
@@ -73,11 +77,11 @@ namespace Chat.API.Hubs
 
         public override Task OnDisconnectedAsync(Exception? exception)
         {
-            var item = _connections.FirstOrDefault(x => x.Value == Context.ConnectionId);
+            var userId = GetUserIdFromClaims();
 
-            if (!string.IsNullOrEmpty(item.Key))
+            if (!string.IsNullOrEmpty(userId))
             {
-                _connections.TryRemove(item.Key, out _);
+                _connections.TryRemove(userId, out _);
             }
 
             return base.OnDisconnectedAsync(exception);
