@@ -1,0 +1,47 @@
+.details-card {
+  max-width: 700px;
+  margin: 16px auto;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+
+  ::ng-deep .chip-primary {
+    background-color: var(--mat-sys-primary-container) !important;
+    .mdc-evolution-chip__text-label {
+      color: var(--mat-sys-on-primary-container) !important;
+    }
+  }
+
+  ::ng-deep .chip-tertiary {
+    background-color: var(--mat-sys-tertiary-container) !important;
+    .mdc-evolution-chip__text-label {
+      color: var(--mat-sys-on-tertiary-container) !important;
+    }
+  }
+}
+
+.salary {
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+.error {
+  color: var(--mat-sys-error);
+  padding: 16px;
+}
+
+mat-card-actions {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+}

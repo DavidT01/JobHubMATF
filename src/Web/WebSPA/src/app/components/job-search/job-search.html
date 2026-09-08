@@ -1,0 +1,80 @@
+<div class="search-form">
+  <mat-form-field appearance="outline" class="query-field">
+    <mat-label>Pretraga (naslov, opis, kompanija)</mat-label>
+    <input matInput
+      [ngModel]="query()"
+      (ngModelChange)="query.set($event)"
+      (keyup.enter)="onSearch()"
+      placeholder="npr. React developer" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Tip posla</mat-label>
+    <mat-select [ngModel]="jobType()" (ngModelChange)="jobType.set($event)">
+      <mat-option value="">Svi</mat-option>
+      @for (type of jobTypes; track type) {
+        <mat-option [value]="type">{{ type }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Iskustvo</mat-label>
+    <mat-select [ngModel]="experienceLevel()" (ngModelChange)="experienceLevel.set($event)">
+      <mat-option value="">Svi</mat-option>
+      @for (level of experienceLevels; track level) {
+        <mat-option [value]="level">{{ level }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Način rada</mat-label>
+    <mat-select [ngModel]="workMode()" (ngModelChange)="workMode.set($event)">
+      <mat-option value="">Svi</mat-option>
+      @for (mode of workModes; track mode) {
+        <mat-option [value]="mode">{{ mode }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Grad</mat-label>
+    <input matInput
+      [ngModel]="city()"
+      (ngModelChange)="city.set($event)"
+      placeholder="npr. Beograd" />
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-raised-button color="primary" (click)="onSearch()">Pretraži</button>
+    <button mat-stroked-button (click)="onReset()">Resetuj</button>
+  </div>
+</div>
+
+@if (loading()) {
+  <p>Pretraga u toku...</p>
+} @else if (searched() && results().length === 0) {
+  <p>Nema rezultata za zadatu pretragu.</p>
+} @else if (results().length > 0) {
+  <div class="job-grid">
+    @for (job of results(); track job.id) {
+      <mat-card class="job-card" (click)="openDetails(job.id)">
+        <mat-card-header>
+          <mat-card-title>{{ job.title }}</mat-card-title>
+          <mat-card-subtitle>{{ job.companyName }} — {{ job.city }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chips">
+            <mat-chip class="chip-primary">{{ job.jobType }}</mat-chip>
+            <mat-chip class="chip-tertiary">{{ job.experienceLevel }}</mat-chip>
+            <mat-chip class="chip-primary">{{ job.workMode }}</mat-chip>
+          </div>
+          @if (job.salaryMin && job.salaryMax) {
+            <p class="salary">{{ job.salaryMin }} - {{ job.salaryMax }} {{ job.currency }}</p>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+}
