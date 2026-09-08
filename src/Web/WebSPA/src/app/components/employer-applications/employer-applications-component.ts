@@ -4,15 +4,25 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, OnChange
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
 import { BehaviorSubject, catchError, map, of, startWith, switchMap } from 'rxjs';
 
 import { ApplicationStatus, PagedResult } from '../../core/models/application-list-item-dto';
+import { ApplicationSortBy, SortDirection } from '../../core/models/application-management-dto';
 import { EmployerApplicationDto } from '../../core/models/employer-application-dto';
 import { ApplicationsService } from '../../core/services/applications/applications-service';
 
-interface Query { jobId: string; pageIndex: number; pageSize: number; }
+interface Query {
+  jobId: string;
+  pageIndex: number;
+  pageSize: number;
+  status?: ApplicationStatus;
+  sortBy?: ApplicationSortBy;
+  sortDirection?: SortDirection;
+}
 type ViewState =
   | { kind: 'invalid' }
   | { kind: 'loading'; query: Query }
@@ -29,7 +39,8 @@ const STATUS_TRANSITIONS: Readonly<Record<ApplicationStatus, readonly Applicatio
 
 @Component({
   selector: 'app-employer-applications',
-  imports: [DatePipe, MatButtonModule, MatCardModule, MatPaginatorModule, MatProgressBarModule],
+  imports: [DatePipe, MatButtonModule, MatCardModule, MatFormFieldModule, MatPaginatorModule,
+    MatProgressBarModule, MatSelectModule],
   templateUrl: './employer-applications-component.html',
   styleUrl: './employer-applications-component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,10 +52,14 @@ export class EmployerApplicationsComponent implements OnChanges {
   private readonly queries = new BehaviorSubject<Query | null>(null);
   private readonly updating = signal<Readonly<Record<string, boolean>>>({});
   private readonly updateErrors = signal<Readonly<Record<string, string>>>({});
+  protected readonly statuses: readonly ApplicationStatus[] =
+    ['Submitted', 'InReview', 'Interview', 'Rejected', 'Accepted'];
 
   protected readonly state = toSignal(this.queries.pipe(
     switchMap(query => query === null ? of<ViewState>({ kind: 'invalid' }) :
-      this.applications.getForJob(query.jobId, query.pageIndex + 1, query.pageSize).pipe(
+      this.applications.getForJob(query.jobId, query.pageIndex + 1, query.pageSize, {
+        status: query.status, sortBy: query.sortBy, sortDirection: query.sortDirection,
+      }).pipe(
         map((result): ViewState => ({ kind: 'loaded', query, result })),
         catchError((error: unknown) => of<ViewState>({
           kind: 'error', query, message: this.errorMessage(error),
@@ -91,6 +106,26 @@ export class EmployerApplicationsComponent implements OnChanges {
       Rejected: 'Rejected', Accepted: 'Accepted' } as Record<ApplicationStatus, string>)[status] ?? 'Unknown status';
   }
 
+  protected currentQuery(): Query | null {
+    return this.queries.value;
+  }
+
+  protected changeStatusFilter(status: ApplicationStatus | ''): void {
+    this.changeFilters({ status: status || undefined });
+  }
+
+  protected changeSortBy(sortBy: ApplicationSortBy): void {
+    this.changeFilters({ sortBy });
+  }
+
+  protected changeSortDirection(sortDirection: SortDirection): void {
+    this.changeFilters({ sortDirection });
+  }
+
+  protected hasStatusFilter(query: Query): boolean {
+    return query.status !== undefined;
+  }
+
   protected statusActions(status: ApplicationStatus): readonly ApplicationStatus[] {
     return STATUS_TRANSITIONS[status] ?? [];
   }
@@ -135,6 +170,11 @@ export class EmployerApplicationsComponent implements OnChanges {
       else delete next[applicationId];
       return next;
     });
+  }
+
+  private changeFilters(changes: Partial<Query>): void {
+    const query = this.queries.value;
+    if (query) this.queries.next({ ...query, ...changes, pageIndex: 0 });
   }
 
   private setUpdateError(applicationId: string, message: string | null): void {

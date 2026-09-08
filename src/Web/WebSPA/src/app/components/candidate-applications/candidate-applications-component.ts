@@ -4,14 +4,23 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
 import { BehaviorSubject, catchError, map, of, startWith, switchMap } from 'rxjs';
 
 import { ApplicationListItemDto, ApplicationStatus, PagedResult } from '../../core/models/application-list-item-dto';
+import { ApplicationSortBy, SortDirection } from '../../core/models/application-management-dto';
 import { ApplicationsService } from '../../core/services/applications/applications-service';
 
-interface PageRequest { pageIndex: number; pageSize: number; }
+interface PageRequest {
+  pageIndex: number;
+  pageSize: number;
+  status?: ApplicationStatus;
+  sortBy?: ApplicationSortBy;
+  sortDirection?: SortDirection;
+}
 type ViewState =
   | { kind: 'loading'; page: PageRequest }
   | { kind: 'loaded'; page: PageRequest; result: PagedResult<ApplicationListItemDto> }
@@ -19,7 +28,8 @@ type ViewState =
 
 @Component({
   selector: 'app-candidate-applications',
-  imports: [DatePipe, MatButtonModule, MatCardModule, MatPaginatorModule, MatProgressBarModule],
+  imports: [DatePipe, MatButtonModule, MatCardModule, MatFormFieldModule, MatPaginatorModule,
+    MatProgressBarModule, MatSelectModule],
   templateUrl: './candidate-applications-component.html',
   styleUrl: './candidate-applications-component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,9 +37,13 @@ type ViewState =
 export class CandidateApplicationsComponent {
   private readonly applications = inject(ApplicationsService);
   private readonly pages = new BehaviorSubject<PageRequest>({ pageIndex: 0, pageSize: 20 });
+  protected readonly statuses: readonly ApplicationStatus[] =
+    ['Submitted', 'InReview', 'Interview', 'Rejected', 'Accepted'];
 
   protected readonly state = toSignal(this.pages.pipe(
-    switchMap(page => this.applications.getMyApplications(page.pageIndex + 1, page.pageSize).pipe(
+    switchMap(page => this.applications.getMyApplications(page.pageIndex + 1, page.pageSize, {
+      status: page.status, sortBy: page.sortBy, sortDirection: page.sortDirection,
+    }).pipe(
       map((result): ViewState => ({ kind: 'loaded', page, result })),
       catchError((error: unknown) => of<ViewState>({
         kind: 'error', page,
@@ -49,7 +63,27 @@ export class CandidateApplicationsComponent {
   }
 
   protected firstPage(): void {
-    this.pages.next({ pageIndex: 0, pageSize: this.pages.value.pageSize });
+    this.pages.next({ ...this.pages.value, pageIndex: 0 });
+  }
+
+  protected currentPage(): PageRequest {
+    return this.pages.value;
+  }
+
+  protected changeStatusFilter(status: ApplicationStatus | ''): void {
+    this.changeFilters({ status: status || undefined });
+  }
+
+  protected changeSortBy(sortBy: ApplicationSortBy): void {
+    this.changeFilters({ sortBy });
+  }
+
+  protected changeSortDirection(sortDirection: SortDirection): void {
+    this.changeFilters({ sortDirection });
+  }
+
+  protected hasStatusFilter(page: PageRequest): boolean {
+    return page.status !== undefined;
   }
 
   protected statusLabel(status: ApplicationStatus): string {
@@ -58,6 +92,10 @@ export class CandidateApplicationsComponent {
       Rejected: 'Rejected', Accepted: 'Accepted',
     };
     return labels[status] ?? 'Unknown status';
+  }
+
+  private changeFilters(changes: Partial<PageRequest>): void {
+    this.pages.next({ ...this.pages.value, ...changes, pageIndex: 0 });
   }
 
   private errorMessage(error: unknown): string {

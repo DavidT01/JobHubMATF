@@ -1,6 +1,8 @@
 :host { display: block; }
 section { max-width: 76rem; margin: 0 auto; padding: 1.5rem; }
 header { margin-bottom: 1.5rem; }
+.filters { display: flex; flex-wrap: wrap; gap: 1rem; align-items: start; }
+.filters mat-form-field { flex: 1 1 12rem; }
 .applications { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: 1rem; }
 li, mat-card { min-width: 0; }
 mat-card { height: 100%; }

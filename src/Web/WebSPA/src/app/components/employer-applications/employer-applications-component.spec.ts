@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatSelect } from '@angular/material/select';
 import { By } from '@angular/platform-browser';
 import { EmployerApplicationDto } from '../../core/models/employer-application-dto';
 import { EmployerApplicationsComponent } from './employer-applications-component';
@@ -27,6 +28,11 @@ describe('EmployerApplicationsComponent', () => {
     const button = buttons.find(button => button.textContent?.trim() === label);
     expect(button).toBeDefined();
     button!.click(); fixture.detectChanges();
+  };
+  const changeSelect = (index: number, value: string) => {
+    const select = fixture.debugElement.queryAll(By.directive(MatSelect))[index];
+    select.triggerEventHandler('selectionChange', { value });
+    fixture.detectChanges();
   };
 
   beforeEach(async () => {
@@ -174,6 +180,28 @@ describe('EmployerApplicationsComponent', () => {
     respond([], 1, url(job, 2));
     expect(content()).toContain('no applications on this page');
     click('Back to first page'); respond();
+  });
+
+  it('filters, sorts, resets pagination and cancels stale requests', () => {
+    respond([item()], 100);
+    const paginator = fixture.debugElement.query(By.directive(MatPaginator)).componentInstance as MatPaginator;
+    paginator.page.emit({ pageIndex: 1, pageSize: 20, length: 100 });
+    const oldPage = http.expectOne(url(job, 2));
+
+    changeSelect(0, 'Interview');
+    expect(oldPage.cancelled).toBe(true);
+    const oldFilter = http.expectOne(`${url()}&status=Interview`);
+    changeSelect(1, 'UpdatedAtUtc');
+    expect(oldFilter.cancelled).toBe(true);
+    const oldSort = http.expectOne(`${url()}&status=Interview&sortBy=UpdatedAtUtc`);
+    changeSelect(2, 'Asc');
+    expect(oldSort.cancelled).toBe(true);
+    http.expectOne(`${url()}&status=Interview&sortBy=UpdatedAtUtc&sortDirection=Asc`).flush({
+      items: [], totalCount: 0, pageNumber: 1, pageSize: 20,
+    });
+    fixture.detectChanges();
+    expect(content()).toContain('No applications match this status.');
+    expect(content()).not.toContain('No applications for this job yet.');
   });
 
   it('resets pagination and cancels the previous job when the input changes', () => {
