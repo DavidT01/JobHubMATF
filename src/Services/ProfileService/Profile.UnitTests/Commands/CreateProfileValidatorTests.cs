@@ -21,6 +21,46 @@ namespace Profile.UnitTests.Commands
         }
 
         [Fact]
+        public async Task CreateCandidateValidator_ValidCommand_HasNoErrors()
+        {
+            using var context = TestHelpers.CreateDbContext();
+            var result = await new CreateCandidateProfileCommandValidator(context).ValidateAsync(new CreateCandidateProfileCommand
+            {
+                UserId = "candidate-1",
+                FirstName = "Ana",
+                LastName = "Peric",
+                Email = "ana@example.com"
+            });
+
+            result.IsValid.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task CreateCandidateValidator_UserIdAlreadyExists_ReturnsError()
+        {
+            using var context = TestHelpers.CreateDbContext();
+            context.CandidateProfiles.Add(new Profile.API.Entities.CandidateProfile
+            {
+                UserId = "candidate-1",
+                FirstName = "Ana",
+                LastName = "Peric",
+                Email = "ana@example.com"
+            });
+            await context.SaveChangesAsync();
+
+            var result = await new CreateCandidateProfileCommandValidator(context).ValidateAsync(new CreateCandidateProfileCommand
+            {
+                UserId = "candidate-1",
+                FirstName = "Marko",
+                LastName = "Markovic",
+                Email = "marko@example.com"
+            });
+
+            result.IsValid.Should().BeFalse();
+            result.Errors.Should().Contain(error => error.PropertyName == nameof(CreateCandidateProfileCommand.UserId));
+        }
+
+        [Fact]
         public async Task CreateCompanyValidator_ValidCommand_HasNoErrors()
         {
             using var context = TestHelpers.CreateDbContext();

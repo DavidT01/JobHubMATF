@@ -36,6 +36,37 @@ namespace Profile.UnitTests.Commands
         }
 
         [Fact]
+        public async Task UploadCandidateCv_ExistingCv_DeletesPreviousFile()
+        {
+            using var context = TestHelpers.CreateDbContext();
+            var profile = new CandidateProfile { UserId = "candidate-1" };
+            context.CandidateProfiles.Add(profile);
+            await context.SaveChangesAsync();
+            using var root = TestHelpers.CreateTemporaryRoot();
+            var handler = new UploadCandidateCvCommandHandler(
+                context,
+                TestHelpers.CreateEnvironment(root.Path),
+                NullLogger<UploadCandidateCvCommandHandler>.Instance);
+
+            var firstResult = await handler.Handle(new UploadCandidateCvCommand
+            {
+                Id = profile.Id,
+                File = TestHelpers.CreateFile("resume.pdf", "application/pdf", "cv-content")
+            }, CancellationToken.None);
+            var previousFilePath = Path.Combine(root.Path, "uploads", "cvs", Path.GetFileName(firstResult!));
+
+            var secondResult = await handler.Handle(new UploadCandidateCvCommand
+            {
+                Id = profile.Id,
+                File = TestHelpers.CreateFile("resume-v2.pdf", "application/pdf", "cv-content-v2")
+            }, CancellationToken.None);
+
+            secondResult.Should().NotBe(firstResult);
+            File.Exists(previousFilePath).Should().BeFalse();
+            File.Exists(Path.Combine(root.Path, "uploads", "cvs", Path.GetFileName(secondResult!))).Should().BeTrue();
+        }
+
+        [Fact]
         public async Task UploadCandidateCv_MissingProfile_ReturnsNull()
         {
             using var context = TestHelpers.CreateDbContext();
@@ -118,6 +149,37 @@ namespace Profile.UnitTests.Commands
         }
 
         [Fact]
+        public async Task UploadCandidatePicture_ExistingPicture_DeletesPreviousFile()
+        {
+            using var context = TestHelpers.CreateDbContext();
+            var profile = new CandidateProfile { UserId = "candidate-1" };
+            context.CandidateProfiles.Add(profile);
+            await context.SaveChangesAsync();
+            using var root = TestHelpers.CreateTemporaryRoot();
+            var handler = new UploadCandidatePictureCommandHandler(
+                context,
+                TestHelpers.CreateEnvironment(root.Path),
+                NullLogger<UploadCandidatePictureCommandHandler>.Instance);
+
+            var firstResult = await handler.Handle(new UploadCandidatePictureCommand
+            {
+                Id = profile.Id,
+                File = TestHelpers.CreateFile("picture.png", "image/png", "image-content")
+            }, CancellationToken.None);
+            var previousFilePath = Path.Combine(root.Path, "uploads", "pictures", Path.GetFileName(firstResult!));
+
+            var secondResult = await handler.Handle(new UploadCandidatePictureCommand
+            {
+                Id = profile.Id,
+                File = TestHelpers.CreateFile("picture-v2.png", "image/png", "image-content-v2")
+            }, CancellationToken.None);
+
+            secondResult.Should().NotBe(firstResult);
+            File.Exists(previousFilePath).Should().BeFalse();
+            File.Exists(Path.Combine(root.Path, "uploads", "pictures", Path.GetFileName(secondResult!))).Should().BeTrue();
+        }
+
+        [Fact]
         public async Task UploadCompanyLogo_ExistingProfile_SavesFileAndUrl()
         {
             using var context = TestHelpers.CreateDbContext();
@@ -157,6 +219,37 @@ namespace Profile.UnitTests.Commands
             }, CancellationToken.None);
 
             result.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task UploadCompanyLogo_ExistingLogo_DeletesPreviousFile()
+        {
+            using var context = TestHelpers.CreateDbContext();
+            var profile = new CompanyProfile { UserId = "company-1" };
+            context.CompanyProfiles.Add(profile);
+            await context.SaveChangesAsync();
+            using var root = TestHelpers.CreateTemporaryRoot();
+            var handler = new UploadCompanyLogoCommandHandler(
+                context,
+                TestHelpers.CreateEnvironment(root.Path),
+                NullLogger<UploadCompanyLogoCommandHandler>.Instance);
+
+            var firstResult = await handler.Handle(new UploadCompanyLogoCommand
+            {
+                Id = profile.Id,
+                File = TestHelpers.CreateFile("logo.jpg", "image/jpeg", "logo-content")
+            }, CancellationToken.None);
+            var previousFilePath = Path.Combine(root.Path, "uploads", "logos", Path.GetFileName(firstResult!));
+
+            var secondResult = await handler.Handle(new UploadCompanyLogoCommand
+            {
+                Id = profile.Id,
+                File = TestHelpers.CreateFile("logo-v2.jpg", "image/jpeg", "logo-content-v2")
+            }, CancellationToken.None);
+
+            secondResult.Should().NotBe(firstResult);
+            File.Exists(previousFilePath).Should().BeFalse();
+            File.Exists(Path.Combine(root.Path, "uploads", "logos", Path.GetFileName(secondResult!))).Should().BeTrue();
         }
 
     }
