@@ -9,8 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. Učitavanje ocelot.json konfiguracionog fajla
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 
-// 2. Registracija JWT Autentifikacije
-var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "SuperSecretKeyForJobHubIdentityApiThatIsAtLeast32BytesLong!";
+// 2. Registracija JWT Autentifikacije (Sinhronizovano sa Chat.API)
+var jwtSecret = builder.Configuration["JwtSettings:Secret"]
+    ?? builder.Configuration["Jwt:Secret"]
+    ?? "SuperSecretKeyForJobHubIdentityApiThatIsAtLeast32BytesLong!";
+
 var key = Encoding.UTF8.GetBytes(jwtSecret);
 
 builder.Services.AddAuthentication(options =>
@@ -32,7 +35,6 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero
     };
 
-    // Podrška za SignalR WebSockets (prihvata token iz Query stringa)
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
@@ -48,7 +50,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// 3. Podešavanje CORS-a za Angular frontend
+// 3. CORS Politika
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
@@ -60,14 +62,13 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 4. Registracija Ocelot servisa
+// 4. Registracija Ocelota
 builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
 
 app.UseCors("AllowAngular");
 
-// 5. Aktivacija autentifikacije pre Ocelota
 app.UseAuthentication();
 app.UseAuthorization();
 

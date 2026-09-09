@@ -1,11 +1,15 @@
 using System.Text;
 using Chat.API.Hubs;
+using Chat.API.Models;
 using Chat.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// 0. Učitavanje MongoDbSettings za IOptions<MongoDbSettings> u ChatService-u
+builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
 
 // 1. Dodavanje servisa
 builder.Services.AddControllers();
@@ -24,7 +28,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 3. JWT Autentifikacija - Čita tačan Secret iz appsettings.json
+// 3. JWT Autentifikacija
 var jwtSecret = builder.Configuration["JwtSettings:Secret"];
 if (string.IsNullOrEmpty(jwtSecret))
 {
@@ -51,7 +55,6 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero
     };
 
-    // Preuzimanje tokena iz query string-a za SignalR
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
@@ -71,7 +74,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// 4. Registracija pravog ChatService-a (uklanja crvenu liniju)
+// 4. Registracija ChatService-a
 builder.Services.AddSingleton<ChatService>();
 
 var app = builder.Build();
