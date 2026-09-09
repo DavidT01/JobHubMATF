@@ -1,0 +1,46 @@
+﻿using FluentValidation;
+using Profile.API.Extensions;
+using Profile.API.Features.CandidateProfiles.Commands.UpdateCandidate;
+
+namespace Profile.API.Features.CandidateProfiles.Commands.Validators
+{
+    public class UpdateCandidateProfileCommandValidator : AbstractValidator<UpdateCandidateProfileCommand>
+    {
+        public UpdateCandidateProfileCommandValidator()
+        {
+            RuleFor(p => p.Id).NotEmpty().WithMessage("Profile Id is required.");
+
+            RuleFor(p => p.UserId).NotEmpty().WithMessage("UserId is required.");
+
+            RuleFor(p => p.FirstName).NotEmpty().WithMessage("First name is required.")
+                .MaximumLength(50).WithMessage("First name cannot exceed 50 characters.");
+
+            RuleFor(p => p.LastName).NotEmpty().WithMessage("Last name is required.")
+                .MaximumLength(50).WithMessage("Last name cannot exceed 50 characters.");
+
+            RuleFor(p => p.Email).NotEmpty().WithMessage("Email is required.")
+                .EmailAddress().WithMessage("Invalid email format.");
+
+            RuleFor(p => p.PhoneNumber).MaximumLength(20).WithMessage("Phone number cannot exceed 20 characters.");
+
+            RuleFor(p => p.Location).MaximumLength(30).WithMessage("Location cannot exceed 30 characters.");
+
+            RuleFor(p => p.GithubUrl).ValidUrl().WithName("GithubUrl");
+
+            RuleFor(p => p.GitlabUrl).ValidUrl().WithName("GitlabUrl");
+
+            RuleFor(p => p.LinkedInUrl).ValidUrl().WithName("LinkedInUrl");
+
+            RuleFor(p => p.CvUrl).ValidUrl().WithName("CvUrl");
+
+            RuleFor(p => p.PictureUrl).ValidUrl().WithName("PictureUrl");
+
+            RuleForEach(p => p.Skills).MaximumLength(20).WithMessage("Skill cannot exceed 20 characters.");
+
+            RuleForEach(p => p.Education).SetValidator(new EducationDtoValidator());
+            RuleForEach(p => p.Experience).SetValidator(new ExperienceDtoValidator());
+            RuleForEach(p => p.Projects).SetValidator(new ProjectDtoValidator());
+            RuleForEach(p => p.Languages).SetValidator(new LanguageDtoValidator());
+        }
+    }
+}

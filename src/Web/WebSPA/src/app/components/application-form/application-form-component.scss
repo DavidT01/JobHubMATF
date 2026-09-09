@@ -1,0 +1,7 @@
+:host { display: block; max-width: 48rem; margin-inline: auto; padding: 1rem; }
+h1 { font: inherit; margin: 0; }
+mat-card-subtitle, .reference { overflow-wrap: anywhere; }
+form { display: grid; gap: 1.25rem; }
+mat-form-field { width: 100%; }
+textarea { resize: vertical; min-height: 8rem; }
+button { justify-self: start; }

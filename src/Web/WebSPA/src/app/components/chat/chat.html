@@ -1,0 +1,102 @@
+<mat-sidenav-container class="chat-layout">
+
+  <!-- LEVA STRANA: Sidebar sa kontaktima -->
+  <mat-sidenav mode="side" opened class="chat-sidebar">
+    <div class="sidebar-header">
+      <h3>Poruke</h3>
+      <span class="my-badge"><strong>{{ myId }}</strong></span>
+    </div>
+
+    <mat-nav-list class="conversations-list">
+      <mat-list-item *ngFor="let c of conversations"
+                     class="conversation-item"
+                     [class.active]="receiverId === c.userId"
+                     (click)="selectConversation(c)">
+
+        <div matListItemIcon class="user-avatar">
+          {{ c.userName ? c.userName.charAt(0).toUpperCase() : 'U' }}
+        </div>
+
+        <div matListItemTitle class="user-name">
+          {{ c.userName || c.userId }}
+        </div>
+
+        <div matListItemLine class="last-message">
+          {{ c.lastMessage }}
+        </div>
+
+        <div class="meta-info" matListItemMeta>
+          <span class="time" *ngIf="c.lastMessageTime">{{ c.lastMessageTime | date:'HH:mm' }}</span>
+
+          <span class="badge"
+                *ngIf="c.hasUnread || (c.unreadCount && c.unreadCount > 0)"
+                [matBadge]="c.unreadCount"
+                matBadgeColor="warn"
+                matBadgeOverlap="false">
+          </span>
+        </div>
+      </mat-list-item>
+
+      <div *ngIf="conversations.length === 0" class="no-conversations">
+        Nema aktivnih konverzacija
+      </div>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- DESNA STRANA: Glavni chat prozor -->
+  <mat-sidenav-content class="chat-main">
+
+    <!-- Zaglavlje -->
+    <div class="chat-header">
+      <div class="user-status">
+        <span class="active-user-title">Chat sa:</span>
+        <strong>{{ selectedConversation?.userName || receiverId }}</strong>
+      </div>
+      <button mat-stroked-button class="back-btn" (click)="goToDashboard()">
+        <mat-icon>arrow_back</mat-icon> Nazad na Dashboard
+      </button>
+    </div>
+
+    <!-- Lista poruka sa skrolom -->
+    <div class="messages-list" #scrollContainer (scroll)="onScroll()">
+      <div *ngFor="let msg of messages"
+           class="message-item"
+           [ngClass]="{'sent': msg.senderId === myId, 'received': msg.senderId !== myId}">
+
+        <span class="message-content">{{ msg.content }}</span>
+        <span class="message-time" *ngIf="msg.timestamp">{{ msg.timestamp | date:'HH:mm' }}</span>
+      </div>
+    </div>
+
+    <!-- Plutajuće dugme za nove poruke -->
+    <button mat-fab
+            extended
+            color="accent"
+            class="new-message-badge"
+            *ngIf="unreadCount > 0"
+            (click)="scrollToBottomManual()">
+      <mat-icon>arrow_downward</mat-icon>
+      Nova poruka ({{ unreadCount }})
+    </button>
+
+    <!-- Polje za unos poruke -->
+    <div class="chat-input-container">
+      <mat-form-field appearance="outline" class="chat-input-field">
+        <mat-label>Ukucajte poruku...</mat-label>
+        <input matInput
+               type="text"
+               [(ngModel)]="newMessageContent"
+               (keyup.enter)="sendMessage()" />
+
+        <button mat-icon-button
+                matSuffix
+                class="send-btn"
+                (click)="sendMessage()"
+                [disabled]="!newMessageContent.trim()">
+          <mat-icon>send</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+
+  </mat-sidenav-content>
+</mat-sidenav-container>

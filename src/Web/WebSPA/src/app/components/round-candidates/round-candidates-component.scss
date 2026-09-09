@@ -1,0 +1,13 @@
+.round-candidates {
+  max-width: 900px;
+  margin: 2rem auto;
+}
+
+.candidate-list {
+  display: grid;
+  gap: 16px;
+}
+
+.error-message {
+  color: #b3261e;
+}

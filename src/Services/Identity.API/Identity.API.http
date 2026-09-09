@@ -1,0 +1,74 @@
+@Identity.API_HostAddress = http://localhost:5283
+
+### Register candidate
+POST {{Identity.API_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Ana",
+  "lastName": "Petrovic",
+  "email": "ana@example.com",
+  "password": "Pass123!",
+  "role": "Candidate"
+}
+
+### Confirm email (paste userId + token from register)
+POST {{Identity.API_HostAddress}}/api/auth/confirm-email
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "token": "{{emailToken}}"
+}
+
+### Login
+POST {{Identity.API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana@example.com",
+  "password": "Pass123!"
+}
+
+### Forgot password
+POST {{Identity.API_HostAddress}}/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "ana@example.com"
+}
+
+### Reset password (paste token from forgot-password)
+POST {{Identity.API_HostAddress}}/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "email": "ana@example.com",
+  "token": "{{resetToken}}",
+  "newPassword": "NewPass123!"
+}
+
+### Current user (paste token from login)
+GET {{Identity.API_HostAddress}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### Admin login
+POST {{Identity.API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@jobhub.local",
+  "password": "Admin123!"
+}
+
+### Admin list users
+GET {{Identity.API_HostAddress}}/api/admin/users
+Authorization: Bearer {{token}}
+
+### Notifications
+GET {{Identity.API_HostAddress}}/api/notifications
+Authorization: Bearer {{token}}
+
+### Unread count
+GET {{Identity.API_HostAddress}}/api/notifications/unread-count
+Authorization: Bearer {{token}}

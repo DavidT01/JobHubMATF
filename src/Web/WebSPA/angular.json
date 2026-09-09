@@ -3,7 +3,7 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-    "analytics": "aded7b9c-ed92-4097-81e4-81e2f5b42075"
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -31,10 +31,23 @@
               }
             ],
             "styles": [
+              "@angular/material/prebuilt-themes/cyan-orange.css",
               "src/styles.scss"
             ]
           },
           "configurations": {
+            "preview": {
+              "browser": "src/main.preview.ts",
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "assets": [
+                {
+                  "glob": "**/*",
+                  "input": "src/preview/assets"
+                }
+              ]
+            },
             "production": {
               "budgets": [
                 {
@@ -53,7 +66,13 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.development.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -61,6 +80,9 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "configurations": {
+            "preview": {
+              "buildTarget": "WebSPA:build:preview"
+            },
             "production": {
               "buildTarget": "WebSPA:build:production"
             },
