@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Grpc.AspNetCore.Server;
 using Recruitment.API.Data;
 using Scalar.AspNetCore;
 using MediatR;
@@ -7,12 +8,14 @@ using JobHub.Grpc.Contracts.Profile;
 using Recruitment.API.Features.Behaviors;
 using System.Reflection;
 using Recruitment.API.Infrastructure;
+using Recruitment.API.Services.GrpcServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddGrpc();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -52,5 +55,6 @@ app.UseExceptionHandler();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapGrpcService<RecruitmentGrpcService>();
 
 app.Run();
