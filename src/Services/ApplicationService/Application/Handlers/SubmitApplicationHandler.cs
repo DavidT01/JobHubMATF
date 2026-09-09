@@ -4,6 +4,7 @@ using ApplicationService.Application.Commands;
 using ApplicationService.Application.DTOs;
 using ApplicationService.Application.Exceptions;
 using ApplicationService.Application.Profiles;
+using ApplicationService.Application.Recruitment;
 using ApplicationService.Domain.Entities;
 using ApplicationService.Persistence.Data;
 using MediatR;
@@ -17,7 +18,9 @@ public sealed class SubmitApplicationHandler(
     ICurrentUser currentUser,
     ICandidateProfileReader profileReader,
     IJobReader jobReader,
-    TimeProvider timeProvider) : IRequestHandler<SubmitApplicationCommand, ApplicationListItemDto>
+    TimeProvider timeProvider,
+    IRecruitmentClient recruitmentClient,
+    ILogger<SubmitApplicationHandler> logger) : IRequestHandler<SubmitApplicationCommand, ApplicationListItemDto>
 {
     public async Task<ApplicationListItemDto> Handle(SubmitApplicationCommand request, CancellationToken cancellationToken)
     {
@@ -83,6 +86,17 @@ public sealed class SubmitApplicationHandler(
         })
         {
             throw new ConflictException("You have already applied for this job.");
+        }
+
+        try
+        {
+            await recruitmentClient.ActivateCandidateProgressAsync(
+                profile.Id, application.JobId, application.Id, cancellationToken);
+        }
+        catch (DependencyUnavailableException exception)
+        {
+            logger.LogWarning(exception,
+                "Application {ApplicationId} was saved, but recruitment activation failed.", application.Id);
         }
 
         return new ApplicationListItemDto(application.Id, application.JobId, application.Status,
