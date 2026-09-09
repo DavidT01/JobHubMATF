@@ -11,6 +11,20 @@
         <button mat-button type="button" (click)="reload()">Refresh</button>
       </div>
 
+      @if (stats(); as s) {
+        <div class="stats">
+          <span>Users: {{ s.totalUsers }}</span>
+          <span>Confirmed: {{ s.confirmedEmails }}</span>
+          <span>Locked: {{ s.lockedAccounts }}</span>
+        </div>
+      }
+
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search email or name</mat-label>
+        <input matInput [(ngModel)]="search" (keyup.enter)="reload()" />
+      </mat-form-field>
+      <button mat-stroked-button type="button" (click)="reload()">Search</button>
+
       @if (error()) {
         <p class="error">{{ error() }}</p>
       }
@@ -49,6 +63,9 @@
                   </td>
                   <td>{{ user.lockedOut ? 'Locked' : 'Active' }}</td>
                   <td class="actions">
+                    @if (!user.emailConfirmed) {
+                      <button mat-button type="button" (click)="confirmEmail(user)">Confirm email</button>
+                    }
                     @if (user.lockedOut) {
                       <button mat-button type="button" (click)="unlock(user)">Unlock</button>
                     } @else if (!user.roles.includes('Admin')) {

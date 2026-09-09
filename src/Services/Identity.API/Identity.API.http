@@ -72,3 +72,15 @@ Authorization: Bearer {{token}}
 ### Unread count
 GET {{Identity.API_HostAddress}}/api/notifications/unread-count
 Authorization: Bearer {{token}}
+
+### Admin search users
+GET {{Identity.API_HostAddress}}/api/admin/users?search=ana
+Authorization: Bearer {{token}}
+
+### Admin stats
+GET {{Identity.API_HostAddress}}/api/admin/stats
+Authorization: Bearer {{token}}
+
+### Admin confirm email
+POST {{Identity.API_HostAddress}}/api/admin/users/{{userId}}/confirm-email
+Authorization: Bearer {{token}}

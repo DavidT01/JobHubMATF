@@ -20,8 +20,23 @@
   margin-bottom: 16px;
 }
 
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
+  color: #4a5568;
+  font-weight: 600;
+}
+
+.search-field {
+  width: min(360px, 100%);
+  margin-right: 8px;
+}
+
 .table-wrap {
   overflow-x: auto;
+  margin-top: 16px;
 }
 
 table {

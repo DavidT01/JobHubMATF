@@ -47,6 +47,8 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment()
+        && !builder.Environment.IsEnvironment("Testing");
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -57,7 +59,9 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]!)),
-        RoleClaimType = System.Security.Claims.ClaimTypes.Role
+        RoleClaimType = System.Security.Claims.ClaimTypes.Role,
+        // Align with Chat/Gateway: reject near-expired tokens promptly.
+        ClockSkew = TimeSpan.Zero
     };
 });
 
@@ -76,7 +80,17 @@ builder.Services.AddScoped<NotificationService>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
+    options.Password.RequiredLength = 8;
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+
     options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+
+    options.SignIn.RequireConfirmedEmail = true;
 });
 
 var app = builder.Build();
