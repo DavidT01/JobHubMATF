@@ -1,6 +1,8 @@
 using ApplicationService.Application.Authorization;
 using ApplicationService.Application.Commands;
 using ApplicationService.Application.Exceptions;
+using ApplicationService.Application.Recruitment;
+using ApplicationService.Domain.Enums;
 using ApplicationService.Persistence.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +10,11 @@ using Microsoft.EntityFrameworkCore;
 namespace ApplicationService.Application.Handlers;
 
 public sealed class ChangeApplicationStatusHandler(
-    ApplicationDbContext dbContext, JobOwnershipGuard ownership, TimeProvider timeProvider)
+    ApplicationDbContext dbContext,
+    JobOwnershipGuard ownership,
+    TimeProvider timeProvider,
+    IRecruitmentClient recruitmentClient,
+    ILogger<ChangeApplicationStatusHandler> logger)
     : IRequestHandler<ChangeApplicationStatusCommand, Unit>
 {
     public async Task<Unit> Handle(ChangeApplicationStatusCommand request, CancellationToken cancellationToken)
@@ -44,6 +50,20 @@ public sealed class ChangeApplicationStatusHandler(
         if (affectedRows == 0)
         {
             throw new ConflictException("This application changed while you were editing it. Reload it and try again.");
+        }
+
+        if (application.Status == ApplicationStatus.Accepted)
+        {
+            try
+            {
+                await recruitmentClient.ActivateCandidateProgressAsync(
+                    application.CandidateId, application.JobId, application.Id, cancellationToken);
+            }
+            catch (DependencyUnavailableException exception)
+            {
+                logger.LogWarning(exception,
+                    "Application {ApplicationId} status changed, but recruitment activation failed.", application.Id);
+            }
         }
 
         return Unit.Value;

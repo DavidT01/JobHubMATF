@@ -6,8 +6,11 @@ using ApplicationService.Application.Profiles;
 using ApplicationService.Infrastructure.Profiles;
 using ApplicationService.Application.Catalog;
 using ApplicationService.Infrastructure.Catalog;
+using ApplicationService.Application.Recruitment;
+using ApplicationService.Infrastructure.Recruitment;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using JobHub.Grpc.Contracts.Recruitment;
 
 namespace ApplicationService.Infrastructure;
 
@@ -76,6 +79,12 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(uri.AbsoluteUri.TrimEnd('/') + "/");
             client.Timeout = TimeSpan.FromSeconds(10);
         }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+        services.AddGrpcClient<RecruitmentGrpcService.RecruitmentGrpcServiceClient>(options =>
+        {
+            var recruitmentAddress = configuration["GrpcServices:RecruitmentApi"]
+                ?? throw new InvalidOperationException("gRPC Recruitment API address is not configured.");
+            options.Address = new Uri(recruitmentAddress);
+        });
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
