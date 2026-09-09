@@ -4,7 +4,7 @@
   </div>
 } @else if (error()) {
   <p class="error">{{ error() }}</p>
-  <a routerLink="/" mat-stroked-button>Nazad na listu</a>
+  <a routerLink="/jobs" mat-stroked-button>Nazad na listu</a>
 } @else if (job()) {
   <mat-card class="details-card">
     <mat-card-header>
@@ -100,7 +100,7 @@
       <button mat-stroked-button (click)="checkMatch()" [disabled]="matchLoading()">
         Proveri poklapanje
       </button>
-      <a routerLink="/" mat-stroked-button>Nazad na listu</a>
+      <a routerLink="/jobs" mat-stroked-button>Nazad na listu</a>
     </mat-card-actions>
   </mat-card>
 }

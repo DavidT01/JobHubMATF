@@ -6,7 +6,7 @@ import { JobCreate } from './components/job-create/job-create';
 import { SavedJobs } from './components/saved-jobs/saved-jobs';
 
 export const routes: Routes = [
-    {path: '' , component: JobList},
+    {path: 'jobs' , component: JobList},
     {path: 'search' , component: JobSearch},
     {path: 'jobs/new' , component: JobCreate},
     {path: 'bookmarks' , component: SavedJobs},
