@@ -1,0 +1,77 @@
+@let view = state();
+<section aria-labelledby="application-statistics-heading" [attr.aria-busy]="view.kind === 'loading'">
+  <header>
+    <h1 id="application-statistics-heading">Application statistics</h1>
+    <p>Review application volume and status distribution from the Application Service.</p>
+  </header>
+
+  <form class="period" [formGroup]="periodForm" (ngSubmit)="applyPeriod()">
+    <mat-form-field appearance="outline">
+      <mat-label>From</mat-label>
+      <input matInput type="date" formControlName="from" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>To</mat-label>
+      <input matInput type="date" formControlName="to" />
+    </mat-form-field>
+    <div class="period-actions">
+      <button mat-flat-button type="submit">Apply period</button>
+      <button mat-stroked-button type="button" (click)="clearPeriod()">Clear</button>
+    </div>
+  </form>
+  @if (periodError(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+
+  @if (view.kind === 'loading') {
+    <div role="status">
+      <p>Loading application statistics...</p>
+      <mat-progress-bar mode="indeterminate" aria-label="Loading application statistics" />
+    </div>
+  } @else if (view.kind === 'error') {
+    <div role="alert">
+      <p>{{ view.message }}</p>
+      @if (view.canRetry) {
+        <button mat-stroked-button type="button" (click)="retry()">Try again</button>
+      }
+    </div>
+  } @else {
+    <mat-card class="total" appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Total applications</mat-card-title>
+      </mat-card-header>
+      <mat-card-content><strong>{{ view.result.totalCount }}</strong></mat-card-content>
+    </mat-card>
+
+    <div class="status-grid" aria-label="Applications by status">
+      @for (status of view.result.byStatus; track status.status) {
+        <mat-card appearance="outlined">
+          <mat-card-header><mat-card-title>{{ statusLabel(status.status) }}</mat-card-title></mat-card-header>
+          <mat-card-content>
+            <strong>{{ status.count }}</strong>
+            <span>{{ status.ratePercent | number:'1.0-2' }}%</span>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    @if (view.result.totalCount === 0) {
+      <p role="status">No applications were submitted in the selected period.</p>
+    } @else {
+      <section class="trend" aria-labelledby="daily-trend-heading">
+        <h2 id="daily-trend-heading">Daily submissions</h2>
+        <ul>
+          @for (point of view.result.dailyTrend; track point.date) {
+            <li>
+              <time [attr.datetime]="point.date">{{ point.date }}</time>
+              <div class="bar-track" aria-hidden="true">
+                <span class="bar" [style.width]="barWidth(point, view.result.dailyTrend)"></span>
+              </div>
+              <strong>{{ point.count }}</strong>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+</section>

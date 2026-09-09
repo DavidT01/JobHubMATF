@@ -1,0 +1,66 @@
+<div class="page-container">
+  <mat-card class="page-card">
+    <mat-card-header>
+      <mat-card-title>Admin</mat-card-title>
+      <mat-card-subtitle>Manage users, roles and lockouts</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="toolbar">
+        <a mat-stroked-button routerLink="/">Back</a>
+        <button mat-button type="button" (click)="reload()">Refresh</button>
+      </div>
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      @if (loading()) {
+        <p>Loading…</p>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Name</th>
+                <th>Confirmed</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of users(); track user.id) {
+                <tr>
+                  <td>{{ user.email }}</td>
+                  <td>{{ user.firstName }} {{ user.lastName }}</td>
+                  <td>{{ user.emailConfirmed ? 'Yes' : 'No' }}</td>
+                  <td>
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="role-field">
+                      <mat-select
+                        [ngModel]="currentRole(user)"
+                        (ngModelChange)="onRoleChange(user, $event)">
+                        @for (role of roles; track role) {
+                          <mat-option [value]="role">{{ role }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  </td>
+                  <td>{{ user.lockedOut ? 'Locked' : 'Active' }}</td>
+                  <td class="actions">
+                    @if (user.lockedOut) {
+                      <button mat-button type="button" (click)="unlock(user)">Unlock</button>
+                    } @else if (!user.roles.includes('Admin')) {
+                      <button mat-button type="button" (click)="lock(user)">Lock</button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

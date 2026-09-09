@@ -1,0 +1,59 @@
+.rounds-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 1.5rem; 
+  margin-bottom: 2rem;
+}
+.round-item { 
+  background-color: var(--mat-sys-surface);
+  padding: 1.5rem; 
+  border-radius: 4px; 
+  border: 1px solid var(--mat-sys-outline-variant);
+  box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, 0.14), 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+.round-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 1rem; 
+  font-weight: bold;
+  cursor: move; /* Pokazuje da moze da se dragg-uje */
+}
+.round-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.drag-icon {
+  color: var(--mat-sys-on-surface-variant);
+}
+.full-width { 
+  width: 100%; 
+}
+
+/* Stilovi kada je element "u ruci" pri prevlačenju */
+.cdk-drag-preview {
+  box-sizing: border-box;
+  background-color: var(--mat-sys-surface);
+  padding: 1.5rem;
+  border-radius: 4px;
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+/* Smanjeni opacity elementa dok ga drzimo iznad njegove sopstvene senke */
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.rounds-list.cdk-drop-list-dragging .round-item:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Stil za rupu/mesto gde će element da sleti dok se prevlači */
+.drag-placeholder {
+  background-color: var(--mat-sys-surface-variant);
+  border: 2px dashed var(--mat-sys-outline);
+  min-height: 100px;
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  margin-bottom: 1.5rem;
+}

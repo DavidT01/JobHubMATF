@@ -1,0 +1,42 @@
+<mat-card appearance="outlined" [attr.aria-busy]="sending()">
+  <mat-card-header>
+    <mat-card-title><h1>Apply for this job</h1></mat-card-title>
+    <mat-card-subtitle>Job ID: {{ jobId() }}</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    @if (result(); as application) {
+      <div role="status">
+        <h2>Application submitted</h2>
+        <p>Your application has been received with status Submitted.</p>
+        <p class="reference">Application ID: {{ application.id }}</p>
+      </div>
+    } @else {
+      <p>Your current profile CV will be used. Updating it on your profile also updates the CV employers see.</p>
+      @if (!validJob()) {
+        <p role="alert">A valid job must be selected before you can apply.</p>
+      }
+      @if (message(); as error) {
+        <p role="alert">{{ error }}</p>
+      }
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline">
+          <mat-label>Cover letter (optional)</mat-label>
+          <textarea matInput formControlName="coverLetter" rows="8"></textarea>
+          <mat-hint align="end">{{ form.controls.coverLetter.value.trim().length }} / 5000</mat-hint>
+          @if (form.controls.coverLetter.hasError('maxlength')) {
+            <mat-error>Use at most 5000 characters, excluding leading and trailing spaces.</mat-error>
+          }
+        </mat-form-field>
+        @if (sending()) {
+          <div role="status">
+            <p>Submitting application...</p>
+            <mat-progress-bar mode="indeterminate" aria-label="Submitting application" />
+          </div>
+        }
+        <button mat-flat-button type="submit" [disabled]="sending() || !validJob() || form.invalid">
+          {{ sending() ? 'Submitting...' : 'Submit application' }}
+        </button>
+      </form>
+    }
+  </mat-card-content>
+</mat-card>

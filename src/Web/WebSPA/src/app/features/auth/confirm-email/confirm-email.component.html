@@ -1,0 +1,22 @@
+<div class="auth-container">
+  <mat-card class="auth-card">
+    <mat-card-header>
+      <mat-card-title>Confirm Email</mat-card-title>
+      <mat-card-subtitle>JobHub account verification</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (status() === 'loading') {
+        <div class="status-block">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>{{ message() }}</p>
+        </div>
+      } @else {
+        <p>{{ message() }}</p>
+        <button mat-flat-button color="primary" type="button" class="submit-button" (click)="goToLogin()">
+          GO TO SIGN IN
+        </button>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

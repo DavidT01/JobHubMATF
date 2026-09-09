@@ -1,0 +1,36 @@
+<h2 mat-dialog-title>Edit Selection Rounds</h2>
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <div formArrayName="rounds" class="rounds-list" cdkDropList (cdkDropListDropped)="drop($event)">
+      <div *ngFor="let roundCtrl of rounds.controls; let i = index" [formGroupName]="i" class="round-item" cdkDrag>
+        
+        <div class="drag-placeholder" *cdkDragPlaceholder></div>
+        
+        <div class="round-header" cdkDragHandle>
+          <div class="round-header-left">
+            <mat-icon class="drag-icon">drag_indicator</mat-icon>
+            <span class="round-number">Round {{ i + 1 }}</span>
+          </div>
+          <button mat-icon-button color="warn" (click)="removeRound(i)" type="button">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title" required>
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="2"></textarea>
+        </mat-form-field>
+
+      </div>
+    </div>
+    <button mat-stroked-button color="primary" type="button" (click)="addRound()">+ Add Round</button>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-raised-button color="primary" [disabled]="form.invalid || loading()" (click)="save()">Save</button>
+</mat-dialog-actions>

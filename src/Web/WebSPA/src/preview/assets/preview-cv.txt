@@ -1,0 +1,7 @@
+LOCAL PREVIEW ONLY - NOT A REAL CANDIDATE CV
+
+Demo candidate
+Skills: C#, .NET, Angular, PostgreSQL
+
+This static sample only demonstrates opening a current CV link in a new tab.
+The real application uses the current CV URL returned by the Profile service.
