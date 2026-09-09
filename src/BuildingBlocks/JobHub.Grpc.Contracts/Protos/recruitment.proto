@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option csharp_namespace = "JobHub.Grpc.Contracts.Recruitment";
+
+package jobhub.recruitment.v1;
+
+enum CandidateProgressStatus {
+  CANDIDATE_PROGRESS_STATUS_UNSPECIFIED = 0;
+  CANDIDATE_PROGRESS_STATUS_IN_PROGRESS = 1;
+  CANDIDATE_PROGRESS_STATUS_COMPLETED = 2;
+  CANDIDATE_PROGRESS_STATUS_REJECTED = 3;
+  CANDIDATE_PROGRESS_STATUS_HIRED = 4;
+}
+
+service RecruitmentGrpcService {
+  rpc ActivateCandidateProgress (ActivateCandidateProgressRequest)
+      returns (CandidateProgressResponse);
+}
+
+message ActivateCandidateProgressRequest {
+  string candidate_profile_id = 1;
+  string job_id = 2;
+  optional string application_id = 3;
+}
+
+message CandidateProgressResponse {
+  string id = 1;
+  string candidate_profile_id = 2;
+  string recruitment_process_id = 3;
+  optional string current_selection_round_id = 4;
+  CandidateProgressStatus status = 5;
+}
