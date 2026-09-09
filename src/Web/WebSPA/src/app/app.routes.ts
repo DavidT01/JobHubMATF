@@ -1,4 +1,7 @@
 import { Routes } from '@angular/router';
+import { ChatComponent } from './components/chat/chat';
+import { DashboardComponent } from './components/dashboard/dashboard';
+import { roleGuard } from './guards/role';
 import { authGuard, guestGuard, adminGuard } from './core/guards/auth.guard';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
@@ -17,6 +20,18 @@ export const routes: Routes = [
   { path: 'reset-password', component: ResetPasswordComponent, canActivate: [guestGuard] },
   { path: 'notifications', component: NotificationsComponent, canActivate: [authGuard] },
   { path: 'admin', component: AdminUsersComponent, canActivate: [adminGuard] },
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [roleGuard],
+    data: { roles: ['Candidate', 'Employer', 'Admin'] }
+  },
+  {
+    path: 'chat',
+    component: ChatComponent,
+    canActivate: [roleGuard],
+    data: { roles: ['Candidate', 'Employer', 'Admin'] }
+  },
   {
     path: 'profile/candidate/:userId',
     loadComponent: () => import('./components/candidate-profile/candidate-profile-component')
@@ -43,4 +58,5 @@ export const routes: Routes = [
       .then(c => c.CandidateApplicationViewComponent)
   },
   { path: '', component: HomeComponent, canActivate: [authGuard] },
+  { path: '**', redirectTo: '' }
 ];
