@@ -44,6 +44,15 @@ namespace Recruitment.API.Data
                 .WithMany()
                 .HasForeignKey(cp => cp.CurrentSelectionRoundId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<RecruitmentProcess>()
+                .Property(process => process.JobId)
+                .HasMaxLength(24)
+                .IsRequired();
+
+            modelBuilder.Entity<RecruitmentProcess>()
+                .HasIndex(process => process.JobId)
+                .IsUnique();
         }
     }
 }

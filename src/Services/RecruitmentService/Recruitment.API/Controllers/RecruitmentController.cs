@@ -14,7 +14,7 @@ namespace Recruitment.API.Controllers
         [HttpGet("job/{jobId}")]
         [ProducesResponseType(typeof(RecruitmentProcessDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetProcessByJobId(Guid jobId)
+        public async Task<IActionResult> GetProcessByJobId(string jobId)
         {
             logger.LogInformation("Received GetProcessByJobId request for JobId {JobId}", jobId);
             var result = await mediator.Send(new GetProcessByJobIdQuery(jobId));
