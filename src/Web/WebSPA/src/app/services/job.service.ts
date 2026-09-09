@@ -2,6 +2,7 @@ import { Injectable , inject } from "@angular/core";
 import { HttpClient , HttpParams } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { JobType , Job , ExperienceLevel , WorkMode } from "../models/job.model";
+import { MatchResult } from "../models/match-result.model";
 import { environment } from "../../environments/environment";
 
 @Injectable({ providedIn: 'root'})
@@ -76,6 +77,24 @@ export class JobService {
     getSortedBySalary(ascending: boolean = true): Observable<Job[]> {
         const params = new HttpParams().set('ascending', ascending);
         return this.http.get<Job[]>(`${this.baseUrl}/sorted/salary`, { params });
+    }
+
+    addBookmark(userId: string, jobId: string): Observable<void> {
+        const params = new HttpParams().set('userId', userId).set('jobId', jobId);
+        return this.http.post<void>(`${this.baseUrl}/bookmarks`, null, { params });
+    }
+
+    removeBookmark(userId: string, jobId: string): Observable<void> {
+        const params = new HttpParams().set('userId', userId).set('jobId', jobId);
+        return this.http.delete<void>(`${this.baseUrl}/bookmarks`, { params });
+    }
+
+    getBookmarks(userId: string): Observable<Job[]> {
+        return this.http.get<Job[]>(`${this.baseUrl}/bookmarks/${userId}`);
+    }
+
+    getMatch(jobId: string, userId: string): Observable<MatchResult> {
+        return this.http.get<MatchResult>(`${this.baseUrl}/match/${jobId}/${userId}`);
     }
 }
 
