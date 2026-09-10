@@ -20,6 +20,13 @@ import { AdminUsersComponent } from './features/admin/admin-users.component';
 
 export const routes: Routes = [
   {
+    path: 'applications-received',
+    loadComponent: () => import('./components/employer-application-page/employer-application-page')
+      .then(c => c.EmployerApplicationPage),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Employer'] },
+  },
+  {
     path: 'applications',
     loadComponent: () => import('./components/candidate-applications/candidate-applications-component')
       .then(c => c.CandidateApplicationsComponent),

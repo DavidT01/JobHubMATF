@@ -14,6 +14,13 @@ Once the server is running, open your browser and navigate to `http://localhost:
 
 ### Application API through the Gateway
 
+Signed-in candidates can open `/applications`; employers can open
+`/applications-received` from the home page and select one of their company's
+jobs (including inactive jobs). The employer page resolves the company profile
+from the signed-in Identity user before querying Catalog by the profile ID.
+`/api/company-profiles/**` is also proxied through the Gateway to Profile Service
+at `http://localhost:5213`. Production hosting must forward this path as well.
+
 The default development server proxies `/api/applications` and its subpaths to
 the Gateway at `http://localhost:5107`. The Gateway forwards these requests to
 Application Service at `http://localhost:5020`. The existing authentication
