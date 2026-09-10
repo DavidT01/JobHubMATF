@@ -45,6 +45,10 @@ namespace Recruitment.API.Data
                 .HasForeignKey(cp => cp.CurrentSelectionRoundId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder.Entity<CandidateProgress>()
+                .HasIndex(cp => cp.ApplicationId)
+                .IsUnique();
+
             modelBuilder.Entity<RecruitmentProcess>()
                 .Property(process => process.JobId)
                 .HasMaxLength(24)

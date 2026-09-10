@@ -29,4 +29,5 @@ message CandidateProgressResponse {
   string recruitment_process_id = 3;
   optional string current_selection_round_id = 4;
   CandidateProgressStatus status = 5;
+  optional string application_id = 6;
 }
