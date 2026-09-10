@@ -6,6 +6,8 @@ public interface IRecruitmentAuthorization
 
     Task EnsureProcessOwnerAsync(Guid processId, CancellationToken cancellationToken);
 
+    Task EnsureProcessOwnerByJobIdAsync(string jobId, CancellationToken cancellationToken);
+
     Task EnsureRoundOwnerAsync(Guid selectionRoundId, CancellationToken cancellationToken);
 
     Task EnsureInterviewOwnerAsync(Guid interviewScheduleId, CancellationToken cancellationToken);

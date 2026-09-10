@@ -37,6 +37,17 @@ public sealed class RecruitmentAuthorization(
         await EnsureCompanyAsync(companyId, cancellationToken);
     }
 
+    public async Task EnsureProcessOwnerByJobIdAsync(string jobId, CancellationToken cancellationToken)
+    {
+        var companyId = await context.Processes
+            .Where(process => process.JobId == jobId)
+            .Select(process => (Guid?)process.CompanyId)
+            .SingleOrDefaultAsync(cancellationToken)
+            ?? throw new RecruitmentValidationException($"Recruitment process for job {jobId} was not found.");
+
+        await EnsureCompanyAsync(companyId, cancellationToken);
+    }
+
     public async Task EnsureRoundOwnerAsync(Guid selectionRoundId, CancellationToken cancellationToken)
     {
         var companyId = await context.Rounds
@@ -61,18 +72,28 @@ public sealed class RecruitmentAuthorization(
 
     public async Task EnsureEvaluationOwnerAsync(Guid candidateProfileId, CancellationToken cancellationToken)
     {
+        if (User.IsInRole("Candidate"))
+        {
+            await EnsureCandidateOwnsProfileAsync(candidateProfileId, cancellationToken);
+            return;
+        }
+
         var companyId = await context.Evaluations
             .Where(evaluation => evaluation.CandidateProfileId == candidateProfileId)
             .Select(evaluation => (Guid?)evaluation.SelectionRound!.RecruitmentProcess!.CompanyId)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (companyId.HasValue)
+        companyId ??= await context.Progresses
+            .Where(progress => progress.CandidateProfileId == candidateProfileId)
+            .Select(progress => (Guid?)progress.RecruitmentProcess!.CompanyId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (!companyId.HasValue)
         {
-            await EnsureCompanyAsync(companyId.Value, cancellationToken);
-            return;
+            throw new RecruitmentForbiddenException();
         }
 
-        await EnsureCandidateOwnsProfileAsync(candidateProfileId, cancellationToken);
+        await EnsureCompanyAsync(companyId.Value, cancellationToken);
     }
 
     public async Task EnsureCandidateOwnsProfileAsync(Guid candidateProfileId, CancellationToken cancellationToken)
