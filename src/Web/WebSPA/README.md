@@ -12,6 +12,25 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+### Application API through the Gateway
+
+The default development server proxies `/api/applications` and its subpaths to
+the Gateway at `http://localhost:5107`. The Gateway forwards these requests to
+Application Service at `http://localhost:5020`. The existing authentication
+interceptor supplies the signed-in user's bearer token.
+
+Start Application Service and its dependencies using its README, then run the
+Gateway from `src/Gateways/Gateway` with `dotnet run --launch-profile http` and
+start this frontend with `npm start`. Configure the same `JwtSettings__Secret`
+for Identity, Gateway, and Application Service. Application Service additionally
+validates the Identity issuer, audience, and role.
+
+The proxy is development-only and does not affect `npm run preview`, which uses
+in-memory application data. Production hosting must forward `/api/applications`
+and its subpaths to the Gateway on the frontend's origin. For containers, replace
+the Gateway's Application downstream `localhost:5020` with the Application
+container's DNS name and internal port.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:

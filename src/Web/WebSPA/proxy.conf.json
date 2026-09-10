@@ -1,0 +1,10 @@
+{
+  "/api/applications": {
+    "target": "http://localhost:5107",
+    "changeOrigin": true
+  },
+  "/api/applications/**": {
+    "target": "http://localhost:5107",
+    "changeOrigin": true
+  }
+}
