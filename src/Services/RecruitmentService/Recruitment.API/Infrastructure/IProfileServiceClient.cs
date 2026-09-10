@@ -9,4 +9,8 @@ public interface IProfileServiceClient
     Task<bool> ValidateCandidateProfileAsync(Guid profileId, CancellationToken cancellationToken);
 
     Task<CandidateProfileResponse> GetCandidateProfileAsync(Guid profileId, CancellationToken cancellationToken);
+
+    Task<Guid?> GetCandidateProfileIdByUserIdAsync(string userId, CancellationToken cancellationToken);
+
+    Task<Guid?> GetCompanyProfileIdByUserIdAsync(string userId, CancellationToken cancellationToken);
 }
