@@ -1,6 +1,13 @@
 <Solution>
+  <Project Path="src/BuildingBlocks/JobHub.Grpc.Contracts/JobHub.Grpc.Contracts.csproj" />
   <Project Path="src/Gateways/Gateway/Gateway.csproj" Id="322af715-bbd3-4aad-a3ae-9dbe95645483" />
+  <Project Path="src/Services/ApplicationService/ApplicationService.csproj" />
+  <Project Path="src/Services/Catalog/Catalog.csproj" />
   <Project Path="src/Services/Chat.API/Chat.API.csproj" />
+  <Project Path="src/Services/Identity.API.Tests/Identity.API.Tests.csproj" />
+  <Project Path="src/Services/Identity.API/Identity.API.csproj" />
+  <Project Path="src/Services/ProfileService/Profile.API/Profile.API.csproj" />
+  <Project Path="src/Services/RecruitmentService/Recruitment.API/Recruitment.API.csproj" />
   <Project Path="src/Web/" Type="Website" DisplayName="Web" Id="8ae733e2-87db-b11e-fdff-4762e944013d">
     <BuildType Project="Debug" />
     <Properties Name="WebsiteProperties">
