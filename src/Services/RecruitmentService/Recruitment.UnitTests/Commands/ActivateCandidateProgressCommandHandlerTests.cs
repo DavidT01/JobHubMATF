@@ -26,6 +26,7 @@ public sealed class ActivateCandidateProgressCommandHandlerTests
         await context.SaveChangesAsync();
 
         var candidateId = Guid.NewGuid();
+        var applicationId = Guid.NewGuid();
         var profileClient = new Mock<IProfileServiceClient>();
         profileClient
             .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
@@ -35,8 +36,9 @@ public sealed class ActivateCandidateProgressCommandHandlerTests
             NullLogger<ActivateCandidateProgressCommandHandler>.Instance);
 
         var result = await handler.Handle(
-            new ActivateCandidateProgressCommand(candidateId, JobId, Guid.NewGuid()), CancellationToken.None);
+            new ActivateCandidateProgressCommand(candidateId, JobId, applicationId), CancellationToken.None);
 
+        result.ApplicationId.Should().Be(applicationId);
         result.CandidateProfileId.Should().Be(candidateId);
         result.RecruitmentProcessId.Should().Be(process.Id);
         result.CurrentSelectionRoundId.Should().Be(round.Id);

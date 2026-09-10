@@ -5,6 +5,7 @@ namespace Recruitment.API.Entities
     public class CandidateProgress
     {
         public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid? ApplicationId { get; set; }
         public Guid CandidateProfileId { get; set; }
         public Guid RecruitmentProcessId { get; set; }
         public Guid? CurrentSelectionRoundId { get; set; }

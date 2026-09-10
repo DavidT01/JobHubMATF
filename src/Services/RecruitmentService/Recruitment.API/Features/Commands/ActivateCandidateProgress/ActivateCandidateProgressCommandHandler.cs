@@ -34,6 +34,12 @@ public sealed class ActivateCandidateProgressCommandHandler(
                 && item.RecruitmentProcessId == process.Id, cancellationToken);
         if (existingProgress is not null)
         {
+            if (request.ApplicationId.HasValue && existingProgress.ApplicationId != request.ApplicationId)
+            {
+                existingProgress.ApplicationId = request.ApplicationId;
+                await context.SaveChangesAsync(cancellationToken);
+            }
+
             logger.LogInformation(
                 "Candidate {CandidateProfileId} is already active in recruitment process {RecruitmentProcessId}.",
                 request.CandidateProfileId, process.Id);
@@ -49,6 +55,7 @@ public sealed class ActivateCandidateProgressCommandHandler(
         var progress = new Entities.CandidateProgress
         {
             CandidateProfileId = request.CandidateProfileId,
+            ApplicationId = request.ApplicationId,
             RecruitmentProcessId = process.Id,
             CurrentSelectionRoundId = process.Rounds.OrderBy(round => round.Index).FirstOrDefault()?.Id,
             Status = CandidateProgressStatus.InProgress

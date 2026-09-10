@@ -44,7 +44,7 @@ public sealed class RecruitmentGrpcService(IMediator mediator, ILogger<Recruitme
                 CandidateProfileId = progress.CandidateProfileId.ToString("D"),
                 RecruitmentProcessId = progress.RecruitmentProcessId.ToString("D"),
                 Status = MapStatus(progress.Status)
-            }.WithCurrentSelectionRound(progress.CurrentSelectionRoundId);
+            }.WithIdentifiers(progress.ApplicationId, progress.CurrentSelectionRoundId);
         }
         catch (RecruitmentValidationException exception)
         {
@@ -66,10 +66,16 @@ public sealed class RecruitmentGrpcService(IMediator mediator, ILogger<Recruitme
 
 file static class CandidateProgressResponseExtensions
 {
-    public static RecruitmentContract.CandidateProgressResponse WithCurrentSelectionRound(
+    public static RecruitmentContract.CandidateProgressResponse WithIdentifiers(
         this RecruitmentContract.CandidateProgressResponse response,
+        Guid? applicationId,
         Guid? currentSelectionRoundId)
     {
+        if (applicationId.HasValue)
+        {
+            response.ApplicationId = applicationId.Value.ToString("D");
+        }
+
         if (currentSelectionRoundId.HasValue)
         {
             response.CurrentSelectionRoundId = currentSelectionRoundId.Value.ToString("D");
