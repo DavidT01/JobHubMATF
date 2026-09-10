@@ -20,6 +20,13 @@ import { AdminUsersComponent } from './features/admin/admin-users.component';
 
 export const routes: Routes = [
   {
+    path: 'admin/statistics',
+    loadComponent: () => import('./components/application-statistics/application-statistics-component')
+      .then(c => c.ApplicationStatisticsComponent),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Admin'] },
+  },
+  {
     path: 'applications-received',
     loadComponent: () => import('./components/employer-application-page/employer-application-page')
       .then(c => c.EmployerApplicationPage),

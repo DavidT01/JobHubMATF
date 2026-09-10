@@ -17,6 +17,11 @@ describe('applicationRoleGuard', () => {
     return result instanceof Observable ? firstValueFrom(result) : result;
   }
   it('allows a verified candidate', async () => expect(await check()).toBe(true));
+  it('allows the statistics route only for an admin', async () => {
+    expect(TestBed.inject(Router).serializeUrl(await check(['Admin']) as UrlTree)).toBe('/');
+    auth.me = () => of({ roles: ['Admin'] });
+    expect(await check(['Admin'])).toBe(true);
+  });
   it('redirects a visitor to login', async () => {
     auth.isLoggedIn = () => false;
     expect(TestBed.inject(Router).serializeUrl(await check() as UrlTree)).toBe('/login');

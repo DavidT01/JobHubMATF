@@ -21,6 +21,12 @@ from the signed-in Identity user before querying Catalog by the profile ID.
 `/api/company-profiles/**` is also proxied through the Gateway to Profile Service
 at `http://localhost:5213`. Production hosting must forward this path as well.
 
+Admins can open `/admin/statistics` from the home page or user-management page.
+This dashboard shows application totals, status distribution and daily counts,
+with an optional date range. It uses the Application database; it does not count
+users, companies or Catalog matches. Access is checked against the signed-in
+Identity role and again by the Application API.
+
 The default development server proxies `/api/applications` and its subpaths to
 the Gateway at `http://localhost:5107`. The Gateway forwards these requests to
 Application Service at `http://localhost:5020`. The existing authentication
