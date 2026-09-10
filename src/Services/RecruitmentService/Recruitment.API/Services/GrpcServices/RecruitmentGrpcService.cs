@@ -1,13 +1,19 @@
 using Grpc.Core;
+using Microsoft.AspNetCore.Authorization;
 using MediatR;
 using Recruitment.API.Enums;
 using Recruitment.API.Exceptions;
 using Recruitment.API.Features.Commands.ActivateCandidateProgress;
+using Recruitment.API.Infrastructure;
 using RecruitmentContract = JobHub.Grpc.Contracts.Recruitment;
 
 namespace Recruitment.API.Services.GrpcServices;
 
-public sealed class RecruitmentGrpcService(IMediator mediator, ILogger<RecruitmentGrpcService> logger)
+[Authorize]
+public sealed class RecruitmentGrpcService(
+    IMediator mediator,
+    IRecruitmentAuthorization authorization,
+    ILogger<RecruitmentGrpcService> logger)
     : RecruitmentContract.RecruitmentGrpcService.RecruitmentGrpcServiceBase
 {
     public override async Task<RecruitmentContract.CandidateProgressResponse> ActivateCandidateProgress(
@@ -34,6 +40,9 @@ public sealed class RecruitmentGrpcService(IMediator mediator, ILogger<Recruitme
 
         try
         {
+            await authorization.EnsureCandidateOwnsProfileAsync(
+                candidateProfileId, context.CancellationToken);
+
             var progress = await mediator.Send(
                 new ActivateCandidateProgressCommand(candidateProfileId, request.JobId, applicationId),
                 context.CancellationToken);
