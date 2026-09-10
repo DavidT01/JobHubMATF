@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://localhost:7043/api'
+  // TODO: route through API Gateway once Catalog is added to ocelot.json
+  apiUrl: 'http://localhost:5246/api/v1/Catalog'
 };

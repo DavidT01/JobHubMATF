@@ -1,4 +1,9 @@
 import { Routes } from '@angular/router';
+import { JobList } from './components/job-list/job-list';
+import { JobSearch } from './components/job-search/job-search';
+import { JobDetails } from './components/job-details/job-details';
+import { JobCreate } from './components/job-create/job-create';
+import { SavedJobs } from './components/saved-jobs/saved-jobs';
 import { ChatComponent } from './components/chat/chat';
 import { DashboardComponent } from './components/dashboard/dashboard';
 import { roleGuard } from './guards/role';
@@ -57,6 +62,11 @@ export const routes: Routes = [
     loadComponent: () => import('./components/candidate-application-view/candidate-application-view')
       .then(c => c.CandidateApplicationViewComponent)
   },
+  { path: 'jobs', component: JobList },
+  { path: 'search', component: JobSearch },
+  { path: 'jobs/new', component: JobCreate },
+  { path: 'bookmarks', component: SavedJobs },
+  { path: 'jobs/:id', component: JobDetails },
   { path: '', component: HomeComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '' }
 ];
