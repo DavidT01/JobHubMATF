@@ -10,6 +10,8 @@ service CandidateProfileGrpcService {
   rpc GetCandidateContact (GetCandidateContactRequest) returns (CandidateContactResponse);
   rpc ValidateCandidateProfile (ValidateCandidateProfileRequest) returns (ValidateCandidateProfileResponse);
   rpc GetCandidateProfile (GetCandidateProfileRequest) returns (CandidateProfileResponse);
+  rpc GetCandidateProfileByUserId (GetProfileByUserIdRequest) returns (ProfileIdentityResponse);
+  rpc GetCompanyProfileByUserId (GetProfileByUserIdRequest) returns (ProfileIdentityResponse);
 }
 
 message GetCandidateContactRequest {
@@ -32,6 +34,15 @@ message ValidateCandidateProfileResponse {
 
 message GetCandidateProfileRequest {
   string profile_id = 1;
+}
+
+message GetProfileByUserIdRequest {
+  string user_id = 1;
+}
+
+message ProfileIdentityResponse {
+  string profile_id = 1;
+  string user_id = 2;
 }
 
 message CandidateProfileResponse {
