@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { applicationRoleGuard } from './core/guards/application-role.guard';
 import { JobList } from './components/job-list/job-list';
 import { JobSearch } from './components/job-search/job-search';
 import { JobDetails } from './components/job-details/job-details';
@@ -18,6 +19,13 @@ import { NotificationsComponent } from './features/notifications/notifications.c
 import { AdminUsersComponent } from './features/admin/admin-users.component';
 
 export const routes: Routes = [
+  {
+    path: 'applications',
+    loadComponent: () => import('./components/candidate-applications/candidate-applications-component')
+      .then(c => c.CandidateApplicationsComponent),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Candidate'] },
+  },
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'register', component: RegisterComponent, canActivate: [guestGuard] },
   { path: 'confirm-email', component: ConfirmEmailComponent, canActivate: [guestGuard] },
