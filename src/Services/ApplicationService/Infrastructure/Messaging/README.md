@@ -80,3 +80,11 @@ copies preserve the same event ID/body and persistent metadata, demonstrating wh
 consumer deduplication is needed. The random queue/exchange are removed in finally.
 No shared queue is purged. Without this variable the test explicitly skips.
 This does not yet simulate broker restarts or a crash between confirm and DB commit.
+
+With both test variables set, the opt-in hosted-worker test runs the production
+messaging registrations against PostgreSQL and RabbitMQ together. It confirms
+delivery-state persistence, graceful shutdown, pending-row delivery by a newly
+created host and absence of replay of the already completed row. It uses a unique
+schema and broker queue/exchange, cleaned afterwards. PostgreSQL integration tests
+share a test collection to avoid competing for the intentional global advisory lock.
+This is a messaging-host integration test, not the complete authenticated HTTP API.

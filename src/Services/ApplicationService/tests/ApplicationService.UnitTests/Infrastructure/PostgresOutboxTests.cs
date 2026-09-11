@@ -16,6 +16,7 @@ using Xunit;
 
 namespace ApplicationService.UnitTests.Infrastructure;
 
+[Collection("PostgreSQL outbox integration")]
 public sealed class PostgresOutboxTests
 {
     [Fact]
