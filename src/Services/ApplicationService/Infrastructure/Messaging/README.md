@@ -18,8 +18,8 @@ stored payload/ID. The dispatcher must record completion after confirmation;
 a crash between confirmation and DB completion can cause duplicate delivery.
 
 Hosted dispatch is registered only when `Outbox:Enabled` is true. The committed
-default is false: no worker or broker connection is created. Tests mock the Rabbit
-API; they do not prove real broker nack/return behavior.
+default is false: no worker or broker connection is created. Unit tests mock the
+Rabbit API; the opt-in broker test below verifies actual mandatory returns and confirms.
 
 API/lifecycle reference: [RabbitMQ .NET client guide](https://www.rabbitmq.com/client-libraries/dotnet-api-guide).
 
@@ -64,3 +64,14 @@ reconnects. Automatic client recovery is disabled to avoid competing recovery pa
 Graceful cancellation stops polling and disposes the owned channel/connection.
 Logs exclude connection URIs and raw broker exception messages. Delivery remains
 disabled in committed settings pending real PostgreSQL/Rabbit tests.
+
+## Isolated broker test
+
+Set `JOBHUB_TEST_RABBITMQ` to a dedicated broker URI (AMQP loopback or AMQPS) and run
+the Application test executable. The test creates a unique durable topic exchange,
+verifies an actual mandatory NO_ROUTE return fails publishing, then binds its own
+durable queue and confirms successful delivery after the session reconnects. Two
+copies preserve the same event ID/body and persistent metadata, demonstrating why
+consumer deduplication is needed. The random queue/exchange are removed in finally.
+No shared queue is purged. Without this variable the test explicitly skips.
+This does not yet simulate broker restarts or a crash between confirm and DB commit.
