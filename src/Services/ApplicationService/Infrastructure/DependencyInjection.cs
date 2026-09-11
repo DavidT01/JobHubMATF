@@ -11,6 +11,7 @@ using ApplicationService.Infrastructure.Recruitment;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using JobHub.Grpc.Contracts.Recruitment;
+using JobHub.Grpc.Contracts.Catalog;
 
 namespace ApplicationService.Infrastructure;
 
@@ -55,18 +56,19 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(uri.AbsoluteUri.TrimEnd('/') + "/");
             client.Timeout = TimeSpan.FromSeconds(10);
         }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
-        services.AddHttpClient<IJobReader, CatalogJobClient>(client =>
+        services.AddGrpcClient<CatalogJobGrpcService.CatalogJobGrpcServiceClient>(options =>
         {
-            var baseUrl = configuration["Services:CatalogBaseUrl"];
+            var baseUrl = configuration["GrpcServices:CatalogApi"];
             if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
-                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+                || !string.IsNullOrEmpty(uri.UserInfo) || uri.AbsolutePath != "/"
+                || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
             {
-                throw new InvalidOperationException("Services:CatalogBaseUrl must be an absolute HTTP(S) URL.");
+                throw new InvalidOperationException("GrpcServices:CatalogApi must be an absolute HTTP(S) origin without credentials, path, query or fragment.");
             }
-
-            client.BaseAddress = new Uri(uri.AbsoluteUri.TrimEnd('/') + "/");
-            client.Timeout = TimeSpan.FromSeconds(10);
+            options.Address = uri;
         }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+        services.AddScoped<IJobReader, CatalogGrpcJobClient>();
         services.AddHttpClient<ICandidateProfileReader, CandidateProfileClient>(client =>
         {
             var baseUrl = configuration["Services:ProfileBaseUrl"];
