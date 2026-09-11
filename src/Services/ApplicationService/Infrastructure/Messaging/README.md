@@ -38,9 +38,16 @@ not silently discarded after a retry limit. Shutdown rolls back the transaction;
 DB failure after broker confirmation can still result in a duplicate on restart.
 Consumers must deduplicate. No lease timeout or SKIP LOCKED behavior is claimed.
 
-Delivery/backoff unit tests are implemented. Real PostgreSQL lock contention,
-ordering and restart tests are still required before enabling the hosted worker;
-SQLite is not a substitute for the advisory-lock SQL.
+Delivery/backoff unit tests and an opt-in PostgreSQL test cover migration,
+sequence generation, ordered retries and cross-instance advisory-lock contention.
+Broker/restart tests remain required before enabling the hosted worker; SQLite
+is not a substitute for the advisory-lock SQL.
+
+Set `JOBHUB_TEST_POSTGRES` to a dedicated PostgreSQL test connection and run the
+Application test executable. The test creates a unique `outbox_test_<guid>` schema,
+applies real migrations, exercises dispatch and drops only that schema in finally.
+It never drops the database. Without this variable the PostgreSQL test explicitly
+skips; do not report the ordinary unit run as a successful integration run.
 
 ## Opt-in worker configuration
 
