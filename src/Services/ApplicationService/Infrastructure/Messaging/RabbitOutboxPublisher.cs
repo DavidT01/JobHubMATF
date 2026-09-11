@@ -4,7 +4,7 @@ using RabbitMQ.Client;
 
 namespace ApplicationService.Infrastructure.Messaging;
 
-public sealed class RabbitOutboxPublisher : IAsyncDisposable
+public sealed class RabbitOutboxPublisher : IOutboxPublisher, IAsyncDisposable
 {
     private readonly IChannel channel;
     private readonly string exchange;
