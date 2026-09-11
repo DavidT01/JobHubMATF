@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option csharp_namespace = "JobHub.Grpc.Contracts.Catalog";
+
+package jobhub.catalog.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service CatalogJobGrpcService {
+  rpc GetJob (GetJobRequest) returns (ApplicationJobResponse);
+}
+
+message GetJobRequest {
+  // Catalog MongoDB ObjectId, represented as 24 hexadecimal characters.
+  string job_id = 1;
+}
+
+message ApplicationJobResponse {
+  string job_id = 1;
+  // Company PROFILE UUID, never the Identity user ID.
+  string company_id = 2;
+  bool is_active = 3;
+  // Absent means no expiry; present timestamps represent UTC instants.
+  google.protobuf.Timestamp expiration_date = 4;
+}

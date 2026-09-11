@@ -15,6 +15,7 @@ builder.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), 
 
 builder.Services.AddControllers();
 builder.Services.AddGrpc();
+builder.Services.AddApplicationProfileAuthentication(builder.Configuration);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -54,8 +55,11 @@ if(!Directory.Exists(app.Environment.WebRootPath))
 }
 
 app.UseStaticFiles();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.MapGrpcService<CandidateProfileGrpcService>();
+app.MapGrpcService<ApplicationProfileGrpcService>();
 
 app.Run();

@@ -11,6 +11,8 @@ using ApplicationService.Infrastructure.Recruitment;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using JobHub.Grpc.Contracts.Recruitment;
+using JobHub.Grpc.Contracts.Catalog;
+using JobHub.Grpc.Contracts.Profile;
 
 namespace ApplicationService.Infrastructure;
 
@@ -45,29 +47,32 @@ public static class DependencyInjection
         services.AddScoped<JobOwnershipGuard>();
         services.AddScoped<IRecruitmentClient, RecruitmentClient>();
         services.AddSingleton<ICvLinkResolver, ProfileCvLinkResolver>();
-        services.AddHttpClient<ICompanyProfileReader, CompanyProfileClient>(client =>
+        services.AddGrpcClient<ApplicationProfileGrpcService.ApplicationProfileGrpcServiceClient>(options =>
         {
-            var baseUrl = configuration["Services:ProfileBaseUrl"];
+            var baseUrl = configuration["GrpcServices:ProfileApi"];
             if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
-                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                || uri.Scheme != Uri.UriSchemeHttps
+                || !string.IsNullOrEmpty(uri.UserInfo) || uri.AbsolutePath != "/"
+                || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
             {
-                throw new InvalidOperationException("Services:ProfileBaseUrl must be an absolute HTTP(S) URL.");
+                throw new InvalidOperationException("GrpcServices:ProfileApi must be an HTTPS origin without credentials, path, query or fragment because it receives bearer tokens.");
             }
-            client.BaseAddress = new Uri(uri.AbsoluteUri.TrimEnd('/') + "/");
-            client.Timeout = TimeSpan.FromSeconds(10);
+            options.Address = uri;
         }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
-        services.AddHttpClient<IJobReader, CatalogJobClient>(client =>
+        services.AddScoped<ICompanyProfileReader, CompanyProfileGrpcClient>();
+        services.AddGrpcClient<CatalogJobGrpcService.CatalogJobGrpcServiceClient>(options =>
         {
-            var baseUrl = configuration["Services:CatalogBaseUrl"];
+            var baseUrl = configuration["GrpcServices:CatalogApi"];
             if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
-                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+                || !string.IsNullOrEmpty(uri.UserInfo) || uri.AbsolutePath != "/"
+                || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
             {
-                throw new InvalidOperationException("Services:CatalogBaseUrl must be an absolute HTTP(S) URL.");
+                throw new InvalidOperationException("GrpcServices:CatalogApi must be an absolute HTTP(S) origin without credentials, path, query or fragment.");
             }
-
-            client.BaseAddress = new Uri(uri.AbsoluteUri.TrimEnd('/') + "/");
-            client.Timeout = TimeSpan.FromSeconds(10);
+            options.Address = uri;
         }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+        services.AddScoped<IJobReader, CatalogGrpcJobClient>();
         services.AddHttpClient<ICandidateProfileReader, CandidateProfileClient>(client =>
         {
             var baseUrl = configuration["Services:ProfileBaseUrl"];

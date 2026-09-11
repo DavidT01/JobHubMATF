@@ -6,7 +6,7 @@ public interface IJobRepository
 {
     Task<IEnumerable<Job>> GetAllAsync();
     
-    Task<Job?> GetByIdAsync(string id);
+    Task<Job?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
     
     Task CreateJobAsync(Job job);
     

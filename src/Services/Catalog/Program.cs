@@ -3,11 +3,14 @@ using Catalog.Repositories;
 using System.Text.Json.Serialization;
 using Catalog.Clients;
 using Catalog.Services;
+using Catalog.Services.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSwaggerGen();
+builder.Services.AddGrpc();
+builder.Services.AddOpenApi();
 builder.Services.AddSingleton<ICatalogContext, CatalogContext>();
 builder.Services.AddScoped<IJobRepository,JobRepository>();
 builder.Services.AddControllers()
@@ -51,5 +54,6 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowFrontend");
 
 app.MapControllers();
+app.MapGrpcService<CatalogJobGrpcService>();
 
 app.Run();

@@ -19,9 +19,9 @@ public class JobRepository : IJobRepository
         return await _context.Jobs.Find(j => true).ToListAsync();
     }
 
-    public async Task<Job?> GetByIdAsync(string id)
+    public async Task<Job?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        return await _context.Jobs.Find(j => j.Id == id).FirstOrDefaultAsync();
+        return await _context.Jobs.Find(j => j.Id == id).FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task CreateJobAsync(Job job)
