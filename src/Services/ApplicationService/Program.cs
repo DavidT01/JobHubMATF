@@ -1,6 +1,7 @@
 using ApplicationService.Application;
 using ApplicationService.Infrastructure;
 using ApplicationService.Infrastructure.Errors;
+using ApplicationService.Infrastructure.Messaging;
 using ApplicationService.Persistence;
 using System.Text.Json.Serialization;
 
@@ -23,6 +24,7 @@ builder.Services.AddExceptionHandler<ApplicationExceptionHandler>();
 builder.Services.AddApplicationLayer(builder.Configuration);
 builder.Services.AddApplicationInfrastructure(builder.Configuration);
 builder.Services.AddApplicationPersistence(builder.Configuration);
+builder.Services.AddOutboxMessaging(builder.Configuration);
 
 var app = builder.Build();
 

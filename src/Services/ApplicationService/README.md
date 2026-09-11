@@ -136,3 +136,34 @@ command handlers, including their Recruitment gRPC client, without network calls
 - Profile Service resolves candidate/company profiles and the candidate's current CV.
 - Catalog Service owns jobs and company ownership. Application Service stores the Catalog job ID but does not duplicate the job entity.
 - API Gateway routing, shared dashboard/auth routing, gRPC contracts, RabbitMQ notifications, chat/recruitment flows, and full multi-service E2E tests are integration work outside this service's standalone scope.
+
+## Reliable lifecycle event delivery
+
+Application submission and actual status changes now persist versioned events in
+the PostgreSQL outbox atomically with the business change. Apply migration
+`20260911053219_AddApplicationOutbox` before serving writes, even when dispatch is
+disabled. Never roll it back with pending events without preserving them.
+
+`Outbox:Enabled` defaults to false. To dispatch, configure `Outbox__ConnectionUri`
+through environment/user secrets, provision durable consumer queues/bindings on
+the `jobhub.applications.v1` topic exchange, and explicitly enable the worker.
+AMQPS is required except for local loopback AMQP. No credentials are committed.
+Routing keys are `application.submitted.v1` and `application.status-changed.v1`;
+consumers must deduplicate by EventId. Consumers themselves are not added here.
+
+See [messaging configuration and verification](Infrastructure/Messaging/README.md),
+[event schema](Application/Events/README.md) and [storage](Persistence/Outbox/README.md).
+The production registrations are tested with PostgreSQL and RabbitMQ, including
+mandatory returns, retries, locking, rollback and messaging-host restart. These
+are not a full authenticated multi-service HTTP end-to-end test.
+
+Run the current xUnit executable directly:
+
+```sh
+dotnet run --project src/Services/ApplicationService/tests/ApplicationService.UnitTests/ApplicationService.UnitTests.csproj --configuration Release
+```
+
+Set `JOBHUB_TEST_POSTGRES` and `JOBHUB_TEST_RABBITMQ` to isolated test services to
+include integration tests; otherwise three integration tests explicitly skip.
+Existing Gateway/UI/startup fixes from PR #111 remain a separate prerequisite for
+the combined Application API flow; this event branch does not duplicate that PR.

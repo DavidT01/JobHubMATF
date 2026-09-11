@@ -5,6 +5,8 @@ using ApplicationService.Application.DTOs;
 using ApplicationService.Application.Exceptions;
 using ApplicationService.Application.Profiles;
 using ApplicationService.Application.Recruitment;
+using ApplicationService.Application.Events;
+using ApplicationService.Persistence.Outbox;
 using ApplicationService.Domain.Entities;
 using ApplicationService.Persistence.Data;
 using MediatR;
@@ -75,6 +77,8 @@ public sealed class SubmitApplicationHandler(
         // Keep profile identity, not a CV URL snapshot: the current CV is resolved when read.
         var application = JobApplication.Create(profile.Id, userId, jobId, request.CoverLetter, now);
         dbContext.JobApplications.Add(application);
+        // EF saves both inserts in the same relational transaction.
+        dbContext.OutboxMessages.Add(OutboxMessage.Create(ApplicationLifecycleEvent.Submitted(application)));
         try
         {
             await dbContext.SaveChangesAsync(cancellationToken);
