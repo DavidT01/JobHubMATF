@@ -118,12 +118,17 @@ Repeating the current status is idempotent. Invalid transitions and concurrent s
 ## Tests
 
 ```powershell
-dotnet test ApplicationService.sln --configuration Release
+dotnet run --project tests/ApplicationService.UnitTests/ApplicationService.UnitTests.csproj --configuration Release
 dotnet build ApplicationService.sln --configuration Release --no-restore
 dotnet format ApplicationService.sln --verify-no-changes --no-restore
 ```
 
 Unit tests cover domain invariants, every status transition, application query filtering/sorting, ownership scoping, and statistics calculations.
+
+The test command runs the xUnit executable directly. The installed test platform
+does not support the legacy VSTest `dotnet test` target on .NET 10. A registration
+regression test also validates the production dependency graph and resolves both
+command handlers, including their Recruitment gRPC client, without network calls.
 
 ## Integration boundaries
 

@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUser, HttpCurrentUser>();
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<JobOwnershipGuard>();
+        services.AddScoped<IRecruitmentClient, RecruitmentClient>();
         services.AddSingleton<ICvLinkResolver, ProfileCvLinkResolver>();
         services.AddHttpClient<ICompanyProfileReader, CompanyProfileClient>(client =>
         {

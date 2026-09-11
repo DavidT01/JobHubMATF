@@ -87,7 +87,8 @@
               "buildTarget": "WebSPA:build:production"
             },
             "development": {
-              "buildTarget": "WebSPA:build:development"
+              "buildTarget": "WebSPA:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

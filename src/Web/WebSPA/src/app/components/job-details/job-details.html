@@ -91,7 +91,7 @@
 
     <mat-card-actions>
       @if (job()!.applyUrl) {
-        <a [href]="job()!.applyUrl" target="_blank" mat-raised-button color="primary">Prijavi se</a>
+        <a [href]="job()!.applyUrl" target="_blank" rel="noopener noreferrer" mat-stroked-button>Spoljna stranica za prijavu</a>
       }
       <button mat-stroked-button (click)="toggleBookmark()">
         <mat-icon>{{ bookmarked() ? 'bookmark' : 'bookmark_border' }}</mat-icon>
@@ -103,4 +103,14 @@
       <a routerLink="/jobs" mat-stroked-button>Nazad na listu</a>
     </mat-card-actions>
   </mat-card>
+  @if (isCandidate()) {
+    <a routerLink="/applications" mat-stroked-button>Moje prijave</a>
+    @if (acceptingApplications()) {
+      <app-application-form [jobId]="job()!.id" />
+    } @else {
+      <p role="status">Ovaj oglas više ne prima prijave.</p>
+    }
+  } @else if (!auth.isLoggedIn()) {
+    <a routerLink="/login" mat-stroked-button>Prijavi se na nalog da konkurišeš</a>
+  }
 }

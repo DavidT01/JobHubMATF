@@ -10,11 +10,16 @@ import { Job } from '../../models/job.model';
 import { MatchResult } from '../../models/match-result.model';
 import { JobService } from '../../services/job.service';
 import { CurrentUser } from '../../core/current-user';
+import { AuthService } from '../../core/services/auth.service';
+import { ApplicationFormComponent } from '../application-form/application-form-component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DestroyRef } from '@angular/core';
 
 @Component({
   selector: 'app-job-details',
   imports: [
     CommonModule,
+    ApplicationFormComponent,
     RouterLink,
     MatCardModule,
     MatChipsModule,
@@ -29,6 +34,14 @@ export class JobDetails implements OnInit {
   private route = inject(ActivatedRoute);
   private jobService = inject(JobService);
   private currentUser = inject(CurrentUser);
+  protected readonly auth = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
+  readonly isCandidate = signal(false);
+
+  acceptingApplications(): boolean {
+    const job = this.job();
+    return !!job?.isActive && (!job.expirationDate || Date.parse(job.expirationDate) > Date.now());
+  }
 
   job = signal<Job | null>(null);
   loading = signal(true);
@@ -40,6 +53,12 @@ export class JobDetails implements OnInit {
   matchError = signal<string | null>(null);
 
   ngOnInit(): void {
+    if (this.auth.isLoggedIn()) {
+      this.auth.me().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: profile => this.isCandidate.set(profile.roles.includes('Candidate')),
+        error: () => this.isCandidate.set(false),
+      });
+    }
     const id = this.route.snapshot.paramMap.get('id');
 
     if (!id) {

@@ -12,6 +12,12 @@
       }
     </mat-card-content>
     <mat-card-actions class="actions">
+      @if (user()?.roles?.includes('Candidate')) {
+        <a mat-stroked-button routerLink="/applications">Moje prijave</a>
+      }
+      @if (user()?.roles?.includes('Employer')) {
+        <a mat-stroked-button routerLink="/applications-received">Prijave na oglase firme</a>
+      }
       <a mat-stroked-button routerLink="/notifications">
         Notifications
         @if (unreadCount() > 0) {
@@ -20,6 +26,7 @@
       </a>
       @if (isAdmin()) {
         <a mat-stroked-button routerLink="/admin">Admin</a>
+        <a mat-stroked-button routerLink="/admin/statistics">Statistike prijava</a>
       }
       <button mat-flat-button color="primary" type="button" (click)="logout()">Sign out</button>
     </mat-card-actions>

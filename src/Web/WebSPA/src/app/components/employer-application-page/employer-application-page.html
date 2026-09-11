@@ -1,0 +1,25 @@
+<h1>Prijave na oglase firme</h1>
+@let view = state();
+@if (view.kind === 'loading') {
+  <mat-progress-bar mode="indeterminate" aria-label="Učitavanje oglasa firme" />
+} @else if (view.kind === 'error') {
+  <p role="alert">Nije moguće učitati profil firme ili oglase. Proveri da je profil firme kreiran i pokušaj ponovo.</p>
+  <button mat-stroked-button (click)="reload()">Pokušaj ponovo</button>
+} @else if (view.jobs.length === 0) {
+  <p>Firma još nema oglase.</p>
+  <a mat-stroked-button routerLink="/jobs/new">Kreiraj oglas</a>
+} @else {
+  <mat-form-field appearance="outline">
+    <mat-label>Oglas</mat-label>
+    <mat-select [value]="selectedJobId()" (selectionChange)="selectedJobId.set($event.value)">
+      @for (job of view.jobs; track job.id) {
+        <mat-option [value]="job.id">{{ job.title }}{{ job.isActive ? '' : ' (neaktivan)' }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  @if (selectedJobId()) {
+    <app-employer-applications [jobId]="selectedJobId()" />
+  } @else {
+    <p>Izaberi oglas za pregled prijava i promenu statusa.</p>
+  }
+}
