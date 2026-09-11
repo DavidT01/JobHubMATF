@@ -18,8 +18,7 @@ time, not retry time. Serialize and persist the event once: a delivery retry mus
 reuse the same EventId and payload. Consumers deduplicate by EventId because
 publisher confirms and retries provide at-least-once, not exactly-once delivery.
 
-This commit defines and tests payloads only. Handlers do not publish yet. The next
-steps are a transactional outbox stored with Application changes, atomic status
-update/outbox insertion, and a RabbitMQ publisher with confirms and retry handling.
-Do not send directly after database commit and assume failures can only be logged.
-Do not enable broker delivery until the durable write path is in place.
+Handlers persist these payloads in the transactional outbox with submission/status
+changes. The opt-in worker publishes them with confirms and retries. Delivery is
+disabled by default until deployment provides credentials, migrations and consumer
+bindings. Notification/Chat/Recruitment consumers are separate integration work.

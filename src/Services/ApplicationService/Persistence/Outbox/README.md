@@ -17,8 +17,8 @@ The migration is additive and has not been applied automatically. Rolling it bac
 drops the outbox and therefore loses pending events; do not roll back a deployed
 outbox before it has drained and its delivery state has been preserved.
 
-This step adds storage only. Until the subsequent handler transaction and publisher
-steps are complete, no rows are enqueued and no messages are sent. A submission
-must save its application and event in one transaction; status compare-and-set and
-event insertion must likewise commit or roll back together. Dispatcher concurrency
-control and publisher confirms remain required before enabling delivery.
+Submission saves its application and event together; status compare-and-set and
+event insertion commit or roll back in an explicit transaction. The opt-in dispatcher
+uses a PostgreSQL transaction advisory lock, ordered retries and publisher confirms.
+Rows accumulate while Outbox:Enabled is false; they are retained for later delivery.
+Apply the migration before serving application writes, even if dispatch is disabled.
