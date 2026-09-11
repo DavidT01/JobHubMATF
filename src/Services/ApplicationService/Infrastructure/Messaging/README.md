@@ -46,6 +46,11 @@ is not a substitute for the advisory-lock SQL.
 Set `JOBHUB_TEST_POSTGRES` to a dedicated PostgreSQL test connection and run the
 Application test executable. The test creates a unique `outbox_test_<guid>` schema,
 applies real migrations, exercises dispatch and drops only that schema in finally.
+It also uses PostgreSQL triggers to reject outbox insertion after the actual status
+handler update, proving rollback, and to reject delivery-state persistence after a
+simulated confirmation. A new dispatch scope then resends the same retained event
+ID and payload. This covers the confirmation/DB failure window without claiming a
+real process kill or RabbitMQ restart (the publisher in this DB test is a stub).
 It never drops the database. Without this variable the PostgreSQL test explicitly
 skips; do not report the ordinary unit run as a successful integration run.
 
