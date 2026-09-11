@@ -75,8 +75,9 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 // 4. Registracija ChatService-a
+// Registrujemo ChatService i kao konkretnu klasu i kao interfejs da bi i Hub i Controller bili zadovoljni
 builder.Services.AddSingleton<ChatService>();
-
+builder.Services.AddSingleton<IChatService>(sp => sp.GetRequiredService<ChatService>());
 var app = builder.Build();
 
 // 5. Middleware Pipeline

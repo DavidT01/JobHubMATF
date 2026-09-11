@@ -4,10 +4,18 @@ using Microsoft.Extensions.Options;
 
 namespace Chat.API.Services
 {
-    public class ChatService
+    public class ChatService : IChatService
     {
         private readonly IMongoCollection<Message> _messages;
         private readonly IMongoCollection<Models.Chat> _chats;
+
+        public ChatService(IMongoDatabase database)
+        {
+            _chats = database.GetCollection<Models.Chat>("Chats");
+            _messages = database.GetCollection<Message>("Messages");
+
+            CreateIndexes().GetAwaiter().GetResult();
+        }
 
         public ChatService(IOptions<MongoDbSettings> settings)
         {
