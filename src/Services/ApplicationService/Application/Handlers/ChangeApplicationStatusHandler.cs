@@ -2,6 +2,8 @@ using ApplicationService.Application.Authorization;
 using ApplicationService.Application.Commands;
 using ApplicationService.Application.Exceptions;
 using ApplicationService.Application.Recruitment;
+using ApplicationService.Application.Events;
+using ApplicationService.Persistence.Outbox;
 using ApplicationService.Domain.Enums;
 using ApplicationService.Persistence.Data;
 using MediatR;
@@ -38,9 +40,11 @@ public sealed class ChangeApplicationStatusHandler(
         var previousStatus = application.Status;
         var previousUpdatedAt = application.UpdatedAtUtc;
         application.ChangeStatus(request.Status!.Value, timeProvider.GetUtcNow());
+        if (previousStatus == application.Status) return Unit.Value;
 
         // Compare and set in one SQL statement: concurrent requests cannot overwrite a newer status.
         // Setting the same status is idempotent and preserves the original update timestamp.
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         var affectedRows = await dbContext.JobApplications
             .Where(item => item.Id == application.Id
                 && item.Status == previousStatus && item.UpdatedAtUtc == previousUpdatedAt)
@@ -51,6 +55,10 @@ public sealed class ChangeApplicationStatusHandler(
         {
             throw new ConflictException("This application changed while you were editing it. Reload it and try again.");
         }
+
+        dbContext.OutboxMessages.Add(OutboxMessage.Create(ApplicationLifecycleEvent.StatusChanged(application, previousStatus)));
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         if (application.Status == ApplicationStatus.Accepted)
         {
