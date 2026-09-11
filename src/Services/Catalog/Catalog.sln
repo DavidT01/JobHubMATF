@@ -2,12 +2,18 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalog", "Catalog.csproj", "{B64CE68F-DC2E-4017-920B-1CC7322B30CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalog.Tests", "..\Catalog.Tests\Catalog.Tests.csproj", "{ED81C443-18A8-46BF-B690-508817874912}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ED81C443-18A8-46BF-B690-508817874912}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED81C443-18A8-46BF-B690-508817874912}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED81C443-18A8-46BF-B690-508817874912}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED81C443-18A8-46BF-B690-508817874912}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B64CE68F-DC2E-4017-920B-1CC7322B30CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B64CE68F-DC2E-4017-920B-1CC7322B30CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B64CE68F-DC2E-4017-920B-1CC7322B30CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
