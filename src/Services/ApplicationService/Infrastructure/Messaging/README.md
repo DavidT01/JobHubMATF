@@ -17,10 +17,9 @@ pending. Reconnect with a new publisher after channel failure and retry the same
 stored payload/ID. The dispatcher must record completion after confirmation;
 a crash between confirmation and DB completion can cause duplicate delivery.
 
-This component is not yet registered as a hosted service and opens no connection
-at API startup. Connection configuration, dispatcher, retry/concurrency handling
-and real broker tests remain before enabling it. Unit tests mock the Rabbit API;
-they do not prove real broker nack/return behavior.
+Hosted dispatch is registered only when `Outbox:Enabled` is true. The committed
+default is false: no worker or broker connection is created. Tests mock the Rabbit
+API; they do not prove real broker nack/return behavior.
 
 API/lifecycle reference: [RabbitMQ .NET client guide](https://www.rabbitmq.com/client-libraries/dotnet-api-guide).
 
@@ -42,3 +41,19 @@ Consumers must deduplicate. No lease timeout or SKIP LOCKED behavior is claimed.
 Delivery/backoff unit tests are implemented. Real PostgreSQL lock contention,
 ordering and restart tests are still required before enabling the hosted worker;
 SQLite is not a substitute for the advisory-lock SQL.
+
+## Opt-in worker configuration
+
+After migrations, durable consumer bindings and real integration checks, set
+`Outbox__Enabled=true`, `Outbox__Exchange` and `Outbox__ConnectionUri` via environment
+or secrets. The URI includes Rabbit credentials and virtual host; never commit it.
+AMQPS is required except for loopback-only local AMQP. Certificates are validated;
+containers need trusted broker TLS. Exchange names beginning with `amq.` are reserved.
+
+The worker creates a fresh scope per iteration, polls every two seconds while idle
+and waits five seconds after infrastructure errors. A single shared connection and
+confirm channel are reused; publish errors dispose the session so a later attempt
+reconnects. Automatic client recovery is disabled to avoid competing recovery paths.
+Graceful cancellation stops polling and disposes the owned channel/connection.
+Logs exclude connection URIs and raw broker exception messages. Delivery remains
+disabled in committed settings pending real PostgreSQL/Rabbit tests.
