@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using JobHub.Grpc.Contracts.Recruitment;
 using JobHub.Grpc.Contracts.Catalog;
+using JobHub.Grpc.Contracts.Profile;
 
 namespace ApplicationService.Infrastructure;
 
@@ -45,17 +46,19 @@ public static class DependencyInjection
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<JobOwnershipGuard>();
         services.AddSingleton<ICvLinkResolver, ProfileCvLinkResolver>();
-        services.AddHttpClient<ICompanyProfileReader, CompanyProfileClient>(client =>
+        services.AddGrpcClient<ApplicationProfileGrpcService.ApplicationProfileGrpcServiceClient>(options =>
         {
-            var baseUrl = configuration["Services:ProfileBaseUrl"];
+            var baseUrl = configuration["GrpcServices:ProfileApi"];
             if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
-                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                || uri.Scheme != Uri.UriSchemeHttps
+                || !string.IsNullOrEmpty(uri.UserInfo) || uri.AbsolutePath != "/"
+                || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
             {
-                throw new InvalidOperationException("Services:ProfileBaseUrl must be an absolute HTTP(S) URL.");
+                throw new InvalidOperationException("GrpcServices:ProfileApi must be an HTTPS origin without credentials, path, query or fragment because it receives bearer tokens.");
             }
-            client.BaseAddress = new Uri(uri.AbsoluteUri.TrimEnd('/') + "/");
-            client.Timeout = TimeSpan.FromSeconds(10);
+            options.Address = uri;
         }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+        services.AddScoped<ICompanyProfileReader, CompanyProfileGrpcClient>();
         services.AddGrpcClient<CatalogJobGrpcService.CatalogJobGrpcServiceClient>(options =>
         {
             var baseUrl = configuration["GrpcServices:CatalogApi"];
