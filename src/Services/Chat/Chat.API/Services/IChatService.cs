@@ -7,7 +7,8 @@ namespace Chat.API.Services
         Task<List<ConversationDto>> GetUserConversationsAsync(string userId);
         Task<List<Message>> GetMessagesAsync(string userId, string targetUserId);
         Task<List<Message>> GetMessagesByChatIdAsync(string chatId);
-        Task<Message> SendMessageAsync(string senderId, string reciverId, string text);
-        Task MarkAsReadAsync(string userId, string otherUserId);
+        Task<Message> SendMessageAsync(string senderId, string senderRole, string receiverId, string text);
+        Task MarkAsReadAsync(string userId, string userRole, string otherUserId);
+        Task<Models.Chat> GetOrCreateChatAsync(string currentUserId, string currentUserRole, string targetUserId);
     }
 }

@@ -175,6 +175,13 @@
         <mat-icon>chat</mat-icon> Otvori Chat
       </button>
 
+      <!-- TEST BUTTON -->
+      <button mat-raised-button
+              color="warn"
+              (click)="testOpenChatWithFakeUser()">
+        <mat-icon>bug_report</mat-icon> TEST: Pristigla poruka (otvori chat sa lažnim korisnikom)
+      </button>
+
       <button mat-stroked-button
               (click)="navigateTo('/profile')">
         <mat-icon>edit</mat-icon> Uredi profil

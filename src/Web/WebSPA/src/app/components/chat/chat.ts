@@ -68,21 +68,26 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.loadConversations();
 
-    this.routeSub = this.route.queryParams.subscribe(params => {
-      if (params['to']) {
-        this.receiverId = params['to'];
-      } else {
-        this.receiverId = (this.myId.toLowerCase() === 'user1') ? 'user2' : 'user1';
-      }
+    // 1. UZIMAMO ID IZ STATE-A (Umesto queryParams)
+    const navigation = this.router.getCurrentNavigation();
+    const state = navigation?.extras?.state as { recipientId?: string };
+    const recipientIdFromState = state?.recipientId || history.state?.recipientId;
 
-      this.isInitialLoad = true;
-      this.previousMessagesCount = 0;
-      this.unreadCount = 0;
+    if (recipientIdFromState) {
+      this.receiverId = recipientIdFromState;
+    } else {
+      // Fallback ako se na chat dolazi direktno bez state-a
+      this.receiverId = (this.myId.toLowerCase() === 'user1') ? 'user2' : 'user1';
+    }
 
-      this.hideScrollContainer();
-      this.chatService.loadHistory(this.receiverId, this.myId);
-    });
+    this.isInitialLoad = true;
+    this.previousMessagesCount = 0;
+    this.unreadCount = 0;
 
+    this.hideScrollContainer();
+    this.chatService.loadHistory(this.receiverId, this.myId);
+
+    // 2. CELOKUPNA POSTOJEĆA LOGIKA ZA PORUKE I SIGNALR OSTAJE ISTA
     this.messageSub = this.chatService.messages$.subscribe((allMessages) => {
       this.ngZone.run(() => {
         const myClean = String(this.myId).trim().toLowerCase();
@@ -200,12 +205,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (this.receiverId !== conv.userId) {
       this.receiverId = conv.userId;
 
-      this.router.navigate([], {
-        relativeTo: this.route,
-        queryParams: { to: conv.userId },
-        queryParamsHandling: 'merge'
-      });
-
+      // URL ostaje čist /chat, samo prebacujemo sagovornika u memoriji i učitavamo istoriju
       this.isInitialLoad = true;
       this.unreadCount = 0;
       this.previousMessagesCount = 0;
