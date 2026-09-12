@@ -7,7 +7,10 @@ namespace Recruitment.API.Features.Commands.CreateRecruitmentProcess
         public CreateRecruitmentProcessValidator()
         {
             RuleFor(x => x.CompanyId).NotEmpty();
-            RuleFor(x => x.JobId).NotEmpty();
+            RuleFor(x => x.JobId)
+                .NotEmpty()
+                .Length(24)
+                .Matches("^[0-9a-fA-F]+$");
         }
     }
 }

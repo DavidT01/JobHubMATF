@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { environment } from '../../../../environments/environment';
 import { Observable } from 'rxjs';
 
 import { CompanyProfileDto } from '../../models/company-profile-dto';
@@ -11,7 +10,7 @@ import { UrlResponseDto } from '../../models/url-response-dto';
 })
 export class CompanyProfileService {
   private readonly http = inject(HttpClient);
-  private readonly api = `${environment.apiUrl}/company-profiles`;
+  private readonly api = '/api/company-profiles';
 
   getProfile(userId: string): Observable<CompanyProfileDto> {
     return this.http.get<CompanyProfileDto>(`${this.api}/${userId}`);

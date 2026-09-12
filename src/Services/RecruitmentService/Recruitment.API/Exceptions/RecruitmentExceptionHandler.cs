@@ -18,6 +18,12 @@ namespace Recruitment.API.Exceptions
                 details.Detail = "One or more recruitment validation errors occurred.";
                 details.Extensions.Add("errors", validationException.Errors);
             }
+            else if (exception is RecruitmentForbiddenException)
+            {
+                details.Status = StatusCodes.Status403Forbidden;
+                details.Title = "Forbidden";
+                details.Detail = exception.Message;
+            }
 
             httpContext.Response.StatusCode = details.Status.Value;
             httpContext.Response.ContentType = "application/problem+json";

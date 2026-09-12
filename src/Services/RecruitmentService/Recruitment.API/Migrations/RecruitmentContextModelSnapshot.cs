@@ -59,6 +59,9 @@ namespace Recruitment.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("ApplicationId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("CandidateProfileId")
                         .HasColumnType("uuid");
 
@@ -78,6 +81,9 @@ namespace Recruitment.API.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationId")
+                        .IsUnique();
 
                     b.HasIndex("CurrentSelectionRoundId");
 
@@ -147,13 +153,18 @@ namespace Recruitment.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("JobId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("JobId")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("JobId")
+                        .IsUnique();
 
                     b.ToTable("Processes");
                 });

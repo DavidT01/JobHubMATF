@@ -28,7 +28,7 @@ namespace Recruitment.UnitTests.Commands
         {
             using var context = TestHelpers.CreateDbContext();
             var mapper = TestHelpers.CreateMapper();
-            var process = new RecruitmentProcess { CompanyId = Guid.NewGuid(), JobId = Guid.NewGuid() };
+            var process = new RecruitmentProcess { CompanyId = Guid.NewGuid(), JobId = "0123456789abcdef0123456c" };
             context.Processes.Add(process);
             await context.SaveChangesAsync();
             context.ChangeTracker.Clear();
@@ -56,7 +56,7 @@ namespace Recruitment.UnitTests.Commands
         {
             using var context = TestHelpers.CreateDbContext();
             var mapper = TestHelpers.CreateMapper();
-            var process = new RecruitmentProcess { CompanyId = Guid.NewGuid(), JobId = Guid.NewGuid() };
+            var process = new RecruitmentProcess { CompanyId = Guid.NewGuid(), JobId = "0123456789abcdef0123456d" };
             var round = new SelectionRound { RecruitmentProcessId = process.Id, Title = "Old Round", Index = 0 };
             process.Rounds.Add(round);
             context.Processes.Add(process);
@@ -76,7 +76,7 @@ namespace Recruitment.UnitTests.Commands
         {
             using var context = TestHelpers.CreateDbContext();
             var mapper = TestHelpers.CreateMapper();
-            var process = new RecruitmentProcess { CompanyId = Guid.NewGuid(), JobId = Guid.NewGuid() };
+            var process = new RecruitmentProcess { CompanyId = Guid.NewGuid(), JobId = "0123456789abcdef0123456e" };
             var round = new SelectionRound { RecruitmentProcessId = process.Id, Title = "Old Title", Index = 0 };
             process.Rounds.Add(round);
             context.Processes.Add(process);

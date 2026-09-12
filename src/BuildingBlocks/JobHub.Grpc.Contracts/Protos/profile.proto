@@ -10,6 +10,31 @@ service CandidateProfileGrpcService {
   rpc GetCandidateContact (GetCandidateContactRequest) returns (CandidateContactResponse);
   rpc ValidateCandidateProfile (ValidateCandidateProfileRequest) returns (ValidateCandidateProfileResponse);
   rpc GetCandidateProfile (GetCandidateProfileRequest) returns (CandidateProfileResponse);
+  rpc GetCandidateProfileByUserId (GetProfileByUserIdRequest) returns (ProfileIdentityResponse);
+  rpc GetCompanyProfileByUserId (GetProfileByUserIdRequest) returns (ProfileIdentityResponse);
+}
+
+// Minimal references used by Application; user_id is the Identity user ID,
+// not a profile UUID. Servers must authorize access to the requested user.
+service ApplicationProfileGrpcService {
+  rpc GetCandidateByUserId (GetApplicationProfileRequest) returns (ApplicationCandidateProfileResponse);
+  rpc GetCompanyByUserId (GetApplicationProfileRequest) returns (ApplicationCompanyProfileResponse);
+}
+
+message GetApplicationProfileRequest {
+  string user_id = 1;
+}
+
+message ApplicationCandidateProfileResponse {
+  string profile_id = 1;
+  string user_id = 2;
+  // Current CV from the candidate profile; empty means no CV uploaded.
+  string cv_url = 3;
+}
+
+message ApplicationCompanyProfileResponse {
+  string profile_id = 1;
+  string user_id = 2;
 }
 
 message GetCandidateContactRequest {
@@ -32,6 +57,15 @@ message ValidateCandidateProfileResponse {
 
 message GetCandidateProfileRequest {
   string profile_id = 1;
+}
+
+message GetProfileByUserIdRequest {
+  string user_id = 1;
+}
+
+message ProfileIdentityResponse {
+  string profile_id = 1;
+  string user_id = 2;
 }
 
 message CandidateProfileResponse {

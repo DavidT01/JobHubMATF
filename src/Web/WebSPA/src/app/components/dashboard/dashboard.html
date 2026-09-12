@@ -1,0 +1,184 @@
+<!-- Debug Banner u Material stilu -->
+<div class="debug-bar">
+  <span class="debug-item">
+    <mat-icon inline>person</mat-icon> <strong>Korisnik ID:</strong> {{ currentUserId || 'Nije podešen' }}
+  </span>
+  <span class="debug-item">
+    <mat-icon inline>admin_panel_settings</mat-icon> <strong>Aktivna Uloga:</strong>
+    <span [ngSwitch]="userRole" class="role-chip">
+      <mat-chip *ngSwitchCase="'Candidate'" class="chip-candidate" highlighted>Candidate</mat-chip>
+      <mat-chip *ngSwitchCase="'Employer'" class="chip-employer" highlighted>Employer</mat-chip>
+      <mat-chip *ngSwitchCase="'Admin'" class="chip-admin" highlighted>Admin</mat-chip>
+      <mat-chip *ngSwitchDefault class="chip-default" highlighted>Nepoznato ({{ userRole }})</mat-chip>
+    </span>
+  </span>
+</div>
+
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h2>Dobrodošli nazad, {{ userName }}! 👋</h2>
+    <p class="subtitle">Pregled vaših aktivnosti i sistemskih obaveštenja.</p>
+  </div>
+
+  <!-- 1. DASHBOARD ZA KANDIDATA -->
+  <div *ngIf="userRole === 'Candidate'" class="stats-grid">
+    <mat-card class="stat-card" (click)="navigateTo('/applications')">
+      <div class="card-icon cyan-bg">
+        <mat-icon>assignment</mat-icon>
+      </div>
+      <div class="stat-info">
+        <h3>{{ candidateStats.activeApplications }}</h3>
+        <p>Aktivne prijave</p>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card" (click)="navigateTo('/jobs')">
+      <div class="card-icon orange-bg">
+        <mat-icon>star</mat-icon>
+      </div>
+      <div class="stat-info">
+        <h3>{{ candidateStats.savedJobs }}</h3>
+        <p>Sačuvani oglasi</p>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card" (click)="navigateTo('/chat')">
+      <div class="card-icon cyan-bg">
+        <mat-icon>chat</mat-icon>
+      </div>
+      <div class="stat-info">
+        <h3>{{ candidateStats.unreadMessages }}</h3>
+        <p>Nepročitane poruke</p>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="card-icon orange-bg">
+        <mat-icon>event</mat-icon>
+      </div>
+      <div class="stat-info">
+        <h3>{{ candidateStats.upcomingInterviews }}</h3>
+        <p>Zakazani intervjui</p>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- 2. DASHBOARD ZA FIRMU -->
+  <div *ngIf="userRole === 'Employer'" class="stats-grid">
+    <mat-card class="stat-card" (click)="navigateTo('/my-ads')">
+      <div class="card-icon cyan-bg">
+        <mat-icon>campaign</mat-icon>
+      </div>
+      <div class="stat-info">
+        <h3>{{ companyStats.activeAds }}</h3>
+        <p>Aktivni oglasi</p>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card" (click)="navigateTo('/applications-received')">
+      <div class="card-icon orange-bg">
+        <mat-icon>move_to_inbox</mat-icon>
+      </div>
+      <div class="stat-info">
+        <h3>{{ companyStats.totalApplications }}</h3>
+        <p>Pristigle prijave</p>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card" (click)="navigateTo('/chat')">
+      <div class="card-icon cyan-bg">
+        <mat-icon>chat</mat-icon>
+      </div>
+      <div class="stat-info">
+        <h3>{{ companyStats.newMessages }}</h3>
+        <p>Nove poruke</p>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="card-icon orange-bg">
+        <mat-icon>calendar_month</mat-icon>
+      </div>
+      <div class="stat-info">
+        <h3>{{ companyStats.scheduledInterviews }}</h3>
+        <p>Intervjui u najavi</p>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- 3. DASHBOARD ZA ADMINA -->
+  <div *ngIf="userRole === 'Admin'" class="stats-grid">
+    <mat-card class="stat-card">
+      <div class="card-icon cyan-bg">
+        <mat-icon>group</mat-icon>
+      </div>
+      <div class="stat-info">
+        <h3>{{ adminStats.totalUsers }}</h3>
+        <p>Registrovani korisnici</p>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="card-icon orange-bg">
+        <mat-icon>business</mat-icon>
+      </div>
+      <div class="stat-info">
+        <h3>{{ adminStats.totalCompanies }}</h3>
+        <p>Verifikovane firme</p>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="card-icon cyan-bg">
+        <mat-icon>description</mat-icon>
+      </div>
+      <div class="stat-info">
+        <h3>{{ adminStats.activeAds }}</h3>
+        <p>Ukupno oglasa</p>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="card-icon status-green">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div class="stat-info">
+        <h3>{{ adminStats.systemHealth }}</h3>
+        <p>Sistem status</p>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- BRZE AKCIJE / PREČICE -->
+  <mat-card class="quick-actions-card">
+    <mat-card-header>
+      <mat-card-title>Brze akcije</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="action-buttons">
+      <button mat-raised-button
+              color="primary"
+              *ngIf="userRole === 'Candidate'"
+              (click)="navigateTo('/jobs')">
+        <mat-icon>search</mat-icon> Pretraži oglase
+      </button>
+
+      <button mat-raised-button
+              color="primary"
+              *ngIf="userRole === 'Employer'"
+              (click)="navigateTo('/create-ad')">
+        <mat-icon>add</mat-icon> Postavi nov oglas
+      </button>
+
+      <button mat-raised-button
+              color="accent"
+              (click)="navigateTo('/chat')">
+        <mat-icon>chat</mat-icon> Otvori Chat
+      </button>
+
+      <button mat-stroked-button
+              (click)="navigateTo('/profile')">
+        <mat-icon>edit</mat-icon> Uredi profil
+      </button>
+    </mat-card-content>
+  </mat-card>
+</div>

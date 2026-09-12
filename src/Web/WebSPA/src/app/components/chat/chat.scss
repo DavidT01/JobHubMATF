@@ -1,0 +1,231 @@
+.chat-layout {
+  height: calc(100vh - 40px);
+  max-width: 1200px;
+  margin: 20px auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+
+  .chat-sidebar {
+    width: 320px;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8fafc;
+
+    .sidebar-header {
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+
+      h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #0f172a;
+      }
+
+      .my-badge {
+        font-size: 0.85rem;
+        color: #0891b2; /* Cyan tamniji ton */
+        background-color: #e0f2fe;
+        padding: 4px 8px;
+        border-radius: 6px;
+      }
+    }
+
+    .conversations-list {
+      flex: 1;
+      overflow-y: auto;
+      padding-top: 0;
+
+      .conversation-item {
+        cursor: pointer;
+        transition: background 0.2s;
+        border-bottom: 1px solid #f1f5f9;
+
+        &:hover {
+          background-color: #f1f5f9;
+        }
+
+        &.active {
+          background-color: #ecfeff; /* Cyan svetla pozadina */
+          border-left: 4px solid #06b6d4; /* Cyan primarna akcenat linija */
+        }
+
+        .user-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background-color: #0891b2; /* Cyan avatar */
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+        }
+
+        .user-name {
+          font-weight: 600;
+          color: #1e293b;
+          font-size: 0.95rem;
+        }
+
+        .last-message {
+          font-size: 0.85rem;
+          color: #64748b;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        /* POZICIONIRANJE VREMENA I BEDŽA BEZ POREMEĆAJA TIPA/VISINE */
+        .meta-info {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 4px;
+          position: relative;
+          padding-right: 18px; /* Omogućava da bedž stoji tačno pored vremena */
+
+          .time {
+            font-size: 0.75rem;
+            color: #94a3b8;
+          }
+          /* Pozicionira Angular Material Badge tik uz desnu ivicu teksta vremena */
+          ::ng-deep .mat-badge-content {
+            position: absolute !important;
+            top: 50% !important;
+            right: 0 !important;
+            transform: translateY(-50%) !important;
+            background-color: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
+          }
+        }
+      }
+
+      .no-conversations {
+        padding: 20px;
+        text-align: center;
+        color: #94a3b8;
+      }
+    }
+  }
+
+  .chat-main {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background-color: #ffffff;
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background-color: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+
+      .user-status {
+        font-size: 1.05rem;
+
+        .active-user-title {
+          color: #64748b;
+          margin-right: 6px;
+        }
+
+        strong {
+          color: #0891b2;
+          font-weight: 600;
+        }
+      }
+
+      .back-btn {
+        border-color: #cbd5e1;
+        color: #334155;
+
+        &:hover {
+          background-color: #f1f5f9;
+        }
+      }
+    }
+
+    .messages-list {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .message-item {
+        max-width: 60%;
+        padding: 10px 14px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+
+        .message-content {
+          font-size: 0.95rem;
+          line-height: 1.4;
+        }
+
+        .message-time {
+          font-size: 0.7rem;
+          margin-top: 4px;
+          align-self: flex-end;
+          opacity: 0.8;
+        }
+
+        &.sent {
+          align-self: flex-end;
+          background-color: #0891b2; /* Cyan za poslate poruke */
+          color: white;
+          border-bottom-right-radius: 2px;
+        }
+
+        &.received {
+          align-self: flex-start;
+          background-color: #fff7ed; /* Narandžasta vrlo svetla pozadina */
+          border: 1px solid #ffedd5;
+          color: #9a3412; /* Narandžasti tamni tekst */
+          border-bottom-left-radius: 2px;
+        }
+      }
+    }
+
+    .new-message-badge {
+      position: absolute;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #f97316 !important; /* Orange dugme za nove poruke */
+      color: white !important;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+    }
+
+    .chat-input-container {
+      padding: 12px 24px;
+      border-top: 1px solid #e2e8f0;
+
+      .chat-input-field {
+        width: 100%;
+
+        .send-btn {
+          color: #f97316; /* Orange dugme za slanje */
+
+          &[disabled] {
+            color: #cbd5e1;
+          }
+        }
+      }
+    }
+  }
+}

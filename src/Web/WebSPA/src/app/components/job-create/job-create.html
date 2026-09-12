@@ -1,0 +1,138 @@
+<mat-card class="create-card">
+  <mat-card-header>
+    <mat-card-title>Kreiraj oglas</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="create-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Naslov</mat-label>
+        <input matInput formControlName="title" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Opis</mat-label>
+        <textarea matInput rows="4" formControlName="description"></textarea>
+      </mat-form-field>
+
+      <div class="row">
+        <mat-form-field appearance="outline">
+          <mat-label>Tip posla</mat-label>
+          <mat-select formControlName="jobType">
+            @for (t of jobTypes; track t) {
+              <mat-option [value]="t">{{ t }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Nivo iskustva</mat-label>
+          <mat-select formControlName="experienceLevel">
+            @for (lvl of experienceLevels; track lvl) {
+              <mat-option [value]="lvl">{{ lvl }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Način rada</mat-label>
+          <mat-select formControlName="workMode">
+            @for (m of workModes; track m) {
+              <mat-option [value]="m">{{ m }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="row">
+        <mat-form-field appearance="outline">
+          <mat-label>Company ID</mat-label>
+          <input matInput formControlName="companyId" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Naziv kompanije</mat-label>
+          <input matInput formControlName="companyName" />
+        </mat-form-field>
+      </div>
+
+      <div class="row">
+        <mat-form-field appearance="outline">
+          <mat-label>Grad</mat-label>
+          <input matInput formControlName="city" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Država</mat-label>
+          <input matInput formControlName="country" />
+        </mat-form-field>
+      </div>
+
+      <div class="row">
+        <mat-form-field appearance="outline">
+          <mat-label>Plata min</mat-label>
+          <input matInput type="number" formControlName="salaryMin" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Plata max</mat-label>
+          <input matInput type="number" formControlName="salaryMax" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Valuta</mat-label>
+          <input matInput formControlName="currency" />
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Veštine (odvojene zarezom)</mat-label>
+        <input matInput formControlName="skills" placeholder="npr. C#, Angular, Docker" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Zahtevi (odvojeni zarezom)</mat-label>
+        <input matInput formControlName="requirements" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Odgovornosti (odvojene zarezom)</mat-label>
+        <input matInput formControlName="responsibilities" />
+      </mat-form-field>
+
+      <div class="row">
+        <mat-form-field appearance="outline">
+          <mat-label>Godine iskustva</mat-label>
+          <input matInput type="number" formControlName="yearsOfExperience" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Nivo obrazovanja</mat-label>
+          <input matInput formControlName="educationLevel" />
+        </mat-form-field>
+      </div>
+
+      <div class="row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Apply URL</mat-label>
+          <input matInput formControlName="applyUrl" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Kontakt email</mat-label>
+          <input matInput type="email" formControlName="contactEmail" />
+        </mat-form-field>
+      </div>
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      <div class="actions">
+        <button mat-raised-button color="primary" type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Kreiranje...' : 'Kreiraj oglas' }}
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

@@ -10,7 +10,7 @@ namespace Recruitment.UnitTests.Commands
         [Fact]
         public void Validate_ValidCommand_HasNoErrors()
         {
-            var command = new CreateRecruitmentProcessCommand { CompanyId = Guid.NewGuid(), JobId = Guid.NewGuid() };
+            var command = new CreateRecruitmentProcessCommand { CompanyId = Guid.NewGuid(), JobId = "0123456789abcdef01234567" };
 
             var result = _validator.Validate(command);
 
@@ -20,7 +20,7 @@ namespace Recruitment.UnitTests.Commands
         [Fact]
         public void Validate_EmptyCompanyId_HasError()
         {
-            var command = new CreateRecruitmentProcessCommand { CompanyId = Guid.Empty, JobId = Guid.NewGuid() };
+            var command = new CreateRecruitmentProcessCommand { CompanyId = Guid.Empty, JobId = "0123456789abcdef01234567" };
 
             var result = _validator.Validate(command);
 
@@ -31,7 +31,7 @@ namespace Recruitment.UnitTests.Commands
         [Fact]
         public void Validate_EmptyJobId_HasError()
         {
-            var command = new CreateRecruitmentProcessCommand { CompanyId = Guid.NewGuid(), JobId = Guid.Empty };
+            var command = new CreateRecruitmentProcessCommand { CompanyId = Guid.NewGuid(), JobId = string.Empty };
 
             var result = _validator.Validate(command);
 

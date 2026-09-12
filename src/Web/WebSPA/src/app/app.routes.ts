@@ -1,4 +1,13 @@
 import { Routes } from '@angular/router';
+import { applicationRoleGuard } from './core/guards/application-role.guard';
+import { JobList } from './components/job-list/job-list';
+import { JobSearch } from './components/job-search/job-search';
+import { JobDetails } from './components/job-details/job-details';
+import { JobCreate } from './components/job-create/job-create';
+import { SavedJobs } from './components/saved-jobs/saved-jobs';
+import { ChatComponent } from './components/chat/chat';
+import { DashboardComponent } from './components/dashboard/dashboard';
+import { roleGuard } from './guards/role';
 import { authGuard, guestGuard, adminGuard } from './core/guards/auth.guard';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
@@ -10,6 +19,27 @@ import { NotificationsComponent } from './features/notifications/notifications.c
 import { AdminUsersComponent } from './features/admin/admin-users.component';
 
 export const routes: Routes = [
+  {
+    path: 'admin/statistics',
+    loadComponent: () => import('./components/application-statistics/application-statistics-component')
+      .then(c => c.ApplicationStatisticsComponent),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Admin'] },
+  },
+  {
+    path: 'applications-received',
+    loadComponent: () => import('./components/employer-application-page/employer-application-page')
+      .then(c => c.EmployerApplicationPage),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Employer'] },
+  },
+  {
+    path: 'applications',
+    loadComponent: () => import('./components/candidate-applications/candidate-applications-component')
+      .then(c => c.CandidateApplicationsComponent),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Candidate'] },
+  },
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'register', component: RegisterComponent, canActivate: [guestGuard] },
   { path: 'confirm-email', component: ConfirmEmailComponent, canActivate: [guestGuard] },
@@ -17,6 +47,18 @@ export const routes: Routes = [
   { path: 'reset-password', component: ResetPasswordComponent, canActivate: [guestGuard] },
   { path: 'notifications', component: NotificationsComponent, canActivate: [authGuard] },
   { path: 'admin', component: AdminUsersComponent, canActivate: [adminGuard] },
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [roleGuard],
+    data: { roles: ['Candidate', 'Employer', 'Admin'] }
+  },
+  {
+    path: 'chat',
+    component: ChatComponent,
+    canActivate: [roleGuard],
+    data: { roles: ['Candidate', 'Employer', 'Admin'] }
+  },
   {
     path: 'profile/candidate/:userId',
     loadComponent: () => import('./components/candidate-profile/candidate-profile-component')
@@ -42,5 +84,11 @@ export const routes: Routes = [
     loadComponent: () => import('./components/candidate-application-view/candidate-application-view')
       .then(c => c.CandidateApplicationViewComponent)
   },
+  { path: 'jobs', component: JobList },
+  { path: 'search', component: JobSearch },
+  { path: 'jobs/new', component: JobCreate },
+  { path: 'bookmarks', component: SavedJobs },
+  { path: 'jobs/:id', component: JobDetails },
   { path: '', component: HomeComponent, canActivate: [authGuard] },
+  { path: '**', redirectTo: '' }
 ];

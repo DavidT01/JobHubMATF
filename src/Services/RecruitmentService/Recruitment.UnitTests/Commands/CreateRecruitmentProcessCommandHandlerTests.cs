@@ -17,7 +17,7 @@ namespace Recruitment.UnitTests.Commands
             var command = new CreateRecruitmentProcessCommand
             {
                 CompanyId = Guid.NewGuid(),
-                JobId = Guid.NewGuid()
+                 JobId = "0123456789abcdef01234567"
             };
 
             var resultId = await handler.Handle(command, CancellationToken.None);

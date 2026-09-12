@@ -15,7 +15,7 @@ namespace Recruitment.UnitTests.Queries
             var mapper = TestHelpers.CreateMapper();
             var handler = new GetProcessByJobIdQueryHandler(context, mapper, NullLogger<GetProcessByJobIdQueryHandler>.Instance);
 
-            var result = await handler.Handle(new GetProcessByJobIdQuery(Guid.NewGuid()), CancellationToken.None);
+            var result = await handler.Handle(new GetProcessByJobIdQuery("0123456789abcdef01234567"), CancellationToken.None);
 
             result.Should().BeNull();
         }
@@ -25,7 +25,7 @@ namespace Recruitment.UnitTests.Queries
         {
             using var context = TestHelpers.CreateDbContext();
             var mapper = TestHelpers.CreateMapper();
-            var jobId = Guid.NewGuid();
+                var jobId = "0123456789abcdef01234567";
             var process = new RecruitmentProcess { CompanyId = Guid.NewGuid(), JobId = jobId };
             process.Rounds.Add(new SelectionRound { RecruitmentProcessId = process.Id, Title = "R2", Index = 1 });
             process.Rounds.Add(new SelectionRound { RecruitmentProcessId = process.Id, Title = "R1", Index = 0 });
