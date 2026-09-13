@@ -1,12 +1,21 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { Observable, map, shareReplay } from 'rxjs';
+import { AuthService } from './services/auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CurrentUser {
-  private readonly userId = 'test-user-123' // placeholder 
+  private authService = inject(AuthService);
+  private userId$?: Observable<string>;
 
-  getUserId(): string {
-    return this.userId;
+  getUserId(): Observable<string> {
+    if (!this.userId$) {
+      this.userId$ = this.authService.me().pipe(
+        map((me) => me.id),
+        shareReplay(1)
+      );
+    }
+    return this.userId$;
   }
 }

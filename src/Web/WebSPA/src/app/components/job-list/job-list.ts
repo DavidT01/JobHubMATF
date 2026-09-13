@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { switchMap } from 'rxjs';
 import { Job } from '../../models/job.model';
 import { JobService } from '../../services/job.service';
 import { CurrentUser } from '../../core/current-user';
@@ -41,7 +42,9 @@ export class JobList implements OnInit {
       }
     });
 
-    this.jobService.getBookmarks(this.currentUser.getUserId()).subscribe({
+    this.currentUser.getUserId().pipe(
+      switchMap((userId) => this.jobService.getBookmarks(userId))
+    ).subscribe({
       next: (bookmarks) => {
         this.bookmarkedIds.set(new Set(bookmarks.map((b) => b.id)));
       },
@@ -55,27 +58,26 @@ export class JobList implements OnInit {
 
   toggleBookmark(event: Event, jobId: string): void {
     event.stopPropagation();
-    const userId = this.currentUser.getUserId();
+    const wasBookmarked = this.isBookmarked(jobId);
 
-    if (this.isBookmarked(jobId)) {
-      this.jobService.removeBookmark(userId, jobId).subscribe({
-        next: () => {
-          const updated = new Set(this.bookmarkedIds());
+    this.currentUser.getUserId().pipe(
+      switchMap((userId) =>
+        wasBookmarked
+          ? this.jobService.removeBookmark(userId, jobId)
+          : this.jobService.addBookmark(userId, jobId)
+      )
+    ).subscribe({
+      next: () => {
+        const updated = new Set(this.bookmarkedIds());
+        if (wasBookmarked) {
           updated.delete(jobId);
-          this.bookmarkedIds.set(updated);
-        },
-        error: (err) => console.error(err),
-      });
-    } else {
-      this.jobService.addBookmark(userId, jobId).subscribe({
-        next: () => {
-          const updated = new Set(this.bookmarkedIds());
+        } else {
           updated.add(jobId);
-          this.bookmarkedIds.set(updated);
-        },
-        error: (err) => console.error(err),
-      });
-    }
+        }
+        this.bookmarkedIds.set(updated);
+      },
+      error: (err) => console.error(err),
+    });
   }
 
   openDetails(id: string): void {
