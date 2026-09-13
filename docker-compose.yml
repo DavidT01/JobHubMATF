@@ -50,19 +50,6 @@ services:
       timeout: 10s
       retries: 20
 
-  # Self-signed sertifikat za Profile gRPC preko TLS-a.
-  # ApplicationService dozvoljava samo https adresu za Profile jer mu prosleđuje bearer token.
-  certs:
-    image: alpine:3.21
-    command: >
-      sh -c "if [ ! -f /certs/profile-api.crt ]; then
-      apk add --no-cache openssl >/dev/null &&
-      openssl req -x509 -newkey rsa:2048 -nodes -days 3650
-      -keyout /certs/profile-api.key -out /certs/profile-api.crt
-      -subj /CN=profile-api -addext subjectAltName=DNS:profile-api &&
-      chmod 644 /certs/profile-api.key /certs/profile-api.crt; fi"
-    volumes:
-      - certs:/certs
 
   # ---------- servisi ----------
 
@@ -109,18 +96,11 @@ services:
       Kestrel__Endpoints__Http__Url: http://+:8080
       Kestrel__Endpoints__Grpc__Url: http://+:8081
       Kestrel__Endpoints__Grpc__Protocols: Http2
-      Kestrel__Endpoints__GrpcTls__Url: https://+:8443
-      Kestrel__Endpoints__GrpcTls__Protocols: Http1AndHttp2
-      Kestrel__Endpoints__GrpcTls__Certificate__Path: /certs/profile-api.crt
-      Kestrel__Endpoints__GrpcTls__Certificate__KeyPath: /certs/profile-api.key
     volumes:
-      - certs:/certs:ro
       - profile-uploads:/app/wwwroot
     depends_on:
       postgres:
         condition: service_healthy
-      certs:
-        condition: service_completed_successfully
     ports:
       - "5213:8080"
 
@@ -155,14 +135,11 @@ services:
       Services__ProfileBaseUrl: http://profile-api:8080
       Services__ProfilePublicBaseUrl: http://localhost:5213
       Services__CatalogBaseUrl: http://catalog-api:8080
-      GrpcServices__ProfileApi: https://profile-api:8443
+      GrpcServices__ProfileApi: http://profile-api:8081
       GrpcServices__CatalogApi: http://catalog-api:8081
       GrpcServices__RecruitmentApi: http://recruitment-api:8081
-      SSL_CERT_FILE: /certs/profile-api.crt
       Outbox__Enabled: "false"
       Outbox__ConnectionUri: amqp://guest:guest@rabbitmq:5672/
-    volumes:
-      - certs:/certs:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -213,4 +190,3 @@ volumes:
   mongo-data:
   identity-data:
   profile-uploads:
-  certs:

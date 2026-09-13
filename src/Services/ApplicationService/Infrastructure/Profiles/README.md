@@ -1,11 +1,10 @@
 # Profile integration migration
 
 `ICompanyProfileReader` now uses the owner-only Profile gRPC lookup. Configure
-`GrpcServices__ProfileApi` (default `https://localhost:7043`) and start Profile's
-HTTPS launch profile with a trusted certificate. Both services must use the same
-Identity JWT settings. This address must be HTTPS, without credentials or
-path/query/fragment: bearer tokens must not cross a plaintext connection.
-Container deployments need trusted TLS and HTTP/2 for this endpoint too.
+`GrpcServices__ProfileApi` (default `http://localhost:5214`, Profile's HTTP/2 gRPC
+endpoint). Both services must use the same Identity JWT settings. The address must be
+an HTTP or HTTPS origin without credentials or path/query/fragment. A plain `http://`
+address requires the Profile endpoint to be configured with `Protocols: Http2`.
 
 The reader forwards only the current request's bearer token in per-call metadata,
 uses a ten-second deadline and propagates cancellation. Missing bearer credentials
