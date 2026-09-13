@@ -1,4 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:7043/api'
+  catalogApiUrl: 'http://localhost:5246/api/v1/Catalog',
+  profileApiUrl: 'http://localhost:7043/api',
+  recruitmentApiUrl: 'http://localhost:5116/api'
 };

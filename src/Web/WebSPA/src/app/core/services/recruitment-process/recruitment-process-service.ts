@@ -20,9 +20,9 @@ import { UpdateInterviewScheduleCommand } from '../../models/update-interview-sc
   providedIn: 'root',
 })
 export class RecruitmentProcessService {
-  private apiUrl = `${environment.apiUrl}/Recruitment`;
-  private interviewUrl = `${environment.apiUrl}/Interview`;
-  private candidateUrl = `${environment.apiUrl}/Candidate`;
+  private apiUrl = `${environment.recruitmentApiUrl}/Recruitment`;
+  private interviewUrl = `${environment.recruitmentApiUrl}/Interview`;
+  private candidateUrl = `${environment.recruitmentApiUrl}/Candidate`;
 
   constructor(private http: HttpClient) { }
 
