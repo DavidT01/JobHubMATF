@@ -42,7 +42,11 @@ namespace Chat.API.Hubs
                 throw new HubException("Korisnik nije autentifikovan.");
             }
 
-            var savedMessage = await _chatService.SendMessageAsync(senderId, reciverId, message);
+            var senderRole = Context.User?.FindFirst(ClaimTypes.Role)?.Value
+                          ?? Context.User?.FindFirst("role")?.Value
+                          ?? "Candidate";
+
+            var savedMessage = await _chatService.SendMessageAsync(senderId, senderRole, reciverId, message);
 
             if (_connections.TryGetValue(reciverId, out var receiverConnection))
             {

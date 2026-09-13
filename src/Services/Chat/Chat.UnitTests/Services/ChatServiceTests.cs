@@ -28,7 +28,6 @@ public class ChatServiceTests
             .Setup(db => db.GetCollection<Message>("Messages", null))
             .Returns(_messagesCollectionMock.Object);
 
-        // Ignorišemo kreiranje indeksa u konstruktoru
         _chatsCollectionMock
             .Setup(c => c.Indexes.CreateOneAsync(It.IsAny<CreateIndexModel<API.Models.Chat>>(), null, default))
             .ReturnsAsync("index");
@@ -68,8 +67,8 @@ public class ChatServiceTests
 
         var service = new ChatService(_databaseMock.Object);
 
-        // Act
-        var result = await service.GetOrCreateChatAsync(user2, user1);
+        // Act - ako chat postoji, uloga nije bitna za restrikciju, ali je prosleđujemo
+        var result = await service.GetOrCreateChatAsync("alice", "Candidate", "bob");
 
         // Assert
         result.Should().NotBeNull();
@@ -79,9 +78,33 @@ public class ChatServiceTests
     }
 
     [Fact]
-    public async Task GetMessagesByChatIdAsync_ShouldReturnMessages_WhenChatIdIsValid()
+    public async Task GetOrCreateChatAsync_ShouldThrowUnauthorized_WhenChatDoesNotExistAndUserIsNotEmployer()
     {
         // Arrange
+        var asyncCursorMock = new Mock<IAsyncCursor<API.Models.Chat>>();
+        asyncCursorMock.Setup(c => c.Current).Returns(new List<API.Models.Chat>());
+        asyncCursorMock
+            .SetupSequence(c => c.MoveNextAsync(default))
+            .ReturnsAsync(false); // Chat ne postoji
+
+        _chatsCollectionMock
+            .Setup(c => c.FindAsync(
+                It.IsAny<FilterDefinition<API.Models.Chat>>(),
+                It.IsAny<FindOptions<API.Models.Chat, API.Models.Chat>>(),
+                default))
+            .ReturnsAsync(asyncCursorMock.Object);
+
+        var service = new ChatService(_databaseMock.Object);
+
+        // Act & Assert - Pokušava da kreira chat neko ko NIJE Employer
+        var act = async () => await service.GetOrCreateChatAsync("candidate-1", "Candidate", "employer-1");
+        await act.Should().ThrowAsync<UnauthorizedAccessException>()
+            .WithMessage("Samo korisnici sa ulogom poslodavca mogu započinjati nove razgovore.");
+    }
+
+    [Fact]
+    public async Task GetMessagesByChatIdAsync_ShouldReturnMessages_WhenChatIdIsValid()
+    {
         var chatId = "chat-123";
         var expectedMessages = new List<Message>
         {
@@ -104,10 +127,8 @@ public class ChatServiceTests
 
         var service = new ChatService(_databaseMock.Object);
 
-        // Act
         var result = await service.GetMessagesByChatIdAsync(chatId);
 
-        // Assert
         result.Should().NotBeNull();
         result.Should().HaveCount(1);
         result[0].Text.Should().Be("Zdravo!");
@@ -116,8 +137,8 @@ public class ChatServiceTests
     [Fact]
     public async Task MarkAsReadAsync_ShouldUpdateMessagesToRead()
     {
-        // Arrange
         var currentUserId = "alice";
+        var currentUserRole = "Employer";
         var otherUserId = "bob";
         var chat = new API.Models.Chat { Id = "chat-1", User1Id = "alice", User2Id = "bob" };
 
@@ -141,23 +162,22 @@ public class ChatServiceTests
 
         var service = new ChatService(_databaseMock.Object);
 
-        // Act & Assert
-        var act = async () => await service.MarkAsReadAsync(currentUserId, otherUserId);
+        var act = async () => await service.MarkAsReadAsync(currentUserId, currentUserRole, otherUserId);
         await act.Should().NotThrowAsync();
     }
 
     [Fact]
-    public async Task SendMessageAsync_ShouldCreateChatAndInsertMessage_WhenValidDataProvided()
+    public async Task SendMessageAsync_ShouldCreateChatAndInsertMessage_WhenValidEmployerDataProvided()
     {
         // Arrange
-        var senderId = "alice";
-        var receiverId = "bob";
-        var text = "Hello Bob!";
-        var chat = new API.Models.Chat { Id = "chat-1", User1Id = "alice", User2Id = "bob" };
+        var senderId = "employer-1";
+        var senderRole = "Employer"; // Dozvoljeno kreiranje novog chata
+        var receiverId = "candidate-1";
+        var text = "Hello Candidate!";
 
         var chatCursorMock = new Mock<IAsyncCursor<API.Models.Chat>>();
-        chatCursorMock.Setup(c => c.Current).Returns(new List<API.Models.Chat> { chat });
-        chatCursorMock.SetupSequence(c => c.MoveNextAsync(default)).ReturnsAsync(true).ReturnsAsync(false);
+        chatCursorMock.Setup(c => c.Current).Returns(new List<API.Models.Chat>()); // Nema postojećeg chata, kreiraće se
+        chatCursorMock.SetupSequence(c => c.MoveNextAsync(default)).ReturnsAsync(false);
 
         _chatsCollectionMock
             .Setup(c => c.FindAsync(
@@ -165,6 +185,10 @@ public class ChatServiceTests
                 It.IsAny<FindOptions<API.Models.Chat, API.Models.Chat>>(),
                 default))
             .ReturnsAsync(chatCursorMock.Object);
+
+        _chatsCollectionMock
+            .Setup(c => c.InsertOneAsync(It.IsAny<API.Models.Chat>(), null, default))
+            .Returns(Task.CompletedTask);
 
         _messagesCollectionMock
             .Setup(c => c.InsertOneAsync(
@@ -176,13 +200,12 @@ public class ChatServiceTests
         var service = new ChatService(_databaseMock.Object);
 
         // Act
-        var result = await service.SendMessageAsync(senderId, receiverId, text);
+        var result = await service.SendMessageAsync(senderId, senderRole, receiverId, text);
 
         // Assert
         result.Should().NotBeNull();
         result.Text.Should().Be(text);
         result.SenderId.Should().Be(senderId);
-        result.ChatId.Should().Be("chat-1");
         result.IsRead.Should().BeFalse();
 
         _messagesCollectionMock.Verify(
@@ -193,7 +216,6 @@ public class ChatServiceTests
     [Fact]
     public async Task GetMessagesAsync_ShouldReturnMessages_WhenChatExists()
     {
-        // Arrange
         var user1 = "alice";
         var user2 = "bob";
         var chat = new API.Models.Chat { Id = "chat-1", User1Id = "alice", User2Id = "bob" };
@@ -226,10 +248,8 @@ public class ChatServiceTests
 
         var service = new ChatService(_databaseMock.Object);
 
-        // Act
         var result = await service.GetMessagesAsync(user1, user2);
 
-        // Assert
         result.Should().NotBeNull();
         result.Should().HaveCount(1);
         result[0].Text.Should().Be("Ćao!");
@@ -238,13 +258,11 @@ public class ChatServiceTests
     [Fact]
     public async Task GetUserConversationsAsync_ShouldReturnConversations_WhenChatsExist()
     {
-        // Arrange
         var currentUserId = "alice";
         var otherUserId = "bob";
         var chat = new API.Models.Chat { Id = "chat-1", User1Id = "alice", User2Id = "bob", CreatedAt = DateTime.UtcNow };
         var lastMessage = new Message { Id = "m1", ChatId = "chat-1", SenderId = "bob", Text = "Zdravo!", Timestamp = DateTime.UtcNow };
 
-        // Mock za listu chatu-ova korisnika
         var chatCursorMock = new Mock<IAsyncCursor<API.Models.Chat>>();
         chatCursorMock.Setup(c => c.Current).Returns(new List<API.Models.Chat> { chat });
         chatCursorMock.SetupSequence(c => c.MoveNextAsync(default)).ReturnsAsync(true).ReturnsAsync(false);
@@ -256,7 +274,6 @@ public class ChatServiceTests
                 default))
             .ReturnsAsync(chatCursorMock.Object);
 
-        // Mock za nalaženje poslednje poruke (FirstOrDefaultAsync koristi kursor)
         var messageCursorMock = new Mock<IAsyncCursor<Message>>();
         messageCursorMock.Setup(c => c.Current).Returns(new List<Message> { lastMessage });
         messageCursorMock.SetupSequence(c => c.MoveNextAsync(default)).ReturnsAsync(true).ReturnsAsync(false);
@@ -268,7 +285,6 @@ public class ChatServiceTests
                 default))
             .ReturnsAsync(messageCursorMock.Object);
 
-        // Mock za brojanje nepročitanih poruka
         _messagesCollectionMock
             .Setup(c => c.CountDocumentsAsync(
                 It.IsAny<FilterDefinition<Message>>(),
@@ -278,10 +294,8 @@ public class ChatServiceTests
 
         var service = new ChatService(_databaseMock.Object);
 
-        // Act
         var result = await service.GetUserConversationsAsync(currentUserId);
 
-        // Assert
         result.Should().NotBeNull();
         result.Should().HaveCount(1);
         result[0].UserId.Should().Be(otherUserId);
