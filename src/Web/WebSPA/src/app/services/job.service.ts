@@ -8,7 +8,7 @@ import { environment } from "../../environments/environment";
 @Injectable({ providedIn: 'root'})
 export class JobService {
     private http = inject(HttpClient);
-    private baseUrl = environment.apiUrl;
+    private baseUrl = environment.catalogApiUrl;
 
     getAll(): Observable<Job[]> {
         return this.http.get<Job[]>(this.baseUrl);

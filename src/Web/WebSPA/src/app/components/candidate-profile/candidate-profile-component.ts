@@ -43,7 +43,7 @@ export class CandidateProfileComponent implements OnInit {
   private fb = inject(FormBuilder);
   private profileService = inject(CandidateProfileService);
   private dialog = inject(MatDialog);
-  public apiUrl = environment.apiUrl;
+  public apiUrl = environment.profileApiUrl;
 
   profileData = signal<CandidateProfileDto | null>(null);
   isLoading = signal<boolean>(true);

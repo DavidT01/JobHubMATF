@@ -34,7 +34,7 @@ export class CompanyProfileComponent implements OnInit {
   private fb = inject(FormBuilder);
   private profileService = inject(CompanyProfileService);
   private dialog = inject(MatDialog);
-  public apiUrl = environment.apiUrl;
+  public apiUrl = environment.profileApiUrl;
 
   profileData = signal<CompanyProfileDto | null>(null);
   isLoading = signal<boolean>(true);

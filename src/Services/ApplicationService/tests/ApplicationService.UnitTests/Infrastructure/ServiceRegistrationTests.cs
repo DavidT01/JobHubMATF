@@ -24,6 +24,8 @@ public sealed class ServiceRegistrationTests
             ["Services:ProfileBaseUrl"] = "http://localhost:5213",
             ["Services:ProfilePublicBaseUrl"] = "http://localhost:5213",
             ["Services:CatalogBaseUrl"] = "http://localhost:5246",
+            ["GrpcServices:ProfileApi"] = "https://localhost:7043",
+            ["GrpcServices:CatalogApi"] = "https://localhost:7018",
             ["GrpcServices:RecruitmentApi"] = "http://localhost:5116",
             ["ConnectionStrings:ApplicationDatabase"] = "Host=localhost;Database=test;Username=test;Password=test"
         }).Build();

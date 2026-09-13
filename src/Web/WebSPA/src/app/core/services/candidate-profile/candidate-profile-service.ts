@@ -11,7 +11,7 @@ import { UrlResponseDto } from '../../models/url-response-dto';
 })
 export class CandidateProfileService {
   private readonly http = inject(HttpClient);
-  private readonly api = `${environment.apiUrl}/candidate-profiles`;
+  private readonly api = `${environment.profileApiUrl}/candidate-profiles`;
 
   getProfile(id: string): Observable<CandidateProfileDto> {
     return this.http.get<CandidateProfileDto>(`${this.api}/${id}`);
