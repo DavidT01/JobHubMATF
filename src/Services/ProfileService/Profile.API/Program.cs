@@ -43,6 +43,12 @@ builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 var app = builder.Build();
 
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    using var migrationScope = app.Services.CreateScope();
+    migrationScope.ServiceProvider.GetRequiredService<ProfileContext>().Database.Migrate();
+}
+
 app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.

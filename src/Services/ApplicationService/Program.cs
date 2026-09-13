@@ -1,3 +1,5 @@
+using ApplicationService.Persistence.Data;
+using Microsoft.EntityFrameworkCore;
 using ApplicationService.Application;
 using ApplicationService.Infrastructure;
 using ApplicationService.Infrastructure.Errors;
@@ -27,6 +29,12 @@ builder.Services.AddApplicationPersistence(builder.Configuration);
 builder.Services.AddOutboxMessaging(builder.Configuration);
 
 var app = builder.Build();
+
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    using var migrationScope = app.Services.CreateScope();
+    migrationScope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
+}
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
