@@ -20,13 +20,14 @@ public class ChatControllerTests
         _chatServiceMock = new Mock<IChatService>();
     }
 
-    private ChatController CreateControllerWithUser(string userId)
+    private ChatController CreateControllerWithUser(string userId, string role = "Employer")
     {
         var controller = new ChatController(_chatServiceMock.Object);
 
         var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, userId)
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            new Claim(ClaimTypes.Role, role)
         }, "TestAuth"));
 
         controller.ControllerContext = new ControllerContext
@@ -42,6 +43,7 @@ public class ChatControllerTests
     {
         // Arrange
         var senderId = "user-1";
+        var senderRole = "Employer";
         var request = new SendMessageRequest
         {
             ReciverId = "user-2",
@@ -49,7 +51,7 @@ public class ChatControllerTests
         };
 
         _chatServiceMock
-            .Setup(s => s.SendMessageAsync(senderId, request.ReciverId, request.Text))
+            .Setup(s => s.SendMessageAsync(senderId, senderRole, request.ReciverId, request.Text))
             .ReturnsAsync(new Message
             {
                 Id = "msg-1",
@@ -59,7 +61,7 @@ public class ChatControllerTests
                 IsRead = false
             });
 
-        var controller = CreateControllerWithUser(senderId);
+        var controller = CreateControllerWithUser(senderId, senderRole);
 
         // Act
         var result = await controller.SendMessage(request);
@@ -178,13 +180,14 @@ public class ChatControllerTests
     {
         // Arrange
         var currentUserId = "user-1";
+        var currentUserRole = "Employer";
         var otherUserId = "user-2";
 
         _chatServiceMock
-            .Setup(s => s.MarkAsReadAsync(currentUserId, otherUserId))
+            .Setup(s => s.MarkAsReadAsync(currentUserId, currentUserRole, otherUserId))
             .Returns(Task.CompletedTask);
 
-        var controller = CreateControllerWithUser(currentUserId);
+        var controller = CreateControllerWithUser(currentUserId, currentUserRole);
 
         // Act
         var result = await controller.MarkAsRead(otherUserId);

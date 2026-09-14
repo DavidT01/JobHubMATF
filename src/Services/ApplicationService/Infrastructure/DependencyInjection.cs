@@ -51,11 +51,11 @@ public static class DependencyInjection
         {
             var baseUrl = configuration["GrpcServices:ProfileApi"];
             if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
-                || uri.Scheme != Uri.UriSchemeHttps
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
                 || !string.IsNullOrEmpty(uri.UserInfo) || uri.AbsolutePath != "/"
                 || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
             {
-                throw new InvalidOperationException("GrpcServices:ProfileApi must be an HTTPS origin without credentials, path, query or fragment because it receives bearer tokens.");
+                throw new InvalidOperationException("GrpcServices:ProfileApi must be an absolute HTTP(S) origin without credentials, path, query or fragment.");
             }
             options.Address = uri;
         }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
@@ -73,18 +73,7 @@ public static class DependencyInjection
             options.Address = uri;
         }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
         services.AddScoped<IJobReader, CatalogGrpcJobClient>();
-        services.AddHttpClient<ICandidateProfileReader, CandidateProfileClient>(client =>
-        {
-            var baseUrl = configuration["Services:ProfileBaseUrl"];
-            if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
-                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-            {
-                throw new InvalidOperationException("Services:ProfileBaseUrl must be an absolute HTTP(S) URL.");
-            }
-
-            client.BaseAddress = new Uri(uri.AbsoluteUri.TrimEnd('/') + "/");
-            client.Timeout = TimeSpan.FromSeconds(10);
-        }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+        services.AddScoped<ICandidateProfileReader, CandidateProfileClient>();
         services.AddGrpcClient<RecruitmentGrpcService.RecruitmentGrpcServiceClient>(options =>
         {
             var recruitmentAddress = configuration["GrpcServices:RecruitmentApi"]

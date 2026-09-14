@@ -41,20 +41,29 @@ namespace Chat.API.Services
             await _messages.Indexes.CreateOneAsync(new CreateIndexModel<Message>(messageIndexKeys));
         }
 
-        public async Task<Models.Chat> GetOrCreateChatAsync(string user1, string user2)
+        public async Task<Models.Chat> GetOrCreateChatAsync(string currentUserId, string currentUserRole, string targetUserId)
         {
-            var sortedUsers = new List<string> { user1, user2 };
+            var sortedUsers = new List<string> { currentUserId, targetUserId };
             sortedUsers.Sort();
 
             var u1 = sortedUsers[0];
             var u2 = sortedUsers[1];
 
+            // 1. Ako chat već postoji, dozvoljavamo komunikaciju
             var chat = await _chats
                 .Find(c => c.User1Id == u1 && c.User2Id == u2)
                 .FirstOrDefaultAsync();
 
             if (chat != null)
+            {
                 return chat;
+            }
+
+            // 2. Ako chat NE postoji, samo poslodavac sme da inicira novi razgovor
+            if (!string.Equals(currentUserRole, "Employer", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException("Samo korisnici sa ulogom poslodavca mogu započinjati nove razgovore.");
+            }
 
             var newChat = new Models.Chat
             {
@@ -64,13 +73,13 @@ namespace Chat.API.Services
             };
 
             await _chats.InsertOneAsync(newChat);
-
             return newChat;
         }
 
-        public async Task<Message> SendMessageAsync(string senderId, string receiverId, string text)
+        public async Task<Message> SendMessageAsync(string senderId, string senderRole, string receiverId, string text)
         {
-            var chat = await GetOrCreateChatAsync(senderId, receiverId);
+            // Prosleđujemo ulogu pošiljaoca da bi GetOrCreateChatAsync mogao da proveri da li sme da kreira chat
+            var chat = await GetOrCreateChatAsync(senderId, senderRole, receiverId);
 
             var message = new Message
             {
@@ -150,9 +159,9 @@ namespace Chat.API.Services
             return conversations.OrderByDescending(c => c.LastMessageTime).ToList();
         }
 
-        public async Task MarkAsReadAsync(string currentUserId, string otherUserId)
+        public async Task MarkAsReadAsync(string currentUserId, string currentUserRole, string otherUserId)
         {
-            var chat = await GetOrCreateChatAsync(currentUserId, otherUserId);
+            var chat = await GetOrCreateChatAsync(currentUserId, currentUserRole, otherUserId);
 
             var filter = Builders<Message>.Filter.And(
                 Builders<Message>.Filter.Eq(m => m.ChatId, chat.Id),

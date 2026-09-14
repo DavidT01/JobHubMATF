@@ -1,5 +1,6 @@
 using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using JobHub.Grpc.Contracts.Profile;
 using AutoMapper;
 using MediatR;
@@ -9,6 +10,7 @@ using Profile.API.Features.CandidateProfiles.Queries.GetCandidateProfileById;
 
 namespace Profile.API.Services.GrpcServices;
 
+[Authorize]
 public sealed class CandidateProfileGrpcService(
     IMediator mediator,
     IMapper mapper,

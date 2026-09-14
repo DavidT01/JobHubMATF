@@ -28,6 +28,14 @@ namespace Chat.API.Controllers
                 ?? User.FindFirst(ClaimTypes.Name)?.Value;
         }
 
+        // Pomoćna metoda za čitanje uloge iz JWT tokena
+        private string GetCurrentUserRole()
+        {
+            return User.FindFirst(ClaimTypes.Role)?.Value
+                ?? User.FindFirst("role")?.Value
+                ?? "Candidate";
+        }
+
         // 1. Sidebar - lista svih konverzacija
         [HttpGet("conversations")]
         public async Task<IActionResult> GetConversations()
@@ -83,8 +91,11 @@ namespace Chat.API.Controllers
             if (string.IsNullOrWhiteSpace(request.Text))
                 return BadRequest("Poruka ne može biti prazna.");
 
+            var senderRole = GetCurrentUserRole();
+
             var message = await _chatService.SendMessageAsync(
                 senderId,
+                senderRole,
                 request.ReciverId,
                 request.Text
             );
@@ -100,7 +111,9 @@ namespace Chat.API.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            await _chatService.MarkAsReadAsync(userId, otherUserId);
+            var userRole = GetCurrentUserRole();
+
+            await _chatService.MarkAsReadAsync(userId, userRole, otherUserId);
             return Ok();
         }
 

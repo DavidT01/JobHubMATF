@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
@@ -15,6 +15,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 
 import { CandidateProfileService } from '../../core/services/candidate-profile/candidate-profile-service';
+import { AuthService } from '../../core/services/auth.service';
 import { CandidateProfileDto } from '../../core/models/candidate-profile-dto';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog-component';
 
@@ -38,12 +39,12 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-
   styleUrl: './candidate-profile-component.scss',
 })
 export class CandidateProfileComponent implements OnInit {
-  private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private profileService = inject(CandidateProfileService);
+  private authService = inject(AuthService);
   private dialog = inject(MatDialog);
-  public apiUrl = environment.apiUrl;
+  public apiUrl = environment.profileApiUrl;
 
   profileData = signal<CandidateProfileDto | null>(null);
   isLoading = signal<boolean>(true);
@@ -53,13 +54,14 @@ export class CandidateProfileComponent implements OnInit {
   form!: FormGroup;
 
   ngOnInit(): void {
-    this.userId = this.route.snapshot.paramMap.get('userId') || '';
     this.initForm();
-
-    if (this.userId)
-      this.loadProfile();
-    else
-      this.router.navigate(['/']);
+    this.authService.me().subscribe({
+      next: user => {
+        this.userId = user.id;
+        this.loadProfile();
+      },
+      error: () => this.router.navigate(['/login'])
+    });
   }
 
   initForm(): void {

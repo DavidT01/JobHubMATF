@@ -4,8 +4,9 @@ import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { AdminService, AdminUser } from '../../core/services/admin.service';
+import { AdminService, AdminStats, AdminUser } from '../../core/services/admin.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -15,6 +16,7 @@ import { AdminService, AdminUser } from '../../core/services/admin.service';
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
+    MatInputModule,
     MatSelectModule,
     RouterLink
   ],
@@ -25,6 +27,8 @@ export class AdminUsersComponent implements OnInit {
   private adminService = inject(AdminService);
 
   users = signal<AdminUser[]>([]);
+  stats = signal<AdminStats | null>(null);
+  search = '';
   error = signal<string | null>(null);
   loading = signal(true);
   readonly roles = ['Candidate', 'Employer', 'Admin'];
@@ -35,7 +39,7 @@ export class AdminUsersComponent implements OnInit {
 
   reload(): void {
     this.loading.set(true);
-    this.adminService.listUsers().subscribe({
+    this.adminService.listUsers(this.search).subscribe({
       next: list => {
         this.users.set(list);
         this.loading.set(false);
@@ -45,6 +49,11 @@ export class AdminUsersComponent implements OnInit {
         this.error.set('Could not load users. Admin role required.');
         this.loading.set(false);
       }
+    });
+
+    this.adminService.stats().subscribe({
+      next: s => this.stats.set(s),
+      error: () => this.stats.set(null)
     });
   }
 
@@ -70,6 +79,13 @@ export class AdminUsersComponent implements OnInit {
     this.adminService.unlockUser(user.id).subscribe({
       next: () => this.reload(),
       error: () => this.error.set('Failed to unlock user.')
+    });
+  }
+
+  confirmEmail(user: AdminUser): void {
+    this.adminService.confirmEmail(user.id).subscribe({
+      next: () => this.reload(),
+      error: () => this.error.set('Failed to confirm email.')
     });
   }
 }

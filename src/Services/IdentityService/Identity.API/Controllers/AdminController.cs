@@ -27,9 +27,20 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("users")]
-    public async Task<IActionResult> ListUsers()
+    public async Task<IActionResult> ListUsers([FromQuery] string? search = null)
     {
-        var users = await _userManager.Users
+        var query = _userManager.Users.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim().ToLowerInvariant();
+            query = query.Where(u =>
+                (u.Email != null && u.Email.ToLower().Contains(term)) ||
+                (u.FirstName != null && u.FirstName.ToLower().Contains(term)) ||
+                (u.LastName != null && u.LastName.ToLower().Contains(term)));
+        }
+
+        var users = await query
             .OrderBy(u => u.Email)
             .ToListAsync();
 
@@ -40,6 +51,64 @@ public class AdminController : ControllerBase
         }
 
         return Ok(result);
+    }
+
+    [HttpGet("stats")]
+    public async Task<IActionResult> Stats()
+    {
+        var users = await _userManager.Users.ToListAsync();
+        var locked = 0;
+        var confirmed = 0;
+        foreach (var user in users)
+        {
+            if (user.EmailConfirmed)
+            {
+                confirmed++;
+            }
+
+            var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+            if (lockoutEnd.HasValue && lockoutEnd.Value > DateTimeOffset.UtcNow)
+            {
+                locked++;
+            }
+        }
+
+        return Ok(new
+        {
+            totalUsers = users.Count,
+            confirmedEmails = confirmed,
+            lockedAccounts = locked
+        });
+    }
+
+    [HttpPost("users/{id}/confirm-email")]
+    public async Task<IActionResult> ConfirmEmail(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+        {
+            return NotFound(new { Message = "User not found." });
+        }
+
+        if (user.EmailConfirmed)
+        {
+            return Ok(new { Message = "Email is already confirmed." });
+        }
+
+        user.EmailConfirmed = true;
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(" ", result.Errors.Select(e => e.Description));
+            return BadRequest(new { Message = errors });
+        }
+
+        await _notifications.NotifyAsync(
+            user.Id,
+            "Email confirmed by admin",
+            "An administrator confirmed your email. You can sign in now.");
+
+        return Ok(await ToDtoAsync(user));
     }
 
     [HttpPost("users/{id}/lock")]
@@ -77,6 +146,7 @@ public class AdminController : ControllerBase
         }
 
         await _userManager.SetLockoutEndDateAsync(user, null);
+        await _userManager.ResetAccessFailedCountAsync(user);
 
         await _notifications.NotifyAsync(
             user.Id,

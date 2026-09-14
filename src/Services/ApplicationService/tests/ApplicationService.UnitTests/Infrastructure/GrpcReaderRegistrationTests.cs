@@ -34,7 +34,7 @@ public sealed class GrpcReaderRegistrationTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("relative")]
-    [InlineData("http://profile:8080")]
+    [InlineData("ftp://profile")]
     [InlineData("https://user:password@profile")]
     [InlineData("https://profile/api")]
     [InlineData("https://profile/?token=value")]
@@ -46,6 +46,16 @@ public sealed class GrpcReaderRegistrationTests
         var error = Assert.Throws<InvalidOperationException>(() => scope.ServiceProvider.GetRequiredService<ICompanyProfileReader>());
         Assert.Contains("GrpcServices:ProfileApi", error.Message);
         Assert.DoesNotContain("password", error.Message);
+    }
+
+    [Theory]
+    [InlineData("http://profile:8081")]
+    [InlineData("https://profile:8443/")]
+    public void Profile_accepts_explicit_internal_http_or_https_origin(string address)
+    {
+        using var provider = Provider("GrpcServices:ProfileApi", address);
+        using var scope = provider.CreateScope();
+        Assert.IsType<CompanyProfileGrpcClient>(scope.ServiceProvider.GetRequiredService<ICompanyProfileReader>());
     }
 
     [Theory]

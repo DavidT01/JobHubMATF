@@ -30,6 +30,8 @@ message ApplicationCandidateProfileResponse {
   string user_id = 2;
   // Current CV from the candidate profile; empty means no CV uploaded.
   string cv_url = 3;
+  string first_name = 4;
+  string last_name = 5;
 }
 
 message ApplicationCompanyProfileResponse {

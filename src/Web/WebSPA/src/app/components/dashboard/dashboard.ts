@@ -130,8 +130,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  public navigateTo(route: string): void {
-    this.router.navigate([route]);
+  public navigateTo(route: string, stateData?: any): void {
+    this.router.navigate([route], { state: stateData });
+  }
+
+  public testOpenChatWithFakeUser() {
+    // Ubaci neki realan Mongo ID korisnika (kandidata) koji postoji u bazi
+    const fakeCandidateId = "PRIJAVLJEN KANDIDAT";
+    this.router.navigate(['/chat'], { state: { recipientId: fakeCandidateId } });
   }
 
   ngOnDestroy(): void {

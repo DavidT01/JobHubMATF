@@ -1,30 +1,21 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
+# Build context: repository root (see docker-compose.yml)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
-USER $APP_UID
 WORKDIR /app
+RUN mkdir -p /app/wwwroot && chown $APP_UID /app/wwwroot
 EXPOSE 8080
-EXPOSE 8081
 
-
-# This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Profile.API.csproj", "."]
-RUN dotnet restore "./Profile.API.csproj"
-COPY . .
-WORKDIR "/src/."
-RUN dotnet build "./Profile.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+COPY ["src/BuildingBlocks/JobHub.Grpc.Contracts/JobHub.Grpc.Contracts.csproj", "src/BuildingBlocks/JobHub.Grpc.Contracts/"]
+COPY ["src/Services/ProfileService/Profile.API/Profile.API.csproj", "src/Services/ProfileService/Profile.API/"]
+RUN dotnet restore "src/Services/ProfileService/Profile.API/Profile.API.csproj"
+COPY src/BuildingBlocks/JobHub.Grpc.Contracts/ src/BuildingBlocks/JobHub.Grpc.Contracts/
+COPY src/Services/ProfileService/Profile.API/ src/Services/ProfileService/Profile.API/
+RUN dotnet publish "src/Services/ProfileService/Profile.API/Profile.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish --no-restore /p:UseAppHost=false
 
-# This stage is used to publish the service project to be copied to the final stage
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Profile.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
+USER $APP_UID
 ENTRYPOINT ["dotnet", "Profile.API.dll"]

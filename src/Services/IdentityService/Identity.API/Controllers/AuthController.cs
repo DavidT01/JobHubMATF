@@ -39,20 +39,33 @@ namespace Identity.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email!);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password!))
+            if (user == null)
             {
                 return Unauthorized(new { Message = "Invalid email or password!" });
             }
 
             if (await _userManager.IsLockedOutAsync(user))
             {
-                return Unauthorized(new { Message = "This account is locked. Contact an administrator." });
+                return Unauthorized(new { Message = "This account is locked. Try again later or contact an administrator." });
+            }
+
+            if (!await _userManager.CheckPasswordAsync(user, model.Password!))
+            {
+                await _userManager.AccessFailedAsync(user);
+                if (await _userManager.IsLockedOutAsync(user))
+                {
+                    return Unauthorized(new { Message = "Too many failed login attempts. Account locked for 15 minutes." });
+                }
+
+                return Unauthorized(new { Message = "Invalid email or password!" });
             }
 
             if (!await _userManager.IsEmailConfirmedAsync(user))
             {
                 return Unauthorized(new { Message = "Please confirm your email before signing in." });
             }
+
+            await _userManager.ResetAccessFailedCountAsync(user);
 
             var userRoles = await _userManager.GetRolesAsync(user);
             var token = GenerateJwtToken(user, userRoles);

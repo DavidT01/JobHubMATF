@@ -6,6 +6,7 @@ using Profile.API.Data;
 using Profile.API.Exceptions;
 using Profile.API.Features.Behaviors;
 using Profile.API.Services.GrpcServices;
+using Profile.API.Infrastructure;
 using Scalar.AspNetCore;
 using System.Reflection;
 
@@ -16,6 +17,8 @@ builder.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), 
 builder.Services.AddControllers();
 builder.Services.AddGrpc();
 builder.Services.AddApplicationProfileAuthentication(builder.Configuration);
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IProfileAuthorization, ProfileAuthorization>();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -39,6 +42,12 @@ builder.Services.AddMediatR(cfg => {
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 var app = builder.Build();
+
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    using var migrationScope = app.Services.CreateScope();
+    migrationScope.ServiceProvider.GetRequiredService<ProfileContext>().Database.Migrate();
+}
 
 app.UseExceptionHandler();
 

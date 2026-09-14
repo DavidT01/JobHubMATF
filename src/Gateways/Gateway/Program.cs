@@ -7,7 +7,8 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Učitavanje ocelot.json konfiguracionog fajla
-builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+var ocelotConfigFile = builder.Configuration["OcelotConfigFile"] ?? "ocelot.json";
+builder.Configuration.AddJsonFile(ocelotConfigFile, optional: false, reloadOnChange: true);
 
 // 2. Registracija JWT Autentifikacije (Sinhronizovano sa Chat.API)
 var jwtSecret = builder.Configuration["JwtSettings:Secret"]

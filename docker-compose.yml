@@ -1,0 +1,192 @@
+name: jobhubmatf
+
+x-dotnet-env: &dotnet-env
+  ASPNETCORE_ENVIRONMENT: Development
+  JwtSettings__Secret: ${JWT_SECRET:-SuperSecretKeyForJobHubIdentityApiThatIsAtLeast32BytesLong!}
+  JwtSettings__Issuer: JobHubIdentityAPI
+  JwtSettings__Audience: JobHubClients
+
+services:
+  # ---------- infrastruktura ----------
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mongo:
+    image: mongo:8
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    ports:
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+
+
+  # ---------- servisi ----------
+
+  identity-api:
+    build:
+      context: .
+      dockerfile: src/Services/IdentityService/Identity.API/Dockerfile
+    environment:
+      <<: *dotnet-env
+      ConnectionStrings__DefaultConnection: Data Source=/app/data/jobhub-identity.db
+    volumes:
+      - identity-data:/app/data
+    ports:
+      - "5283:8080"
+
+  catalog-api:
+    build:
+      context: .
+      dockerfile: src/Services/Catalog/Dockerfile
+    environment:
+      <<: *dotnet-env
+      Kestrel__Endpoints__Http__Url: http://+:8080
+      Kestrel__Endpoints__Grpc__Url: http://+:8081
+      Kestrel__Endpoints__Grpc__Protocols: Http2
+      DatabaseSettings__ConnectionString: mongodb://mongo:27017
+      RedisSettings__ConnectionString: redis:6379
+      ServiceUrls__ProfileApi: http://profile-api:8080
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "5246:8080"
+
+  profile-api:
+    build:
+      context: .
+      dockerfile: src/Services/ProfileService/Profile.API/Dockerfile
+    environment:
+      <<: *dotnet-env
+      Database__MigrateOnStartup: "true"
+      ConnectionStrings__ProfileDbConnection: Host=postgres;Database=jobhub_profile;Username=postgres;Password=${POSTGRES_PASSWORD:-postgres}
+      Kestrel__Endpoints__Http__Url: http://+:8080
+      Kestrel__Endpoints__Grpc__Url: http://+:8081
+      Kestrel__Endpoints__Grpc__Protocols: Http2
+    volumes:
+      - profile-uploads:/app/wwwroot
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5213:8080"
+
+  recruitment-api:
+    build:
+      context: .
+      dockerfile: src/Services/RecruitmentService/Recruitment.API/Dockerfile
+    environment:
+      <<: *dotnet-env
+      Database__MigrateOnStartup: "true"
+      ConnectionStrings__RecruitmentDatabase: Host=postgres;Database=jobhub_recruitment;Username=postgres;Password=${POSTGRES_PASSWORD:-postgres}
+      Kestrel__Endpoints__Http__Url: http://+:8080
+      Kestrel__Endpoints__Grpc__Url: http://+:8081
+      Kestrel__Endpoints__Grpc__Protocols: Http2
+      GrpcServices__ProfileApi: http://profile-api:8081
+    depends_on:
+      postgres:
+        condition: service_healthy
+      profile-api:
+        condition: service_started
+    ports:
+      - "5116:8080"
+
+  application-api:
+    build:
+      context: .
+      dockerfile: src/Services/ApplicationService/Dockerfile
+    environment:
+      <<: *dotnet-env
+      Database__MigrateOnStartup: "true"
+      ConnectionStrings__ApplicationDatabase: Host=postgres;Database=jobhub_applications;Username=postgres;Password=${POSTGRES_PASSWORD:-postgres}
+      Services__ProfileBaseUrl: http://profile-api:8080
+      Services__ProfilePublicBaseUrl: http://localhost:5213
+      Services__CatalogBaseUrl: http://catalog-api:8080
+      GrpcServices__ProfileApi: http://profile-api:8081
+      GrpcServices__CatalogApi: http://catalog-api:8081
+      GrpcServices__RecruitmentApi: http://recruitment-api:8081
+      Outbox__Enabled: "false"
+      Outbox__ConnectionUri: amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      profile-api:
+        condition: service_started
+      catalog-api:
+        condition: service_started
+      recruitment-api:
+        condition: service_started
+    ports:
+      - "5020:8080"
+
+  chat-api:
+    build:
+      context: .
+      dockerfile: src/Services/Chat/Chat.API/Dockerfile
+    environment:
+      <<: *dotnet-env
+      MongoDbSettings__ConnectionString: mongodb://mongo:27017
+      MongoDbSettings__DatabaseName: ChatDb
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "5075:8080"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: src/Gateways/Gateway/Dockerfile
+    environment:
+      <<: *dotnet-env
+      OcelotConfigFile: ocelot.Docker.json
+    depends_on:
+      - identity-api
+      - catalog-api
+      - profile-api
+      - recruitment-api
+      - application-api
+      - chat-api
+    ports:
+      - "5107:8080"
+
+volumes:
+  postgres-data:
+  mongo-data:
+  identity-data:
+  profile-uploads:

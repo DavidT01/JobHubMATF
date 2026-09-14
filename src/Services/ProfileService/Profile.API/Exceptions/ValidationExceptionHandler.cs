@@ -18,6 +18,12 @@ namespace Profile.API.Exceptions
                 details.Detail = "One or more profile validation errors occurred.";
                 details.Extensions.Add("errors", validationException.Errors);
             }
+            else if (exception is ProfileForbiddenException)
+            {
+                details.Status = StatusCodes.Status403Forbidden;
+                details.Title = "Forbidden";
+                details.Detail = exception.Message;
+            }
 
             httpContext.Response.StatusCode = details.Status.Value;
             httpContext.Response.ContentType = "application/problem+json";

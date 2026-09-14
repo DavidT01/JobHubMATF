@@ -8,6 +8,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Behaviors\**" />
+    <Compile Remove="Common\**" />
+    <Compile Remove="Hubs\**" />
+    <Compile Remove="Queries\**" />
+    <EmbeddedResource Remove="Behaviors\**" />
+    <EmbeddedResource Remove="Common\**" />
+    <EmbeddedResource Remove="Hubs\**" />
+    <EmbeddedResource Remove="Queries\**" />
+    <None Remove="Behaviors\**" />
+    <None Remove="Common\**" />
+    <None Remove="Hubs\**" />
+    <None Remove="Queries\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="FluentAssertions" Version="8.10.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.12" />
@@ -23,13 +38,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Chat.API\Chat.API.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Hubs\" />
-    <Folder Include="Behaviors\" />
-    <Folder Include="Common\" />
-    <Folder Include="Queries\" />
   </ItemGroup>
 
 </Project>
