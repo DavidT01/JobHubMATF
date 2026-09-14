@@ -73,18 +73,7 @@ public static class DependencyInjection
             options.Address = uri;
         }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
         services.AddScoped<IJobReader, CatalogGrpcJobClient>();
-        services.AddHttpClient<ICandidateProfileReader, CandidateProfileClient>(client =>
-        {
-            var baseUrl = configuration["Services:ProfileBaseUrl"];
-            if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
-                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-            {
-                throw new InvalidOperationException("Services:ProfileBaseUrl must be an absolute HTTP(S) URL.");
-            }
-
-            client.BaseAddress = new Uri(uri.AbsoluteUri.TrimEnd('/') + "/");
-            client.Timeout = TimeSpan.FromSeconds(10);
-        }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+        services.AddScoped<ICandidateProfileReader, CandidateProfileClient>();
         services.AddGrpcClient<RecruitmentGrpcService.RecruitmentGrpcServiceClient>(options =>
         {
             var recruitmentAddress = configuration["GrpcServices:RecruitmentApi"]
