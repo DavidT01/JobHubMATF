@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { switchMap } from 'rxjs';
 import { Job } from '../../models/job.model';
 import { JobService } from '../../services/job.service';
 import { CurrentUser } from '../../core/current-user';
@@ -38,7 +39,9 @@ export class SavedJobs implements OnInit {
 
   private load(): void {
     this.loading.set(true);
-    this.jobService.getBookmarks(this.currentUser.getUserId()).subscribe({
+    this.currentUser.getUserId().pipe(
+      switchMap((userId) => this.jobService.getBookmarks(userId))
+    ).subscribe({
       next: (data) => {
         this.jobs.set(data);
         this.loading.set(false);
@@ -53,9 +56,10 @@ export class SavedJobs implements OnInit {
 
   removeBookmark(event: Event, jobId: string): void {
     event.stopPropagation();
-    const userId = this.currentUser.getUserId();
 
-    this.jobService.removeBookmark(userId, jobId).subscribe({
+    this.currentUser.getUserId().pipe(
+      switchMap((userId) => this.jobService.removeBookmark(userId, jobId))
+    ).subscribe({
       next: () => {
         this.jobs.set(this.jobs().filter((j) => j.id !== jobId));
       },

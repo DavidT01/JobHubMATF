@@ -6,6 +6,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { switchMap } from 'rxjs';
 import { Job } from '../../models/job.model';
 import { MatchResult } from '../../models/match-result.model';
 import { JobService } from '../../services/job.service';
@@ -79,7 +80,9 @@ export class JobDetails implements OnInit {
       }
     });
 
-    this.jobService.getBookmarks(this.currentUser.getUserId()).subscribe({
+    this.currentUser.getUserId().pipe(
+      switchMap((userId) => this.jobService.getBookmarks(userId))
+    ).subscribe({
       next: (bookmarks) => {
         this.bookmarked.set(bookmarks.some((b) => b.id === id));
       },
@@ -91,19 +94,18 @@ export class JobDetails implements OnInit {
     const job = this.job();
     if (!job) return;
 
-    const userId = this.currentUser.getUserId();
+    const wasBookmarked = this.bookmarked();
 
-    if (this.bookmarked()) {
-      this.jobService.removeBookmark(userId, job.id).subscribe({
-        next: () => this.bookmarked.set(false),
-        error: (err) => console.error(err),
-      });
-    } else {
-      this.jobService.addBookmark(userId, job.id).subscribe({
-        next: () => this.bookmarked.set(true),
-        error: (err) => console.error(err),
-      });
-    }
+    this.currentUser.getUserId().pipe(
+      switchMap((userId) =>
+        wasBookmarked
+          ? this.jobService.removeBookmark(userId, job.id)
+          : this.jobService.addBookmark(userId, job.id)
+      )
+    ).subscribe({
+      next: () => this.bookmarked.set(!wasBookmarked),
+      error: (err) => console.error(err),
+    });
   }
 
   checkMatch(): void {
@@ -114,7 +116,9 @@ export class JobDetails implements OnInit {
     this.matchError.set(null);
     this.matchResult.set(null);
 
-    this.jobService.getMatch(job.id, this.currentUser.getUserId()).subscribe({
+    this.currentUser.getUserId().pipe(
+      switchMap((userId) => this.jobService.getMatch(job.id, userId))
+    ).subscribe({
       next: (result) => {
         this.matchResult.set(result);
         this.matchLoading.set(false);

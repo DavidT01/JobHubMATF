@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Catalog.Clients;
 using Catalog.Services;
 using Catalog.Services.Grpc;
+using JobHub.Grpc.Contracts.Profile;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,7 @@ builder.Services.AddGrpc();
 builder.Services.AddOpenApi();
 builder.Services.AddSingleton<ICatalogContext, CatalogContext>();
 builder.Services.AddScoped<IJobRepository,JobRepository>();
+builder.Services.AddScoped<IProfileApiClient, ProfileApiClient>();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -29,9 +31,9 @@ builder.Services.AddCors(options =>
         .AllowAnyMethod());
 });
 
-builder.Services.AddHttpClient<IProfileApiClient, ProfileApiClient>(client =>
+builder.Services.AddGrpcClient<CandidateProfileGrpcService.CandidateProfileGrpcServiceClient>(options =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProfileApi"]!);
+    options.Address = new Uri(builder.Configuration["GrpcServices:ProfileApi"]!);
 });
 
 builder.Services.AddScoped<IMatchingService,MatchingService>();
