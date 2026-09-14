@@ -48,7 +48,7 @@ export class ChatService {
 
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(`${this.gatewayUrl}/chatHub`, {
-        accessTokenFactory: () => localStorage.getItem('jwt_token') || ''
+        accessTokenFactory: () => localStorage.getItem('auth_token') || ''
       })
       .withAutomaticReconnect()
       .build();
@@ -99,7 +99,7 @@ export class ChatService {
   }
 
   public loadHistory(otherUserId: string, myUserId: string): void {
-    const token = localStorage.getItem('jwt_token') || '';
+    const token = localStorage.getItem('auth_token') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
     const cleanMy = String(myUserId).trim();
@@ -133,7 +133,7 @@ export class ChatService {
 
   // --- METODA ZA DOVLAČENJE KONVERZACIJA ZA SIDEBAR I DASHBOARD ---
   public getConversations(): Observable<Conversation[]> {
-    const token = localStorage.getItem('jwt_token') || '';
+    const token = localStorage.getItem('auth_token') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     const url = `${this.gatewayUrl}/api/chat/conversations`;
 
@@ -149,7 +149,7 @@ export class ChatService {
   }
 
   public getMyUserIdFromToken(): string {
-    const token = localStorage.getItem('jwt_token');
+    const token = localStorage.getItem('auth_token');
     if (!token) return 'user1';
 
     try {
@@ -169,7 +169,7 @@ export class ChatService {
   }
 
   public markAsRead(otherUserId: string) {
-    const token = localStorage.getItem('jwt_token') || '';
+    const token = localStorage.getItem('auth_token') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
     return this.http.post(`${this.gatewayUrl}/api/chat/mark-as-read/${otherUserId}`, {}, { headers }).pipe(

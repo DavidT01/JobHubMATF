@@ -72,7 +72,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private extractUserFromToken(): void {
-    const token = localStorage.getItem('jwt_token');
+    const token = localStorage.getItem('auth_token');
     if (!token) return;
 
     try {

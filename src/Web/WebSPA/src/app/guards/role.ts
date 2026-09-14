@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 
 export const roleGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
-  const token = localStorage.getItem('jwt_token');
+  const token = localStorage.getItem('auth_token');
 
   if (!token) {
     // Ako nema tokena, prekini petlju i idi na login (ili ostavi prolaz ako nemaš login stranicu)
