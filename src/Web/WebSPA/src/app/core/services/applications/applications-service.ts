@@ -7,6 +7,7 @@ import {
   ApplicationStatus,
   PagedResult,
 } from '../../models/application-list-item-dto';
+import { CandidateApplicationDetailsDto } from '../../models/candidate-application-details-dto';
 import {
   ApplicationListOptions,
   ApplicationStatisticsDto,
@@ -55,6 +56,12 @@ export class ApplicationsService {
     const params = this.listParams(pageNumber, pageSize, options);
 
     return this.http.get<PagedResult<ApplicationListItemDto>>(`${this.api}/me`, { params });
+  }
+
+  getCandidateApplication(applicationId: string): Observable<CandidateApplicationDetailsDto> {
+    return this.http.get<CandidateApplicationDetailsDto>(
+      `${this.api}/${encodeURIComponent(applicationId)}`,
+    );
   }
 
   changeStatus(applicationId: string, status: ApplicationStatus): Observable<void> {
