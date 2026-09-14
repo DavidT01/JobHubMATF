@@ -8,6 +8,7 @@ using Recruitment.API.Features.Commands.UpdateCandidateStatus;
 using Recruitment.API.Features.Queries.GetCandidatesInRound;
 using Recruitment.API.Features.Queries.GetCandidateEvaluations;
 using Recruitment.API.Features.Queries.GetCandidateProgress;
+using Recruitment.API.Features.Queries.GetCandidateApplicationProgress;
 using Recruitment.API.Infrastructure;
 
 namespace Recruitment.API.Controllers
@@ -116,6 +117,19 @@ namespace Recruitment.API.Controllers
             logger.LogInformation("Received GetProgress request for candidate {CandidateProfileId} and process {RecruitmentProcessId}", candidateId, processId);
             var result = await _mediator.Send(new GetCandidateProgressQuery(candidateId, processId));
             return Ok(result);
+        }
+
+        [Authorize(Roles = "Candidate")]
+        [HttpGet("application/{applicationId}/progress")]
+        [ProducesResponseType(typeof(CandidateApplicationProgressDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetApplicationProgress(Guid applicationId)
+        {
+            var progress = await _mediator.Send(
+                new GetCandidateApplicationProgressQuery(applicationId));
+            await authorization.EnsureCandidateOwnsProfileAsync(
+                progress.Progress.CandidateProfileId, HttpContext.RequestAborted);
+            return Ok(progress);
         }
     }
 }
