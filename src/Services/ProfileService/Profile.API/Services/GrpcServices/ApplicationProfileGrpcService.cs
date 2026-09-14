@@ -15,21 +15,25 @@ public sealed class ApplicationProfileGrpcService(ISender sender)
     public override async Task<ApplicationCandidateProfileResponse> GetCandidateByUserId(
         GetApplicationProfileRequest request, ServerCallContext context)
     {
-        RequireOwner(request.UserId, "Candidate", context);
+        RequireOwner(request.UserId, ["Candidate", "Employer", "Admin"], context);
         var profile = await QueryAsync(new GetCandidateProfileQuery(request.UserId), context.CancellationToken);
         if (profile is null)
             throw new RpcException(new Status(StatusCode.NotFound, "Candidate profile was not found."));
         ValidateReference(profile.Id, profile.UserId, request.UserId);
         return new ApplicationCandidateProfileResponse
         {
-            ProfileId = profile.Id.ToString(), UserId = profile.UserId, CvUrl = profile.CvUrl ?? ""
+            ProfileId = profile.Id.ToString(),
+            UserId = profile.UserId,
+            CvUrl = profile.CvUrl ?? "",
+            FirstName = profile.FirstName ?? "",
+            LastName = profile.LastName ?? ""
         };
     }
 
     public override async Task<ApplicationCompanyProfileResponse> GetCompanyByUserId(
         GetApplicationProfileRequest request, ServerCallContext context)
     {
-        RequireOwner(request.UserId, "Employer", context);
+        RequireOwner(request.UserId, ["Employer", "Admin"], context);
         var profile = await QueryAsync(new GetCompanyProfileQuery(request.UserId), context.CancellationToken);
         if (profile is null)
             throw new RpcException(new Status(StatusCode.NotFound, "Company profile was not found."));
@@ -46,7 +50,7 @@ public sealed class ApplicationProfileGrpcService(ISender sender)
         }
     }
 
-    private static void RequireOwner(string userId, string role, ServerCallContext context)
+    private static void RequireOwner(string userId, IReadOnlyCollection<string> roles, ServerCallContext context)
     {
         var user = context.GetHttpContext().User;
         if (user.Identity?.IsAuthenticated != true)
@@ -54,8 +58,9 @@ public sealed class ApplicationProfileGrpcService(ISender sender)
         if (string.IsNullOrWhiteSpace(userId))
             throw new RpcException(new Status(StatusCode.InvalidArgument, "user_id is required."));
         var subject = user.FindFirstValue("sub") ?? user.FindFirstValue(ClaimTypes.NameIdentifier);
-        var hasRole = user.IsInRole(role) || user.HasClaim(ClaimTypes.Role, role);
-        if (!hasRole || !string.Equals(subject, userId, StringComparison.Ordinal))
+        var hasRole = roles.Any(role => user.IsInRole(role) || user.HasClaim(ClaimTypes.Role, role));
+        var isOwner = string.Equals(subject, userId, StringComparison.Ordinal);
+        if (!hasRole || (!isOwner && !user.IsInRole("Employer") && !user.IsInRole("Admin")))
             throw new RpcException(new Status(StatusCode.PermissionDenied, "Only the profile owner can access this lookup."));
     }
 
