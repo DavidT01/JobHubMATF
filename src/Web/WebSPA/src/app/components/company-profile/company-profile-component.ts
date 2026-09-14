@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { CompanyProfileDto } from '../../core/models/company-profile-dto';
 import { CompanyProfileService } from '../../core/services/company-profile/company-profile-service';
+import { AuthService } from '../../core/services/auth.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog-component';
 
 @Component({
@@ -29,10 +30,10 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog-compone
   styleUrl: './company-profile-component.scss',
 })
 export class CompanyProfileComponent implements OnInit {
-  private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private profileService = inject(CompanyProfileService);
+  private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   public apiUrl = environment.profileApiUrl;
 
@@ -44,13 +45,14 @@ export class CompanyProfileComponent implements OnInit {
   form!: FormGroup;
 
   ngOnInit(): void {
-    this.userId = this.route.snapshot.paramMap.get('userId') || '';
     this.initForm();
-
-    if (this.userId)
-      this.loadProfile();
-    else
-      this.router.navigate(['/']);
+    this.authService.me().subscribe({
+      next: user => {
+        this.userId = user.id;
+        this.loadProfile();
+      },
+      error: () => this.router.navigate(['/login'])
+    });
   }
 
   initForm(): void {
