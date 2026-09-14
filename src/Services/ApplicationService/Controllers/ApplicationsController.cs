@@ -102,4 +102,19 @@ public sealed class ApplicationsController(ISender sender) : ControllerBase
             new GetCandidateApplicationsQuery(pageNumber, pageSize, status, sortBy, sortDirection),
             cancellationToken));
     }
+
+    [HttpGet("{applicationId:guid}")]
+    [Authorize(Policy = AuthorizationPolicies.Candidate)]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType(typeof(CandidateApplicationDetailsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<ActionResult<CandidateApplicationDetailsDto>> GetCandidateApplication(
+        Guid applicationId, CancellationToken cancellationToken)
+    {
+        return Ok(await sender.Send(
+            new GetCandidateApplicationDetailsQuery(applicationId), cancellationToken));
+    }
 }
