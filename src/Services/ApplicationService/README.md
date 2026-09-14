@@ -26,8 +26,8 @@ The service requires these settings:
 | `JwtSettings__Issuer` | Expected JWT issuer | `JobHubIdentityAPI` |
 | `JwtSettings__Audience` | Expected JWT audience | `JobHubClients` |
 | `JwtSettings__Secret` | Shared HMAC-SHA256 signing key, at least 32 UTF-8 bytes | Supply through an environment variable or user secrets |
-| `Services__ProfileBaseUrl` | Internal Profile Service URL | `http://localhost:5213` |
 | `Services__ProfilePublicBaseUrl` | Public base used to resolve CV links | `http://localhost:5213` |
+| `GrpcServices__ProfileApi` | Internal Profile gRPC service URL | `http://localhost:5214` |
 | `Services__CatalogBaseUrl` | Internal Catalog Service URL | `http://localhost:5246` |
 
 Do not commit a real JWT secret or production database password. The checked-in PostgreSQL credentials are development-only defaults.
