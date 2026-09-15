@@ -5,6 +5,7 @@ using Recruitment.API.Data;
 using Recruitment.API.DTOs;
 using Recruitment.API.Enums;
 using Recruitment.API.Exceptions;
+using Recruitment.API.Features.Events;
 using Recruitment.API.Infrastructure;
 
 namespace Recruitment.API.Features.Commands.UpdateCandidateStatus;
@@ -40,6 +41,14 @@ public class UpdateCandidateStatusCommandHandler(
 
         progress.Status = request.Status;
         progress.ModifiedAt = DateTime.UtcNow;
+        var jobId = await context.Processes
+            .Where(process => process.Id == request.RecruitmentProcessId)
+            .Select(process => process.JobId)
+            .FirstOrDefaultAsync(cancellationToken) ?? string.Empty;
+        var progressEvent = request.Status == CandidateProgressStatus.Hired
+            ? CandidateProgressLifecycleEvent.Hired(progress, jobId)
+            : CandidateProgressLifecycleEvent.Rejected(progress, jobId);
+        context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(progressEvent));
         await context.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Successfully updated candidate {CandidateProfileId} to status {Status} in process {RecruitmentProcessId}", request.CandidateProfileId, request.Status, request.RecruitmentProcessId);
 
