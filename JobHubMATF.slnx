@@ -21,4 +21,8 @@
     <Project Path="src/Services/ProfileService/Profile.UnitTests/Profile.UnitTests.csproj" />
     <Project Path="src/Services/RecruitmentService/Recruitment.UnitTests/Recruitment.UnitTests.csproj" />
   </Folder>
+  <Project Path="src/Web/WebSPA/WebSPA.esproj">
+    <Build />
+    <Deploy />
+  </Project>
 </Solution>

@@ -1,7 +1,6 @@
 ﻿using Chat.API.Models;
 using Chat.API.Services;
 using FluentAssertions;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Moq;
 using Xunit;
@@ -67,8 +66,8 @@ public class ChatServiceTests
 
         var service = new ChatService(_databaseMock.Object);
 
-        // Act - ako chat postoji, uloga nije bitna za restrikciju, ali je prosleđujemo
-        var result = await service.GetOrCreateChatAsync("alice", "Candidate", "bob");
+        // Act - Prosleđujemo svih 5 parametara: currentUserId, currentUserName, currentUserRole, targetUserId, targetUserName
+        var result = await service.GetOrCreateChatAsync("alice", "Alice Name", "Candidate", "bob", "Bob Name");
 
         // Assert
         result.Should().NotBeNull();
@@ -85,7 +84,7 @@ public class ChatServiceTests
         asyncCursorMock.Setup(c => c.Current).Returns(new List<API.Models.Chat>());
         asyncCursorMock
             .SetupSequence(c => c.MoveNextAsync(default))
-            .ReturnsAsync(false); // Chat ne postoji
+            .ReturnsAsync(false);
 
         _chatsCollectionMock
             .Setup(c => c.FindAsync(
@@ -97,7 +96,7 @@ public class ChatServiceTests
         var service = new ChatService(_databaseMock.Object);
 
         // Act & Assert - Pokušava da kreira chat neko ko NIJE Employer
-        var act = async () => await service.GetOrCreateChatAsync("candidate-1", "Candidate", "employer-1");
+        var act = async () => await service.GetOrCreateChatAsync("candidate-1", "Cand Name", "Candidate", "employer-1", "Emp Name");
         await act.Should().ThrowAsync<UnauthorizedAccessException>()
             .WithMessage("Samo korisnici sa ulogom poslodavca mogu započinjati nove razgovore.");
     }
@@ -171,12 +170,14 @@ public class ChatServiceTests
     {
         // Arrange
         var senderId = "employer-1";
-        var senderRole = "Employer"; // Dozvoljeno kreiranje novog chata
+        var senderName = "Employer Name";
+        var senderRole = "Employer";
         var receiverId = "candidate-1";
+        var receiverName = "Candidate Name";
         var text = "Hello Candidate!";
 
         var chatCursorMock = new Mock<IAsyncCursor<API.Models.Chat>>();
-        chatCursorMock.Setup(c => c.Current).Returns(new List<API.Models.Chat>()); // Nema postojećeg chata, kreiraće se
+        chatCursorMock.Setup(c => c.Current).Returns(new List<API.Models.Chat>());
         chatCursorMock.SetupSequence(c => c.MoveNextAsync(default)).ReturnsAsync(false);
 
         _chatsCollectionMock
@@ -199,8 +200,8 @@ public class ChatServiceTests
 
         var service = new ChatService(_databaseMock.Object);
 
-        // Act
-        var result = await service.SendMessageAsync(senderId, senderRole, receiverId, text);
+        // Act - Prosleđujemo svih 6 parametara
+        var result = await service.SendMessageAsync(senderId, senderName, senderRole, receiverId, receiverName, text);
 
         // Assert
         result.Should().NotBeNull();

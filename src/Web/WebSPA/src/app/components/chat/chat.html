@@ -4,7 +4,7 @@
   <mat-sidenav mode="side" opened class="chat-sidebar">
     <div class="sidebar-header">
       <h3>Poruke</h3>
-      <span class="my-badge"><strong>{{ myId }}</strong></span>
+      <span class="my-badge"><strong>{{ myName }}</strong></span>
     </div>
 
     <mat-nav-list class="conversations-list">
@@ -50,7 +50,7 @@
     <div class="chat-header">
       <div class="user-status">
         <span class="active-user-title">Chat sa:</span>
-        <strong>{{ selectedConversation?.userName || receiverId }}</strong>
+        <strong>{{ receiverName || receiverId }}</strong>
       </div>
       <button mat-stroked-button class="back-btn" (click)="goToDashboard()">
         <mat-icon>arrow_back</mat-icon> Nazad na Dashboard

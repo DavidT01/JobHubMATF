@@ -36,6 +36,16 @@ namespace Chat.API.Controllers
                 ?? "Candidate";
         }
 
+        // Pomoćna metoda za čitanje imena trenutnog korisnika iz JWT tokena
+        private string GetCurrentUserName()
+        {
+            return User.FindFirst("name")?.Value
+                ?? User.FindFirst("unique_name")?.Value
+                ?? User.FindFirst(ClaimTypes.Name)?.Value
+                ?? GetCurrentUserId()
+                ?? "Nepoznat";
+        }
+
         // 1. Sidebar - lista svih konverzacija
         [HttpGet("conversations")]
         public async Task<IActionResult> GetConversations()
@@ -92,11 +102,14 @@ namespace Chat.API.Controllers
                 return BadRequest("Poruka ne može biti prazna.");
 
             var senderRole = GetCurrentUserRole();
+            var senderName = GetCurrentUserName();
 
             var message = await _chatService.SendMessageAsync(
                 senderId,
+                senderName,
                 senderRole,
                 request.ReciverId,
+                request.ReceiverName,
                 request.Text
             );
 

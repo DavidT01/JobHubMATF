@@ -5,6 +5,8 @@
         public string SenderId { get; set; }
         public string ReciverId { get; set; }
 
+        public string ReceiverName { get; set; }
+
         public string Text { get; set; }
     }
 }

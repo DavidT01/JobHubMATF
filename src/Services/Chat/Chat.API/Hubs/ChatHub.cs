@@ -30,7 +30,18 @@ namespace Chat.API.Hubs
                 ?? user.FindFirst(ClaimTypes.Name)?.Value;
         }
 
-        public async Task SendMessage(string reciverId, string message)
+        private string? GetUserNameFromClaims()
+        {
+            var user = Context.User;
+            if (user == null) return null;
+
+            return user.FindFirst("name")?.Value
+                ?? user.FindFirst("unique_name")?.Value
+                ?? user.FindFirst(ClaimTypes.Name)?.Value
+                ?? GetUserIdFromClaims();
+        }
+
+        public async Task SendMessage(string reciverId, string receiverName, string message)
         {
             if (string.IsNullOrWhiteSpace(message))
                 return;
@@ -42,11 +53,13 @@ namespace Chat.API.Hubs
                 throw new HubException("Korisnik nije autentifikovan.");
             }
 
+            var senderName = GetUserNameFromClaims() ?? senderId;
+
             var senderRole = Context.User?.FindFirst(ClaimTypes.Role)?.Value
                           ?? Context.User?.FindFirst("role")?.Value
                           ?? "Candidate";
 
-            var savedMessage = await _chatService.SendMessageAsync(senderId, senderRole, reciverId, message);
+            var savedMessage = await _chatService.SendMessageAsync(senderId, senderName, senderRole, reciverId, receiverName, message);
 
             if (_connections.TryGetValue(reciverId, out var receiverConnection))
             {

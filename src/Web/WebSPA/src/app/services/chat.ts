@@ -48,7 +48,7 @@ export class ChatService {
 
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(`${this.gatewayUrl}/chatHub`, {
-        accessTokenFactory: () => localStorage.getItem('jwt_token') || ''
+        accessTokenFactory: () => localStorage.getItem('auth_token') || ''
       })
       .withAutomaticReconnect()
       .build();
@@ -86,9 +86,9 @@ export class ChatService {
     });
   }
 
-  public sendMessage(receiverId: string, content: string, currentMyId: string): void {
+  public sendMessage(receiverId: string, receiverName: string, content: string, currentMyId: string): void {
     if (this.hubConnection && this.hubConnection.state === 'Connected') {
-      this.hubConnection.invoke('SendMessage', receiverId, content)
+      this.hubConnection.invoke('SendMessage', receiverId, receiverName, content)
         .then(() => {
           console.log('🚀 Poruka poslata na server.');
         })
@@ -99,7 +99,7 @@ export class ChatService {
   }
 
   public loadHistory(otherUserId: string, myUserId: string): void {
-    const token = localStorage.getItem('jwt_token') || '';
+    const token = localStorage.getItem('auth_token') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
     const cleanMy = String(myUserId).trim();
@@ -133,7 +133,7 @@ export class ChatService {
 
   // --- METODA ZA DOVLAČENJE KONVERZACIJA ZA SIDEBAR I DASHBOARD ---
   public getConversations(): Observable<Conversation[]> {
-    const token = localStorage.getItem('jwt_token') || '';
+    const token = localStorage.getItem('auth_token') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     const url = `${this.gatewayUrl}/api/chat/conversations`;
 
@@ -149,7 +149,7 @@ export class ChatService {
   }
 
   public getMyUserIdFromToken(): string {
-    const token = localStorage.getItem('jwt_token');
+    const token = localStorage.getItem('auth_token');
     if (!token) return 'user1';
 
     try {
@@ -168,8 +168,29 @@ export class ChatService {
     }
   }
 
+  public getMyUserNameFromToken(): string {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return 'Korisnik';
+
+    try {
+      const payloadBase64 = token.split('.')[1];
+      const decodedJson = atob(payloadBase64);
+      const decoded = JSON.parse(decodedJson);
+
+      return decoded.username ||
+        decoded.unique_name ||
+        decoded.name ||
+        decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
+        decoded.sub ||
+        'Korisnik';
+    } catch (e) {
+      console.error('Greška pri čitanju tokena:', e);
+      return 'Korisnik';
+    }
+  }
+
   public markAsRead(otherUserId: string) {
-    const token = localStorage.getItem('jwt_token') || '';
+    const token = localStorage.getItem('auth_token') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
     return this.http.post(`${this.gatewayUrl}/api/chat/mark-as-read/${otherUserId}`, {}, { headers }).pipe(

@@ -41,13 +41,16 @@ namespace Chat.API.Services
             await _messages.Indexes.CreateOneAsync(new CreateIndexModel<Message>(messageIndexKeys));
         }
 
-        public async Task<Models.Chat> GetOrCreateChatAsync(string currentUserId, string currentUserRole, string targetUserId)
+        public async Task<Models.Chat> GetOrCreateChatAsync(string currentUserId, string currentUserName, string currentUserRole, string targetUserId, string targetUserName)
         {
             var sortedUsers = new List<string> { currentUserId, targetUserId };
             sortedUsers.Sort();
 
             var u1 = sortedUsers[0];
             var u2 = sortedUsers[1];
+
+            var user1Name = (u1 == currentUserId) ? currentUserName : targetUserName;
+            var user2Name = (u2 == currentUserId) ? currentUserName : targetUserName;
 
             // 1. Ako chat već postoji, dozvoljavamo komunikaciju
             var chat = await _chats
@@ -56,6 +59,28 @@ namespace Chat.API.Services
 
             if (chat != null)
             {
+                // Upisujemo ime samo ako je "pravo" (nije prazno i nije placeholder = ID sagovornika),
+                // da ne bismo pregazili već poznato ispravno ime sa privremenim/placeholder vrednostima.
+                var updates = new List<UpdateDefinition<Models.Chat>>();
+
+                var user1NameIsValid = !string.IsNullOrWhiteSpace(user1Name) && user1Name != u1;
+                var user2NameIsValid = !string.IsNullOrWhiteSpace(user2Name) && user2Name != u2;
+
+                if (user1NameIsValid)
+                    updates.Add(Builders<Models.Chat>.Update.Set(c => c.User1Name, user1Name));
+
+                if (user2NameIsValid)
+                    updates.Add(Builders<Models.Chat>.Update.Set(c => c.User2Name, user2Name));
+
+                if (updates.Count > 0)
+                {
+                    var combinedUpdate = Builders<Models.Chat>.Update.Combine(updates);
+                    await _chats.UpdateOneAsync(c => c.Id == chat.Id, combinedUpdate);
+
+                    if (user1NameIsValid) chat.User1Name = user1Name;
+                    if (user2NameIsValid) chat.User2Name = user2Name;
+                }
+
                 return chat;
             }
 
@@ -69,6 +94,8 @@ namespace Chat.API.Services
             {
                 User1Id = u1,
                 User2Id = u2,
+                User1Name = user1Name,
+                User2Name = user2Name,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -76,10 +103,10 @@ namespace Chat.API.Services
             return newChat;
         }
 
-        public async Task<Message> SendMessageAsync(string senderId, string senderRole, string receiverId, string text)
+        public async Task<Message> SendMessageAsync(string senderId, string senderName, string senderRole, string receiverId, string receiverName, string text)
         {
-            // Prosleđujemo ulogu pošiljaoca da bi GetOrCreateChatAsync mogao da proveri da li sme da kreira chat
-            var chat = await GetOrCreateChatAsync(senderId, senderRole, receiverId);
+            // Prosleđujemo ulogu i imena da bi GetOrCreateChatAsync mogao da proveri da li sme da kreira chat i da upiše imena
+            var chat = await GetOrCreateChatAsync(senderId, senderName, senderRole, receiverId, receiverName);
 
             var message = new Message
             {
@@ -134,6 +161,7 @@ namespace Chat.API.Services
             foreach (var chat in userChats)
             {
                 var otherUserId = chat.User1Id == currentUserId ? chat.User2Id : chat.User1Id;
+                var otherUserName = chat.User1Id == currentUserId ? chat.User2Name : chat.User1Name;
 
                 var lastMessage = await _messages
                     .Find(m => m.ChatId == chat.Id)
@@ -148,7 +176,7 @@ namespace Chat.API.Services
                 conversations.Add(new ConversationDto
                 {
                     UserId = otherUserId,
-                    UserName = otherUserId,
+                    UserName = string.IsNullOrEmpty(otherUserName) ? otherUserId : otherUserName,
                     LastMessage = lastMessage?.Text ?? "Nema poruka",
                     LastMessageTime = lastMessage?.Timestamp ?? chat.CreatedAt,
                     UnreadCount = unreadCount,
@@ -161,7 +189,7 @@ namespace Chat.API.Services
 
         public async Task MarkAsReadAsync(string currentUserId, string currentUserRole, string otherUserId)
         {
-            var chat = await GetOrCreateChatAsync(currentUserId, currentUserRole, otherUserId);
+            var chat = await GetOrCreateChatAsync(currentUserId, currentUserId, currentUserRole, otherUserId, otherUserId);
 
             var filter = Builders<Message>.Filter.And(
                 Builders<Message>.Filter.Eq(m => m.ChatId, chat.Id),

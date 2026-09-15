@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/0.5.128-alpha">
+  <PropertyGroup>
+    <!-- Putanja do startne stranice ili porta -->
+    <StartupUrl>http://localhost:4200</StartupUrl>
+    <!-- Folder gde se buildje aplikacija -->
+    <JavaScriptTestRoot>src\</JavaScriptTestRoot>
+  </PropertyGroup>
+</Project>
