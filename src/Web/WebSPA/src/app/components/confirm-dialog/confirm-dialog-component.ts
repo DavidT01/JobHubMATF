@@ -11,7 +11,15 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class ConfirmDialogComponent {
   private dialogRef = inject<MatDialogRef<ConfirmDialogComponent>>(MatDialogRef);
-  public data = inject<{ message: string }>(MAT_DIALOG_DATA);
+  public data = inject<{ message: string; confirmLabel?: string; showCancel?: boolean }>(MAT_DIALOG_DATA);
+
+  get confirmLabel(): string {
+    return this.data.confirmLabel ?? 'Confirm';
+  }
+
+  get showCancel(): boolean {
+    return this.data.showCancel ?? true;
+  }
 
   onCancel(): void {
     this.dialogRef.close(false);

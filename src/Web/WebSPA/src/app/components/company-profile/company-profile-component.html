@@ -175,8 +175,13 @@
           </mat-card-content>
         </mat-card>
 
-        <div class="form-actions">
-          <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid" style="padding: 0 2rem; font-size: 1.1rem;">Save Profile</button>
+        <div class="form-actions" style="display: flex; align-items: center; gap: 12px;">
+          <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || isSaving()" style="padding: 0 2rem; font-size: 1.1rem;">
+            {{ isSaving() ? 'Saving...' : 'Save Profile' }}
+          </button>
+          @if (isSaving()) {
+            <span aria-live="polite" style="font-size: 0.9rem; color: rgba(0,0,0,0.7);">Saving profile...</span>
+          }
         </div>
       </form>
     }
