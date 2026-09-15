@@ -249,5 +249,14 @@ public class CatalogController : ControllerBase
         return Ok(jobs);
     }
 
+    [HttpGet("search-candidates")]
+    public async Task<ActionResult<IEnumerable<CandidateProfileDto>>> SearchCandidates(
+        [FromQuery] List<string>? skills,
+        [FromQuery] string? location,
+        [FromQuery] int limit = 20)
+    {
+        var candidates = await _profileApiClient.SearchCandidatesAsync(skills ?? new List<string>(), location, limit);
+        return Ok(candidates);
+    }
 
 }

@@ -7,6 +7,7 @@ using MediatR;
 using Profile.API.DTOs;
 using Profile.API.Data;
 using Profile.API.Features.CandidateProfiles.Queries.GetCandidateProfileById;
+using Profile.API.Features.CandidateProfiles.Queries.SearchCandidates;
 
 namespace Profile.API.Services.GrpcServices;
 
@@ -81,6 +82,17 @@ public sealed class CandidateProfileGrpcService(
                 ProfileId = profile.Id.ToString("D"),
                 UserId = profile.UserId
             };
+    }
+
+    public override async Task<SearchCandidateResponse> SearchCandidates(SearchCandidateRequest request, ServerCallContext context)
+    {
+        var profiles = await mediator.Send(
+            new SearchCandidateQuery(request.Skills.ToList(),request.Location,request.Limit), 
+            context.CancellationToken);
+
+        var response = new SearchCandidateResponse();
+        response.Candidates.AddRange(profiles.Select(mapper.Map<CandidateProfileResponse>));
+        return response;
     }
 
     private async Task<CandidateProfileDto> GetProfileAsync(string profileId, CancellationToken cancellationToken)
