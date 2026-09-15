@@ -12,6 +12,7 @@ using JobHub.Grpc.Contracts.Profile;
 using Recruitment.API.Features.Behaviors;
 using System.Reflection;
 using Recruitment.API.Infrastructure;
+using Recruitment.API.Infrastructure.Messaging;
 using Recruitment.API.Services.GrpcServices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,6 +53,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<RecruitmentContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("RecruitmentDatabase")));
+builder.Services.AddOutboxMessaging(builder.Configuration);
 
 builder.Services.AddScoped<IMeetingService, GoogleMeetingService>();
 builder.Services.AddGrpcClient<CandidateProfileGrpcService.CandidateProfileGrpcServiceClient>(options =>
