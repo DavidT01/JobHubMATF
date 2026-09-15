@@ -12,6 +12,7 @@ service CandidateProfileGrpcService {
   rpc GetCandidateProfile (GetCandidateProfileRequest) returns (CandidateProfileResponse);
   rpc GetCandidateProfileByUserId (GetProfileByUserIdRequest) returns (ProfileIdentityResponse);
   rpc GetCompanyProfileByUserId (GetProfileByUserIdRequest) returns (ProfileIdentityResponse);
+  rpc SearchCandidates (SearchCandidateRequest) returns (SearchCandidateResponse);
 }
 
 // Minimal references used by Application; user_id is the Identity user ID,
@@ -113,4 +114,14 @@ message Project {
 message Language {
   string name = 1;
   optional string level = 2;
+}
+
+message SearchCandidateRequest {
+  repeated string skills = 1;
+  optional string location = 2;
+  int32 limit = 3;
+}
+
+message SearchCandidateResponse {
+  repeated CandidateProfileResponse candidates = 1;
 }

@@ -24,21 +24,39 @@ public class ProfileApiClient : IProfileApiClient
             var profile = await _client.GetCandidateProfileAsync(
                 new GetCandidateProfileRequest { ProfileId = identity.ProfileId });
 
-            return new CandidateProfileDto
-            {
-                Id = profile.ProfileId,
-                Location = profile.Location,
-                Skills = profile.Skills.ToList(),
-                Experience = profile.Experience.Select(e => new ExperienceDto
-                {
-                    StartDate = e.StartDate.ToDateTime(),
-                    EndDate = e.EndDate?.ToDateTime()
-                }).ToList()
-            };
+            return MapToDto(profile);
         }
         catch (RpcException ex) when (ex.StatusCode == StatusCode.NotFound)
         {
             return null;
         }
+    }
+
+    public async Task<List<CandidateProfileDto>> SearchCandidatesAsync(List<string> skills, string? location, int limit)
+    {
+        var request = new SearchCandidateRequest { Limit = limit };
+        request.Skills.AddRange(skills);
+        if (!string.IsNullOrWhiteSpace(location))
+        {
+            request.Location = location;
+        }
+
+        var response = await _client.SearchCandidatesAsync(request);
+        return response.Candidates.Select(MapToDto).ToList();
+    }
+
+    private static CandidateProfileDto MapToDto(CandidateProfileResponse profile)
+    {
+        return new CandidateProfileDto
+        {
+            Id = profile.ProfileId,
+            Location = profile.Location,
+            Skills = profile.Skills.ToList(),
+            Experience = profile.Experience.Select(e => new ExperienceDto
+            {
+                StartDate = e.StartDate.ToDateTime(),
+                EndDate = e.EndDate?.ToDateTime()
+            }).ToList()
+        };
     }
 }
