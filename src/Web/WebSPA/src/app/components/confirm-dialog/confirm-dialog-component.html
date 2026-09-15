@@ -1,10 +1,12 @@
-<h2 mat-dialog-title>Confirm Action</h2>
+<h2 mat-dialog-title>{{ showCancel ? 'Confirm Action' : 'Profile Update' }}</h2>
 
 <mat-dialog-content>
   <p>{{ data.message }}</p>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-raised-button color="warn" (click)="onConfirm()">Confirm</button>
+  @if (showCancel) {
+    <button mat-button (click)="onCancel()">Cancel</button>
+  }
+  <button mat-raised-button color="primary" (click)="onConfirm()">{{ confirmLabel }}</button>
 </mat-dialog-actions>

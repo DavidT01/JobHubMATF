@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { finalize } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -48,6 +49,7 @@ export class CandidateProfileComponent implements OnInit {
 
   profileData = signal<CandidateProfileDto | null>(null);
   isLoading = signal<boolean>(true);
+  isSaving = signal<boolean>(false);
   isEditMode = signal<boolean>(false);
 
   userId: string = '';
@@ -238,16 +240,31 @@ export class CandidateProfileComponent implements OnInit {
   }
 
   saveProfile(): void {
-    if (this.form.invalid || !this.profileData()?.id) {
+    if (this.form.invalid || !this.profileData()?.id || this.isSaving()) {
       this.form.markAllAsTouched();
       return;
     }
 
+    this.isSaving.set(true);
     const data = { ...this.profileData()!, ...this.form.value, userId: this.userId };
-    this.profileService.updateProfile(this.profileData()!.id, data).subscribe({
+    this.profileService.updateProfile(this.profileData()!.id, data).pipe(
+      finalize(() => this.isSaving.set(false)),
+    ).subscribe({
       next: () => {
         this.profileData.set(data);
+        this.form.patchValue(data);
         this.isEditMode.set(false);
+        this.dialog.open(ConfirmDialogComponent, {
+          width: '420px',
+          data: { message: 'Your profile was updated successfully.', confirmLabel: 'OK', showCancel: false }
+        });
+      },
+      error: () => {
+        this.form.markAllAsTouched();
+        this.dialog.open(ConfirmDialogComponent, {
+          width: '420px',
+          data: { message: 'Profile update failed. Please try again.', confirmLabel: 'OK', showCancel: false }
+        });
       }
     });
   }
