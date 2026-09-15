@@ -42,8 +42,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   public newMessageContent: string = '';
 
   public myId: string = 'user1';
+  public myName: string = '';
   public currentUserId: string = 'user1';
   public receiverId: string = 'user2';
+  public receiverName: string = '';
 
   public unreadCount: number = 0;
 
@@ -64,20 +66,24 @@ export class ChatComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.chatService.startConnection();
     this.myId = this.chatService.getMyUserIdFromToken();
+    this.myName = this.chatService.getMyUserNameFromToken();
     this.currentUserId = this.myId;
 
     this.loadConversations();
 
     // 1. UZIMAMO ID IZ STATE-A (Umesto queryParams)
     const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras?.state as { recipientId?: string };
+    const state = navigation?.extras?.state as { recipientId?: string; recipientName?: string };
     const recipientIdFromState = state?.recipientId || history.state?.recipientId;
+    const recipientNameFromState = state?.recipientName || history.state?.recipientName;
 
     if (recipientIdFromState) {
       this.receiverId = recipientIdFromState;
+      this.receiverName = recipientNameFromState || recipientIdFromState;
     } else {
       // Fallback ako se na chat dolazi direktno bez state-a
       this.receiverId = (this.myId.toLowerCase() === 'user1') ? 'user2' : 'user1';
+      this.receiverName = this.receiverId;
     }
 
     this.isInitialLoad = true;
@@ -201,6 +207,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     conv.unreadCount = 0;
 
     this.selectedConversation = conv;
+    this.receiverName = conv.userName || conv.userId;
 
     if (this.receiverId !== conv.userId) {
       this.receiverId = conv.userId;
@@ -223,7 +230,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (!this.newMessageContent.trim()) return;
 
     const sentContent = this.newMessageContent;
-    this.chatService.sendMessage(this.receiverId, sentContent, this.myId);
+    this.chatService.sendMessage(this.receiverId, this.receiverName, sentContent, this.myId);
     this.newMessageContent = '';
 
     this.unreadCount = 0;

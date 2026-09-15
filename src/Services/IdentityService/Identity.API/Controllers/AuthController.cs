@@ -269,14 +269,22 @@ namespace Identity.API.Controllers
 
         private JwtSecurityToken GenerateJwtToken(ApplicationUser user, IList<string> userRoles)
         {
+            var fullName = $"{user.FirstName} {user.LastName}".Trim();
+            if (string.IsNullOrWhiteSpace(fullName))
+            {
+                fullName = user.Email!;
+            }
+
             var authClaims = new List<Claim>
             {
-                new(ClaimTypes.Name, user.UserName!),
+                new(ClaimTypes.Name, fullName),
                 new(ClaimTypes.Email, user.Email!),
                 new(ClaimTypes.NameIdentifier, user.Id),
                 new(JwtRegisteredClaimNames.Sub, user.Id),
                 new(JwtRegisteredClaimNames.Email, user.Email!),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new("FirstName", user.FirstName ?? string.Empty),
+                new("LastName", user.LastName ?? string.Empty),
             };
 
             foreach (var userRole in userRoles)

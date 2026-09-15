@@ -16,18 +16,18 @@ public class ChatControllerTests
 
     public ChatControllerTests()
     {
-        // Mock-ujemo isključivo IChatService interfejs
         _chatServiceMock = new Mock<IChatService>();
     }
 
-    private ChatController CreateControllerWithUser(string userId, string role = "Employer")
+    private ChatController CreateControllerWithUser(string userId, string role = "Employer", string name = "Test Korisnik")
     {
         var controller = new ChatController(_chatServiceMock.Object);
 
         var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
             new Claim(ClaimTypes.NameIdentifier, userId),
-            new Claim(ClaimTypes.Role, role)
+            new Claim(ClaimTypes.Role, role),
+            new Claim(ClaimTypes.Name, name)
         }, "TestAuth"));
 
         controller.ControllerContext = new ControllerContext
@@ -44,24 +44,33 @@ public class ChatControllerTests
         // Arrange
         var senderId = "user-1";
         var senderRole = "Employer";
+        var senderName = "Test Korisnik";
         var request = new SendMessageRequest
         {
             ReciverId = "user-2",
+            ReceiverName = "Primalac",
             Text = "Zdravo iz testa!"
         };
 
         _chatServiceMock
-            .Setup(s => s.SendMessageAsync(senderId, senderRole, request.ReciverId, request.Text))
+            .Setup(s => s.SendMessageAsync(
+                senderId,
+                senderName,
+                senderRole,
+                request.ReciverId,
+                request.ReceiverName,
+                request.Text))
             .ReturnsAsync(new Message
             {
                 Id = "msg-1",
+                ChatId = "chat-1",
                 SenderId = senderId,
                 Text = request.Text,
                 Timestamp = DateTime.UtcNow,
                 IsRead = false
             });
 
-        var controller = CreateControllerWithUser(senderId, senderRole);
+        var controller = CreateControllerWithUser(senderId, senderRole, senderName);
 
         // Act
         var result = await controller.SendMessage(request);
@@ -80,7 +89,8 @@ public class ChatControllerTests
         var request = new SendMessageRequest
         {
             ReciverId = "user-2",
-            Text = "" // Prazna poruka koja aktivira proveru u kontroleru
+            ReceiverName = "Primalac",
+            Text = ""
         };
 
         // Act
@@ -131,7 +141,7 @@ public class ChatControllerTests
         var currentUserId = "user-1";
         var controller = CreateControllerWithUser(currentUserId);
 
-        // Act - Prosleđujemo sve parametre kao null da izazovemo BadRequest
+        // Act
         var result = await controller.GetMessages(null, null, null);
 
         // Assert

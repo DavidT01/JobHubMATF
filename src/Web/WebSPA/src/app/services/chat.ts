@@ -86,9 +86,9 @@ export class ChatService {
     });
   }
 
-  public sendMessage(receiverId: string, content: string, currentMyId: string): void {
+  public sendMessage(receiverId: string, receiverName: string, content: string, currentMyId: string): void {
     if (this.hubConnection && this.hubConnection.state === 'Connected') {
-      this.hubConnection.invoke('SendMessage', receiverId, content)
+      this.hubConnection.invoke('SendMessage', receiverId, receiverName, content)
         .then(() => {
           console.log('🚀 Poruka poslata na server.');
         })
@@ -165,6 +165,27 @@ export class ChatService {
     } catch (e) {
       console.error('Greška pri čitanju tokena:', e);
       return 'user1';
+    }
+  }
+
+  public getMyUserNameFromToken(): string {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return 'Korisnik';
+
+    try {
+      const payloadBase64 = token.split('.')[1];
+      const decodedJson = atob(payloadBase64);
+      const decoded = JSON.parse(decodedJson);
+
+      return decoded.username ||
+        decoded.unique_name ||
+        decoded.name ||
+        decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
+        decoded.sub ||
+        'Korisnik';
+    } catch (e) {
+      console.error('Greška pri čitanju tokena:', e);
+      return 'Korisnik';
     }
   }
 

@@ -136,8 +136,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   public testOpenChatWithFakeUser() {
     // Ubaci neki realan Mongo ID korisnika (kandidata) koji postoji u bazi
-    const fakeCandidateId = "PRIJAVLJEN KANDIDAT";
-    this.router.navigate(['/chat'], { state: { recipientId: fakeCandidateId } });
+    const fakeCandidateId = "6b934877-899b-4bff-ac2d-102468129cb7";
+    const fakeCandidateName = "Test Kandidat";
+    this.router.navigate(['/chat'], { state: { recipientId: fakeCandidateId, recipientName: fakeCandidateName } });
   }
 
   ngOnDestroy(): void {
