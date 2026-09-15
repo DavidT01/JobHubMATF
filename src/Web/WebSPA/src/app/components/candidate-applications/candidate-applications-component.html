@@ -60,7 +60,10 @@
           <li>
             <mat-card appearance="outlined">
               <mat-card-header>
-                <mat-card-title><h2>Job ID: {{ application.jobId }}</h2></mat-card-title>
+                <mat-card-title>
+                  <a [routerLink]="['/applications', application.id]">Application details</a>
+                </mat-card-title>
+                <mat-card-subtitle>Job ID: {{ application.jobId }}</mat-card-subtitle>
                 <mat-card-subtitle>Status: {{ statusLabel(application.status) }}</mat-card-subtitle>
               </mat-card-header>
               <mat-card-content>

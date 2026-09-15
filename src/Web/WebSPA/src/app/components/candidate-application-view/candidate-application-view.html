@@ -1,34 +1,85 @@
-<div class="application-view-container">
-  <mat-card class="application-card">
-    <mat-card-header>
-      <mat-card-title>Application Details</mat-card-title>
-      <!-- TODO: Display the application job title and status received through gRPC. -->
-    </mat-card-header>
+@let view = state();
+<main class="application-view-container" aria-labelledby="application-heading" [attr.aria-busy]="view.kind === 'loading'">
+  <a mat-button routerLink="/applications">Back to applications</a>
 
-    <mat-card-content>
-      <div class="candidate-info">
-        <h3>Candidate Profile</h3>
-        <!-- TODO: Display candidate profile details received through gRPC. -->
+  @if (view.kind === 'loading') {
+    <section class="state" role="status">
+      <p>Loading application progress...</p>
+      <mat-progress-bar mode="indeterminate" aria-label="Loading application progress" />
+    </section>
+  } @else if (view.kind === 'error') {
+    <section class="state" role="alert">
+      <h1 id="application-heading">Application details</h1>
+      <p>{{ view.message }}</p>
+    </section>
+  } @else {
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Application progress</p>
+        <h1 id="application-heading">{{ view.data.job.title }}</h1>
+        <p>{{ view.data.job.companyName }} · {{ view.data.job.city || 'Location not specified' }}</p>
       </div>
+      <span class="status" [class]="'status status-' + view.data.application.status.toLowerCase()">
+        {{ statusLabel(view.data.application.status) }}
+      </span>
+    </header>
 
-      <mat-divider></mat-divider>
+    <section class="summary-grid" aria-label="Application summary">
+      <mat-card appearance="outlined">
+        <mat-card-header><mat-card-title>Application</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <dl>
+            <div><dt>Submitted</dt><dd>{{ view.data.application.submittedAtUtc | date:'medium' }}</dd></div>
+            <div><dt>Last updated</dt><dd>{{ view.data.application.updatedAtUtc | date:'medium' }}</dd></div>
+          </dl>
+        </mat-card-content>
+      </mat-card>
+      <mat-card appearance="outlined">
+        <mat-card-header><mat-card-title>Candidate profile</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <h2>{{ profileName(view.data.profile) }}</h2>
+          <p>{{ view.data.profile.email }}</p>
+          <p>{{ view.data.profile.location || 'Location not specified' }}</p>
+          @if (view.data.profile.cvUrl) {
+            <a mat-stroked-button [href]="view.data.profile.cvUrl" target="_blank" rel="noopener">Open CV</a>
+          }
+        </mat-card-content>
+      </mat-card>
+    </section>
 
-      <div class="recruitment-info">
-        <h3>Current Recruitment Stage</h3>
-        <!-- TODO: Display the current selection round received through gRPC. -->
-      </div>
-    </mat-card-content>
-
-    <mat-card-actions align="end">
-      <!-- TODO: Enable this action when application and candidate data are available through gRPC. -->
-      <button mat-stroked-button color="primary" (click)="scheduleInterview()" disabled>
-        <mat-icon>event</mat-icon>
-        Schedule Interview
-      </button>
-      <button mat-raised-button color="accent" (click)="evaluateCandidate()" disabled>
-        <mat-icon>star_rate</mat-icon>
-        Evaluate Candidate
-      </button>
-    </mat-card-actions>
-  </mat-card>
-</div>
+    <mat-card appearance="outlined" class="progress-card">
+      <mat-card-header>
+        <mat-card-title>Recruitment progress</mat-card-title>
+        <mat-card-subtitle>{{ view.data.recruitment.progress.status }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <ol class="rounds">
+          @for (round of view.data.recruitment.process.rounds; track round.id; let index = $index) {
+            @let roundStatus = roundState(index, view.data.recruitment.progress.currentSelectionRoundId, round.id);
+            @let interview = interviewFor(round.id);
+            <li [class]="'round round-' + roundStatus">
+              <div class="round-marker" aria-hidden="true">{{ index + 1 }}</div>
+              <div class="round-content">
+                <div class="round-heading">
+                  <h2>{{ round.title }}</h2>
+                  <span>{{ roundStatus | titlecase }}</span>
+                </div>
+                @if (round.description) { <p>{{ round.description }}</p> }
+                @if (interview) {
+                  <div class="interview">
+                    <h3>{{ interview.title }}</h3>
+                    <p>{{ interview.startTime | date:'medium' }} - {{ interview.endTime | date:'shortTime' }}</p>
+                    @if (interview.description) { <p>{{ interview.description }}</p> }
+                    @if (interview.googleMeetUrl) {
+                      <a mat-stroked-button [href]="interview.googleMeetUrl" target="_blank" rel="noopener">Join Google Meet</a>
+                    }
+                  </div>
+                }
+              </div>
+            </li>
+          }
+        </ol>
+      </mat-card-content>
+    </mat-card>
+  }
+</main>

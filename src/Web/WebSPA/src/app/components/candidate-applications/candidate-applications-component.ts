@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -29,7 +30,7 @@ type ViewState =
 @Component({
   selector: 'app-candidate-applications',
   imports: [DatePipe, MatButtonModule, MatCardModule, MatFormFieldModule, MatPaginatorModule,
-    MatProgressBarModule, MatSelectModule],
+    MatProgressBarModule, MatSelectModule, RouterLink],
   templateUrl: './candidate-applications-component.html',
   styleUrl: './candidate-applications-component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
