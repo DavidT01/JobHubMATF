@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Recruitment.API.Data;
 using Recruitment.API.Exceptions;
+using Recruitment.API.Features.Events;
 using Recruitment.API.Infrastructure;
 
 namespace Recruitment.API.Features.Commands.CancelInterviewSchedule;
@@ -27,7 +28,9 @@ public class CancelInterviewScheduleCommandHandler(
             await meetingService.DeleteMeetingAsync(schedule.EventId);
         }
 
+        var cancelledEvent = InterviewLifecycleEvent.Cancelled(schedule);
         context.InterviewSchedules.Remove(schedule);
+        context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(cancelledEvent));
         await context.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Successfully cancelled interview schedule {InterviewScheduleId}.", request.InterviewScheduleId);
     }

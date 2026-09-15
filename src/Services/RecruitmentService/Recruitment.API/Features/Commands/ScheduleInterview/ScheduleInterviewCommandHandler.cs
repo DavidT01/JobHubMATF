@@ -5,6 +5,7 @@ using Recruitment.API.Data;
 using Recruitment.API.DTOs;
 using Recruitment.API.Entities;
 using Recruitment.API.Exceptions;
+using Recruitment.API.Features.Events;
 using Recruitment.API.Infrastructure;
 
 namespace Recruitment.API.Features.Commands.ScheduleInterview
@@ -50,6 +51,7 @@ namespace Recruitment.API.Features.Commands.ScheduleInterview
             schedule.GoogleMeetUrl = url;
 
             _context.InterviewSchedules.Add(schedule);
+            _context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(InterviewLifecycleEvent.Scheduled(schedule)));
             await _context.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation("Successfully scheduled interview {InterviewScheduleId} for candidate {CandidateProfileId} in round {SelectionRoundId}", schedule.Id, request.CandidateProfileId, request.SelectionRoundId);

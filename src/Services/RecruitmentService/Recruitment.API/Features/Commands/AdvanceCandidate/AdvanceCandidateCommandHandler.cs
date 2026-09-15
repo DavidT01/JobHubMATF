@@ -5,6 +5,7 @@ using Recruitment.API.Data;
 using Recruitment.API.DTOs;
 using Recruitment.API.Exceptions;
 using Recruitment.API.Enums;
+using Recruitment.API.Features.Events;
 using Recruitment.API.Infrastructure;
 
 namespace Recruitment.API.Features.Commands.AdvanceCandidate
@@ -42,6 +43,11 @@ namespace Recruitment.API.Features.Commands.AdvanceCandidate
                 progress.CurrentSelectionRoundId = process.Rounds.OrderBy(r => r.Index).FirstOrDefault()?.Id;
                 progress.Status = CandidateProgressStatus.InProgress;
                 _context.Progresses.Add(progress);
+                if (progress.CurrentSelectionRoundId is not null)
+                {
+                    _context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(
+                        CandidateProgressLifecycleEvent.RoundAdvanced(progress, process.JobId)));
+                }
             }
             else
             {
@@ -61,6 +67,8 @@ namespace Recruitment.API.Features.Commands.AdvanceCandidate
                     progress.CurrentSelectionRoundId = nextRound.Id;
                     progress.ModifiedAt = DateTime.UtcNow;
                     _context.Progresses.Update(progress);
+                    _context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(
+                        CandidateProgressLifecycleEvent.RoundAdvanced(progress, process.JobId)));
                 }
                 else
                 {
