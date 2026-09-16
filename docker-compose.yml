@@ -76,7 +76,8 @@ services:
       Kestrel__Endpoints__Grpc__Protocols: Http2
       DatabaseSettings__ConnectionString: mongodb://mongo:27017
       RedisSettings__ConnectionString: redis:6379
-      ServiceUrls__ProfileApi: http://profile-api:8080
+      GrpcServices__ProfileApi: http://profile-api:8081
+      Cors__AllowedOrigin: http://localhost:4200
     depends_on:
       mongo:
         condition: service_healthy
