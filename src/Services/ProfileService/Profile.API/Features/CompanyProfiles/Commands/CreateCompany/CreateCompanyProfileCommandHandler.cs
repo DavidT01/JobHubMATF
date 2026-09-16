@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using MediatR;
 using Profile.API.Data;
+using Profile.API.Data.Outbox;
 using Profile.API.Entities;
+using Profile.API.Features.Events;
 
 namespace Profile.API.Features.CompanyProfiles.Commands.CreateCompany
 {
@@ -14,6 +16,7 @@ namespace Profile.API.Features.CompanyProfiles.Commands.CreateCompany
             entity.CreatedAt = DateTime.UtcNow;
 
             context.CompanyProfiles.Add(entity);
+            context.OutboxMessages.Add(OutboxMessage.Create(CompanyProfileLifecycleEvent.Created(entity)));
             await context.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation("Successfully created company profile with Id {ProfileId} for user {UserId}", entity.Id, request.UserId);
