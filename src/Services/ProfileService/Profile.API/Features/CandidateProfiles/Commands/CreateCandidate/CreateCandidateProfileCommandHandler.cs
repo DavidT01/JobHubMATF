@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using MediatR;
 using Profile.API.Data;
+using Profile.API.Data.Outbox;
 using Profile.API.Entities;
+using Profile.API.Features.Events;
 
 namespace Profile.API.Features.CandidateProfiles.Commands.CreateCandidate
 {
@@ -14,6 +16,7 @@ namespace Profile.API.Features.CandidateProfiles.Commands.CreateCandidate
             entity.CreatedAt = DateTime.UtcNow;
 
             context.CandidateProfiles.Add(entity);
+            context.OutboxMessages.Add(OutboxMessage.Create(CandidateProfileLifecycleEvent.Created(entity)));
             await context.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation("Successfully created candidate profile with Id {ProfileId} for user {UserId}", entity.Id, request.UserId);
