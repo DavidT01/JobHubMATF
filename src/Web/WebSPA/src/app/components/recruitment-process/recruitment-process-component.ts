@@ -10,11 +10,12 @@ import { RoundEditorDialogComponent } from '../round-editor-dialog/round-editor-
 import { RecruitmentProcessService } from '../../core/services/recruitment-process/recruitment-process-service';
 import { RecruitmentProcessDto } from '../../core/models/recruitment-process-dto';
 import { CreateProcessCommandDto } from '../../core/models/create-process-command-dto';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
 @Component({
   selector: 'app-recruitment-process-component',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatCardModule, MatDialogModule],
+  imports: [CommonModule, MatButtonModule, MatCardModule, MatDialogModule, PageHeaderComponent],
   templateUrl: './recruitment-process-component.html',
   styleUrls: ['./recruitment-process-component.scss']
 })

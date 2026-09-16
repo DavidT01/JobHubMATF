@@ -1,1 +1,86 @@
-<router-outlet></router-outlet>
+@if (showChrome()) {
+  <mat-toolbar class="app-toolbar">
+    @if (isHandset()) {
+      <button mat-icon-button type="button" aria-label="Toggle navigation" (click)="toggleNavigation()">
+        <mat-icon>menu</mat-icon>
+      </button>
+    }
+
+    <a class="app-brand" routerLink="/" aria-label="JobHub home">
+      <mat-icon class="app-brand__icon">work</mat-icon>
+      <span>JobHub</span>
+    </a>
+
+    <span class="app-toolbar__spacer"></span>
+
+    @if (auth.isLoggedIn()) {
+      <a mat-icon-button routerLink="/notifications" matTooltip="Notifications"
+         [attr.aria-label]="session.unreadCount() > 0 ? 'Notifications, ' + session.unreadCount() + ' unread' : 'Notifications'">
+        <mat-icon [matBadge]="session.unreadCount()" [matBadgeHidden]="session.unreadCount() === 0"
+                  matBadgeSize="small" matBadgeColor="warn" aria-hidden="true">notifications_none</mat-icon>
+      </a>
+
+      <button mat-button type="button" class="app-user-button" [matMenuTriggerFor]="userMenu">
+        <mat-icon>account_circle</mat-icon>
+        <span class="app-user-button__name">{{ session.displayName() || 'Account' }}</span>
+        <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+      </button>
+
+      <mat-menu #userMenu="matMenu" xPosition="before">
+        @if (session.user(); as user) {
+          <div class="app-user-menu__summary">
+            <span class="app-user-menu__name">{{ session.displayName() }}</span>
+            <span class="app-user-menu__meta">{{ user.email }}</span>
+            @if (session.roleLabel()) {
+              <span class="app-user-menu__meta">{{ session.roleLabel() }}</span>
+            }
+          </div>
+          <mat-divider />
+        }
+        @if (profileLink(); as link) {
+          <a mat-menu-item [routerLink]="link">
+            <mat-icon>person_outline</mat-icon>
+            <span>My profile</span>
+          </a>
+        }
+        <a mat-menu-item routerLink="/notifications">
+          <mat-icon>notifications_none</mat-icon>
+          <span>Notifications</span>
+        </a>
+        <button mat-menu-item type="button" (click)="signOut()">
+          <mat-icon>logout</mat-icon>
+          <span>Sign out</span>
+        </button>
+      </mat-menu>
+    } @else {
+      <a mat-button routerLink="/register">Create account</a>
+      <a mat-flat-button routerLink="/login">Sign in</a>
+    }
+  </mat-toolbar>
+}
+
+<mat-sidenav-container class="app-container">
+  <mat-sidenav class="app-sidenav"
+               [mode]="isHandset() ? 'over' : 'side'"
+               [opened]="showChrome() && !isHandset()">
+    <mat-nav-list aria-label="Main navigation">
+      @for (item of navItems(); track item.link) {
+        <a mat-list-item
+           [routerLink]="item.link"
+           routerLinkActive
+           #linkState="routerLinkActive"
+           [routerLinkActiveOptions]="{ exact: !!item.exact }"
+           [activated]="linkState.isActive">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <main class="app-content" [class.app-content--bare]="!showChrome()">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

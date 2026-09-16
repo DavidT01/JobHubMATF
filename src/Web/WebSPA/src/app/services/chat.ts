@@ -55,10 +55,10 @@ export class ChatService {
 
     this.hubConnection.start()
       .then(() => {
-        console.log('✅ SignalR konekcija uspostavljena.');
+        console.log('SignalR connection established.');
         this.addMessageListener();
       })
-      .catch(err => console.error('❌ Greška pri konekciji:', err));
+      .catch(err => console.error('SignalR connection failed:', err));
   }
 
   private addMessageListener(): void {
@@ -90,11 +90,11 @@ export class ChatService {
     if (this.hubConnection && this.hubConnection.state === 'Connected') {
       this.hubConnection.invoke('SendMessage', receiverId, receiverName, content)
         .then(() => {
-          console.log('🚀 Poruka poslata na server.');
+          console.log('Message sent to the server.');
         })
-        .catch(err => console.error('❌ Greška pri slanju poruke:', err));
+        .catch(err => console.error('Failed to send message:', err));
     } else {
-      console.warn('⚠️ SignalR konekcija nije aktivna.');
+      console.warn('SignalR connection is not active.');
     }
   }
 
@@ -127,7 +127,7 @@ export class ChatService {
             this.messagesSubject.next(historyArray);
           });
         },
-        error: (err) => console.error('❌ Greška pri učitavanju istorije:', err)
+        error: (err) => console.error('Failed to load chat history:', err)
       });
   }
 
@@ -163,14 +163,14 @@ export class ChatService {
         decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
         'user1';
     } catch (e) {
-      console.error('Greška pri čitanju tokena:', e);
+      console.error('Failed to read the auth token:', e);
       return 'user1';
     }
   }
 
   public getMyUserNameFromToken(): string {
     const token = localStorage.getItem('auth_token');
-    if (!token) return 'Korisnik';
+    if (!token) return 'User';
 
     try {
       const payloadBase64 = token.split('.')[1];
@@ -182,10 +182,10 @@ export class ChatService {
         decoded.name ||
         decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
         decoded.sub ||
-        'Korisnik';
+        'User';
     } catch (e) {
-      console.error('Greška pri čitanju tokena:', e);
-      return 'Korisnik';
+      console.error('Failed to read the auth token:', e);
+      return 'User';
     }
   }
 

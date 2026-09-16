@@ -1,6 +1,6 @@
 @let view = state();
-<main class="application-view-container" aria-labelledby="application-heading" [attr.aria-busy]="view.kind === 'loading'">
-  <a mat-button routerLink="/applications">Back to applications</a>
+<section class="application-view-container page page--narrow" aria-labelledby="application-heading" [attr.aria-busy]="view.kind === 'loading'">
+  <a mat-button routerLink="/applications" class="back-link">&larr; Back to applications</a>
 
   @if (view.kind === 'loading') {
     <section class="state" role="status">
@@ -82,4 +82,4 @@
       </mat-card-content>
     </mat-card>
   }
-</main>
+</section>

@@ -14,6 +14,7 @@ import { BehaviorSubject, catchError, map, of, startWith, switchMap } from 'rxjs
 import { ApplicationListItemDto, ApplicationStatus, PagedResult } from '../../core/models/application-list-item-dto';
 import { ApplicationSortBy, SortDirection } from '../../core/models/application-management-dto';
 import { ApplicationsService } from '../../core/services/applications/applications-service';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
 interface PageRequest {
   pageIndex: number;
@@ -30,7 +31,7 @@ type ViewState =
 @Component({
   selector: 'app-candidate-applications',
   imports: [DatePipe, MatButtonModule, MatCardModule, MatFormFieldModule, MatPaginatorModule,
-    MatProgressBarModule, MatSelectModule, RouterLink],
+    MatProgressBarModule, MatSelectModule, RouterLink, PageHeaderComponent],
   templateUrl: './candidate-applications-component.html',
   styleUrl: './candidate-applications-component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

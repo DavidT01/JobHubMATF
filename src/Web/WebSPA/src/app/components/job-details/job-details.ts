@@ -12,6 +12,8 @@ import { MatchResult } from '../../models/match-result.model';
 import { JobService } from '../../services/job.service';
 import { CurrentUser } from '../../core/current-user';
 import { AuthService } from '../../core/services/auth.service';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { JobLabelPipe } from '../../shared/job-label.pipe';
 import { ApplicationFormComponent } from '../application-form/application-form-component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DestroyRef } from '@angular/core';
@@ -26,7 +28,9 @@ import { DestroyRef } from '@angular/core';
     MatChipsModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    PageHeaderComponent,
+    JobLabelPipe
   ],
   templateUrl: './job-details.html',
   styleUrl: './job-details.scss',
@@ -42,6 +46,11 @@ export class JobDetails implements OnInit {
   acceptingApplications(): boolean {
     const job = this.job();
     return !!job?.isActive && (!job.expirationDate || Date.parse(job.expirationDate) > Date.now());
+  }
+
+  locationLabel(job: Job): string {
+    const place = [job.city, job.country].filter(Boolean).join(', ');
+    return place ? `${job.companyName} · ${place}` : job.companyName;
   }
 
   job = signal<Job | null>(null);
@@ -63,7 +72,7 @@ export class JobDetails implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
 
     if (!id) {
-      this.error.set('Nevalidan ID oglasa.');
+      this.error.set('The job ID is invalid.');
       this.loading.set(false);
       return;
     }
@@ -74,7 +83,7 @@ export class JobDetails implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set('Oglas nije pronađen.');
+        this.error.set('This job could not be found.');
         this.loading.set(false);
         console.error(err);
       }
@@ -124,7 +133,7 @@ export class JobDetails implements OnInit {
         this.matchLoading.set(false);
       },
       error: (err) => {
-        this.matchError.set('Podaci o profilu trenutno nisu dostupni.');
+        this.matchError.set('Your profile data is not available right now.');
         this.matchLoading.set(false);
         console.error(err);
       },

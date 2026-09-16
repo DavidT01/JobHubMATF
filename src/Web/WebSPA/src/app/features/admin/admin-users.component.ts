@@ -1,12 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { AdminService, AdminStats, AdminUser } from '../../core/services/admin.service';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
 @Component({
   selector: 'app-admin-users',
@@ -18,7 +18,7 @@ import { AdminService, AdminStats, AdminUser } from '../../core/services/admin.s
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    RouterLink
+    PageHeaderComponent
   ],
   templateUrl: './admin-users.component.html',
   styleUrl: './admin-users.component.scss'
@@ -46,7 +46,7 @@ export class AdminUsersComponent implements OnInit {
         this.error.set(null);
       },
       error: () => {
-        this.error.set('Could not load users. Admin role required.');
+        this.error.set('Could not load users. The admin role is required.');
         this.loading.set(false);
       }
     });

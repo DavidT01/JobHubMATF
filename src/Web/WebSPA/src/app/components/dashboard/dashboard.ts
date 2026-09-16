@@ -1,14 +1,13 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ChatService } from '../../services/chat';
+import { profileLinkFor } from '../../core/layout/navigation';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
-// --- Angular Material Imports ---
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 
 export type UserRole = 'Candidate' | 'Employer' | 'Admin';
 
@@ -16,21 +15,19 @@ export type UserRole = 'Candidate' | 'Employer' | 'Admin';
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
-    RouterModule,
-    // Material Moduli
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatChipsModule
+    PageHeaderComponent
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   public userRole: UserRole = 'Candidate';
-  public userName: string = 'Korisnik';
+  public userName: string = 'User';
   public currentUserId: string = '';
+  public profileLink: string | null = null;
 
   public candidateStats = {
     activeApplications: 5,
@@ -63,11 +60,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.extractUserFromToken();
+    this.profileLink = profileLinkFor(this.userRole);
 
-    // 1. Pokrećemo SignalR konekciju i sa Dashboarda da bismo hvatali poruke u real-time-u
+    // Start the SignalR connection here too so new messages arrive in real time.
     this.chatService.startConnection();
 
-    // 2. Pretplaćujemo se na reaktivni stream nepročitanih poruka
+    // Keep the unread message counters in sync with the chat service.
     this.subscribeToUnreadCount();
   }
 
@@ -87,34 +85,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
         payload.name ||
         payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
         payload.sub ||
-        'Korisnik';
+        'User';
 
       const roleClaim =
         payload.role ||
         payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
 
-      // ZAŠTITA: Proveravamo da li je izvučena uloga zaista jedna od dozvoljenih
+      // Only accept roles the dashboard knows how to render.
       const VALID_ROLES: UserRole[] = ['Candidate', 'Employer', 'Admin'];
 
       if (roleClaim && VALID_ROLES.includes(roleClaim as UserRole)) {
         this.userRole = roleClaim as UserRole;
       } else {
-        console.warn(`Prepoznata neispravna uloga: "${roleClaim}". Postavljam fallback na Candidate.`);
-        this.userRole = 'Candidate'; // Siguran fallback da UI ne ostane prazan
+        console.warn(`Unrecognized role "${roleClaim}". Falling back to Candidate.`);
+        this.userRole = 'Candidate';
       }
     } catch (e) {
-      console.error('Greška pri dekodiranju tokena', e);
+      console.error('Failed to decode the auth token', e);
       this.userRole = 'Candidate';
     }
   }
 
   private subscribeToUnreadCount(): void {
-    // Inicijalno dovlačimo konverzacije (tap operator u servisu automatski osvežava unreadCount$)
+    // Loading conversations also refreshes unreadCount$ inside the chat service.
     this.chatService.getConversations().subscribe({
-      error: (err) => console.error('Greška pri učitavanju nepročitanih poruka za Dashboard:', err)
+      error: (err) => console.error('Failed to load unread messages for the dashboard:', err)
     });
 
-    // Pretplaćujemo se na stream koji reaguje i na inicijalno stanje i na SignalR poruke
+    // Reacts to both the initial state and messages pushed over SignalR.
     this.unreadSub = this.chatService.unreadCount$.subscribe((totalUnread: number) => {
       this.candidateStats = {
         ...this.candidateStats,
@@ -135,9 +133,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   public testOpenChatWithFakeUser() {
-    // Ubaci neki realan Mongo ID korisnika (kandidata) koji postoji u bazi
+    // Use the id of a candidate that exists in the database.
     const fakeCandidateId = "6b934877-899b-4bff-ac2d-102468129cb7";
-    const fakeCandidateName = "Test Kandidat";
+    const fakeCandidateName = "Sample candidate";
     this.router.navigate(['/chat'], { state: { recipientId: fakeCandidateId, recipientName: fakeCandidateName } });
   }
 

@@ -17,12 +17,12 @@
 
     label {
         font-weight: 500;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--mat-sys-on-surface-variant);
         margin-bottom: 4px;
     }
 }
 
 .error-message {
-    color: #b3261e;
+    color: var(--mat-sys-error);
     margin: 8px 0 0;
 }

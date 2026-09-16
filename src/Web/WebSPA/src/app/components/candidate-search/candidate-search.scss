@@ -1,9 +1,13 @@
+.filter-card {
+  margin-bottom: 24px;
+}
+
 .search-form {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   align-items: flex-start;
-  padding: 16px;
+  padding-top: 16px;
 
   mat-form-field {
     min-width: 180px;
@@ -19,30 +23,7 @@
   }
 }
 
-.candidate-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-  padding: 16px;
-}
-
-.candidate-card {
-  cursor: pointer;
-}
-
 .years {
-  font-weight: 500;
+  font: var(--mat-sys-title-small);
   margin: 4px 0;
-}
-
-.chips {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-
-.error {
-  color: var(--mat-sys-error);
-  padding: 16px;
 }

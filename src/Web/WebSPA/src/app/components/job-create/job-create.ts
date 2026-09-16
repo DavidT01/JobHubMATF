@@ -8,6 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { Job, JobType, ExperienceLevel, WorkMode } from '../../models/job.model';
 import { JobService } from '../../services/job.service';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { JobLabelPipe } from '../../shared/job-label.pipe';
 
 @Component({
   selector: 'app-job-create',
@@ -18,6 +20,8 @@ import { JobService } from '../../services/job.service';
     MatSelectModule,
     MatButtonModule,
     MatCardModule,
+    PageHeaderComponent,
+    JobLabelPipe,
   ],
   templateUrl: './job-create.html',
   styleUrl: './job-create.scss',
@@ -103,7 +107,7 @@ export class JobCreate {
       },
       error: (err) => {
         this.submitting.set(false);
-        this.error.set('Greška pri kreiranju oglasa.');
+        this.error.set('The job could not be posted. Please try again.');
         console.error(err);
       },
     });

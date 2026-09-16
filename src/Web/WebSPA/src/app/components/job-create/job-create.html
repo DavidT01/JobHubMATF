@@ -1,138 +1,138 @@
-<mat-card class="create-card">
-  <mat-card-header>
-    <mat-card-title>Kreiraj oglas</mat-card-title>
-  </mat-card-header>
+<section class="page page--narrow">
+  <app-page-header title="Post a job" subtitle="Describe the role so candidates know what to expect" />
 
-  <mat-card-content>
-    <form [formGroup]="form" (ngSubmit)="submit()" class="create-form">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Naslov</mat-label>
-        <input matInput formControlName="title" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Opis</mat-label>
-        <textarea matInput rows="4" formControlName="description"></textarea>
-      </mat-form-field>
-
-      <div class="row">
-        <mat-form-field appearance="outline">
-          <mat-label>Tip posla</mat-label>
-          <mat-select formControlName="jobType">
-            @for (t of jobTypes; track t) {
-              <mat-option [value]="t">{{ t }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Nivo iskustva</mat-label>
-          <mat-select formControlName="experienceLevel">
-            @for (lvl of experienceLevels; track lvl) {
-              <mat-option [value]="lvl">{{ lvl }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Način rada</mat-label>
-          <mat-select formControlName="workMode">
-            @for (m of workModes; track m) {
-              <mat-option [value]="m">{{ m }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <div class="row">
-        <mat-form-field appearance="outline">
-          <mat-label>Company ID</mat-label>
-          <input matInput formControlName="companyId" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Naziv kompanije</mat-label>
-          <input matInput formControlName="companyName" />
-        </mat-form-field>
-      </div>
-
-      <div class="row">
-        <mat-form-field appearance="outline">
-          <mat-label>Grad</mat-label>
-          <input matInput formControlName="city" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Država</mat-label>
-          <input matInput formControlName="country" />
-        </mat-form-field>
-      </div>
-
-      <div class="row">
-        <mat-form-field appearance="outline">
-          <mat-label>Plata min</mat-label>
-          <input matInput type="number" formControlName="salaryMin" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Plata max</mat-label>
-          <input matInput type="number" formControlName="salaryMax" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Valuta</mat-label>
-          <input matInput formControlName="currency" />
-        </mat-form-field>
-      </div>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Veštine (odvojene zarezom)</mat-label>
-        <input matInput formControlName="skills" placeholder="npr. C#, Angular, Docker" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Zahtevi (odvojeni zarezom)</mat-label>
-        <input matInput formControlName="requirements" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Odgovornosti (odvojene zarezom)</mat-label>
-        <input matInput formControlName="responsibilities" />
-      </mat-form-field>
-
-      <div class="row">
-        <mat-form-field appearance="outline">
-          <mat-label>Godine iskustva</mat-label>
-          <input matInput type="number" formControlName="yearsOfExperience" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Nivo obrazovanja</mat-label>
-          <input matInput formControlName="educationLevel" />
-        </mat-form-field>
-      </div>
-
-      <div class="row">
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="create-form">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Apply URL</mat-label>
-          <input matInput formControlName="applyUrl" />
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Kontakt email</mat-label>
-          <input matInput type="email" formControlName="contactEmail" />
+          <mat-label>Description</mat-label>
+          <textarea matInput rows="4" formControlName="description"></textarea>
         </mat-form-field>
-      </div>
 
-      @if (error()) {
-        <p class="error">{{ error() }}</p>
-      }
+        <div class="row">
+          <mat-form-field appearance="outline">
+            <mat-label>Job type</mat-label>
+            <mat-select formControlName="jobType">
+              @for (t of jobTypes; track t) {
+                <mat-option [value]="t">{{ t | jobLabel: 'jobType' }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
 
-      <div class="actions">
-        <button mat-raised-button color="primary" type="submit" [disabled]="submitting()">
-          {{ submitting() ? 'Kreiranje...' : 'Kreiraj oglas' }}
-        </button>
-      </div>
-    </form>
-  </mat-card-content>
-</mat-card>
+          <mat-form-field appearance="outline">
+            <mat-label>Experience level</mat-label>
+            <mat-select formControlName="experienceLevel">
+              @for (lvl of experienceLevels; track lvl) {
+                <mat-option [value]="lvl">{{ lvl | jobLabel: 'experienceLevel' }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Work mode</mat-label>
+            <mat-select formControlName="workMode">
+              @for (m of workModes; track m) {
+                <mat-option [value]="m">{{ m | jobLabel: 'workMode' }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="row">
+          <mat-form-field appearance="outline">
+            <mat-label>Company ID</mat-label>
+            <input matInput formControlName="companyId" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Company name</mat-label>
+            <input matInput formControlName="companyName" />
+          </mat-form-field>
+        </div>
+
+        <div class="row">
+          <mat-form-field appearance="outline">
+            <mat-label>City</mat-label>
+            <input matInput formControlName="city" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Country</mat-label>
+            <input matInput formControlName="country" />
+          </mat-form-field>
+        </div>
+
+        <div class="row">
+          <mat-form-field appearance="outline">
+            <mat-label>Minimum salary</mat-label>
+            <input matInput type="number" formControlName="salaryMin" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Maximum salary</mat-label>
+            <input matInput type="number" formControlName="salaryMax" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Currency</mat-label>
+            <input matInput formControlName="currency" />
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Skills (comma-separated)</mat-label>
+          <input matInput formControlName="skills" placeholder="e.g. C#, Angular, Docker" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Requirements (comma-separated)</mat-label>
+          <input matInput formControlName="requirements" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Responsibilities (comma-separated)</mat-label>
+          <input matInput formControlName="responsibilities" />
+        </mat-form-field>
+
+        <div class="row">
+          <mat-form-field appearance="outline">
+            <mat-label>Years of experience</mat-label>
+            <input matInput type="number" formControlName="yearsOfExperience" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Education level</mat-label>
+            <input matInput formControlName="educationLevel" />
+          </mat-form-field>
+        </div>
+
+        <div class="row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Application URL</mat-label>
+            <input matInput formControlName="applyUrl" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Contact email</mat-label>
+            <input matInput type="email" formControlName="contactEmail" />
+          </mat-form-field>
+        </div>
+
+        @if (error()) {
+          <p class="error-text" role="alert">{{ error() }}</p>
+        }
+
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="submitting()">
+            {{ submitting() ? 'Posting...' : 'Post job' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</section>

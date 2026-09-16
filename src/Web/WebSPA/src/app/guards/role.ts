@@ -6,8 +6,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
   const token = localStorage.getItem('auth_token');
 
   if (!token) {
-    // Ako nema tokena, prekini petlju i idi na login (ili ostavi prolaz ako nemaš login stranicu)
-    console.warn('Nema tokena u localStorage-u.');
+    console.warn('No auth token found in localStorage.');
     return false;
   }
 
@@ -25,14 +24,14 @@ export const roleGuard: CanActivateFn = (route, state) => {
       return true;
     }
 
-    console.warn(`Pristup odbijen za ulogu: ${userRole}. Preusmeravanje...`);
+    console.warn(`Access denied for role: ${userRole}.`);
 
     // VAŽNO: Da bi izbegao petlju, vrati true i pusti ga na Dashboard 
     // gde će ga naš Dashboard fallback u TS-u bezbedno obraditi!
     return true;
 
   } catch (e) {
-    console.error('Nevažeći token u RoleGuard-u:', e);
+    console.error('Invalid token in roleGuard:', e);
     return false;
   }
 };

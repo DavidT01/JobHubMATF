@@ -1,16 +1,20 @@
-<section class="round-candidates">
-  <h1>Candidates in This Round</h1>
+<section class="page page--narrow">
+  @if (jobId) {
+    <a mat-button class="back-link" [routerLink]="['/recruitment-processes', jobId]">&larr; Back to recruitment process</a>
+  }
+
+  <app-page-header title="Candidates in this round" subtitle="Schedule interviews, evaluate candidates, and decide who moves forward" />
 
   @if (loading()) {
-    <p>Loading candidates...</p>
+    <p class="state-message">Loading candidates...</p>
   } @else if (error(); as message) {
-    <p class="error-message">{{ message }}</p>
+    <p class="error-text" role="alert">{{ message }}</p>
   } @else if (candidates().length === 0) {
-    <p>No candidates are currently in this round.</p>
+    <p class="state-message">No candidates are in this round yet.</p>
   } @else {
     <div class="candidate-list">
       @for (candidate of candidates(); track candidate.id) {
-        <mat-card>
+        <mat-card appearance="outlined">
           <mat-card-content>
             <p>Candidate profile: {{ candidate.candidateProfileId }}</p>
             <p>Status: {{ candidate.status }}</p>
@@ -21,15 +25,15 @@
               }
             }
           </mat-card-content>
-          <mat-card-actions align="end">
-            <button mat-button (click)="openScheduleInterview(candidate.candidateProfileId)">Schedule Interview</button>
+          <mat-card-actions align="end" class="candidate-actions">
+            <button mat-button type="button" (click)="openScheduleInterview(candidate.candidateProfileId)">Schedule interview</button>
             @if (schedules()[candidate.candidateProfileId]; as schedule) {
-              <button mat-button (click)="editInterview(candidate.candidateProfileId, schedule)">Edit Interview</button>
-              <button mat-button color="warn" (click)="cancelInterview(candidate.candidateProfileId, schedule.id)">Cancel Interview</button>
+              <button mat-button type="button" (click)="editInterview(candidate.candidateProfileId, schedule)">Edit interview</button>
+              <button mat-button type="button" class="danger" (click)="cancelInterview(candidate.candidateProfileId, schedule.id)">Cancel interview</button>
             }
-            <button mat-flat-button color="primary" (click)="openCandidateEvaluation(candidate.candidateProfileId)">Evaluate</button>
-            <button mat-button color="warn" (click)="rejectCandidate(candidate)">Reject</button>
-            <button mat-flat-button color="accent" (click)="hireCandidate(candidate)">Hire</button>
+            <button mat-flat-button type="button" (click)="openCandidateEvaluation(candidate.candidateProfileId)">Evaluate</button>
+            <button mat-button type="button" class="danger" (click)="rejectCandidate(candidate)">Reject</button>
+            <button mat-flat-button type="button" class="hire" (click)="hireCandidate(candidate)">Hire</button>
           </mat-card-actions>
         </mat-card>
       }

@@ -1,48 +1,37 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
+import { Component, computed, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
-import { AuthService, MeResponse } from '../../core/services/auth.service';
-import { NotificationService } from '../../core/services/notification.service';
+import { MatIconModule } from '@angular/material/icon';
+import { navigationFor } from '../../core/layout/navigation';
+import { SessionService } from '../../core/services/session.service';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [MatButtonModule, MatCardModule, RouterLink],
+  imports: [MatCardModule, MatIconModule, RouterLink, PageHeaderComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent implements OnInit {
-  private authService = inject(AuthService);
-  private notificationService = inject(NotificationService);
-  private router = inject(Router);
+export class HomeComponent {
+  private readonly session = inject(SessionService);
 
-  user = signal<MeResponse | null>(null);
-  unreadCount = signal(0);
+  protected readonly greeting = computed(() => {
+    const user = this.session.user();
+    const name = user?.firstName || this.session.displayName();
+    return name ? `Welcome back, ${name}` : 'Welcome to JobHub';
+  });
 
-  isAdmin = computed(() =>
-    (this.user()?.roles ?? []).some(r => r.toLowerCase() === 'admin')
+  protected readonly subtitle = computed(() => {
+    switch (this.session.role()) {
+      case 'Candidate': return 'Find your next role and keep track of your applications.';
+      case 'Employer': return 'Post jobs, review applications, and reach out to candidates.';
+      case 'Admin': return 'Manage user accounts and review platform activity.';
+      default: return 'Pick a section to get started.';
+    }
+  });
+
+  protected readonly quickLinks = computed(() =>
+    navigationFor(this.session.role()).filter(item => item.link !== '/')
   );
-
-  ngOnInit(): void {
-    this.authService.me().subscribe({
-      next: profile => {
-        this.user.set(profile);
-        this.refreshUnread();
-      },
-      error: () => this.logout()
-    });
-  }
-
-  refreshUnread(): void {
-    this.notificationService.unreadCount().subscribe({
-      next: res => this.unreadCount.set(res.count),
-      error: () => this.unreadCount.set(0)
-    });
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
 }

@@ -9,6 +9,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { Job, JobType, ExperienceLevel, WorkMode } from '../../models/job.model';
 import { JobService } from '../../services/job.service';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { JobLabelPipe } from '../../shared/job-label.pipe';
 import { Router } from '@angular/router';
 
 
@@ -22,7 +24,9 @@ import { Router } from '@angular/router';
     MatButtonModule,
     MatSelectModule,
     MatCardModule,
-    MatChipsModule
+    MatChipsModule,
+    PageHeaderComponent,
+    JobLabelPipe
   ],
   templateUrl: './job-search.html',
   styleUrl: './job-search.scss',

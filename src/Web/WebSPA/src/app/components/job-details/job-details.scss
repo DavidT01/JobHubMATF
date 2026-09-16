@@ -1,49 +1,26 @@
-.details-card {
-  max-width: 700px;
-  margin: 16px auto;
+.back-link {
+  margin: 0 0 16px -12px;
 }
 
-.chips {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin: 8px 0;
+.details-card {
+  margin-bottom: 24px;
 
-  ::ng-deep .chip-primary {
-    background-color: var(--mat-sys-primary-container) !important;
-    .mdc-evolution-chip__text-label {
-      color: var(--mat-sys-on-primary-container) !important;
-    }
-  }
-
-  ::ng-deep .chip-tertiary {
-    background-color: var(--mat-sys-tertiary-container) !important;
-    .mdc-evolution-chip__text-label {
-      color: var(--mat-sys-on-tertiary-container) !important;
-    }
+  h3 {
+    font: var(--mat-sys-title-medium);
+    margin: 20px 0 8px;
   }
 }
 
 .salary {
-  font-weight: 500;
-  font-size: 1.1rem;
+  font: var(--mat-sys-title-medium);
+  margin: 8px 0 0;
 }
 
-.loading-container {
+.details-actions {
   display: flex;
-  justify-content: center;
-  padding: 48px;
-}
-
-.error {
-  color: var(--mat-sys-error);
-  padding: 16px;
-}
-
-mat-card-actions {
-  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  padding: 16px;
+  padding: 8px 16px 16px;
 }
 
 .match-section {
@@ -53,8 +30,18 @@ mat-card-actions {
 }
 
 .match-score {
-  font-size: 2rem;
-  font-weight: 600;
+  font: var(--mat-sys-display-small);
   color: var(--mat-sys-primary);
   margin: 4px 0 12px;
+}
+
+.apply-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+
+  app-application-form {
+    align-self: stretch;
+  }
 }

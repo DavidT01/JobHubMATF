@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSelect } from '@angular/material/select';
+import { provideRouter } from '@angular/router';
 
 import { ApplicationListItemDto, ApplicationStatus } from '../../core/models/application-list-item-dto';
 import { CandidateApplicationsComponent } from './candidate-applications-component';
@@ -33,7 +34,7 @@ describe('CandidateApplicationsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CandidateApplicationsComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
     http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(CandidateApplicationsComponent);

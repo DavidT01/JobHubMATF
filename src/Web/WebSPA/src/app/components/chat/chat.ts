@@ -198,7 +198,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         this.sortConversations();
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('❌ Greška pri učitavanju konverzacija:', err)
+      error: (err) => console.error('Failed to load conversations:', err)
     });
   }
 
@@ -222,7 +222,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
 
     this.chatService.markAsRead(conv.userId).subscribe({
-      error: (err) => console.error('Greška pri označavanju poruka kao pročitanih:', err)
+      error: (err) => console.error('Failed to mark messages as read:', err)
     });
   }
 
@@ -306,7 +306,4 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (this.routeSub) this.routeSub.unsubscribe();
   }
 
-  public goToDashboard(): void {
-    this.router.navigate(['/dashboard']);
-  }
 }

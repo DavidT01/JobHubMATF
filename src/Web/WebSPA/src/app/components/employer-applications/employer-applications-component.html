@@ -1,7 +1,7 @@
 @let view = state();
 <section aria-labelledby="employer-applications-heading" [attr.aria-busy]="view.kind === 'loading'">
   <header>
-    <h1 id="employer-applications-heading">Job applications</h1>
+    <h2 id="employer-applications-heading" class="section-title">Applications for this job</h2>
     <p class="identifier">Job ID: {{ jobId() }}</p>
     <p>CV links show the candidate's current profile CV, not a copy saved with the application.</p>
   </header>

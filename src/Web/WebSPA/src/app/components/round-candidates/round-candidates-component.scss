@@ -1,6 +1,5 @@
-.round-candidates {
-  max-width: 900px;
-  margin: 2rem auto;
+.back-link {
+  margin: 0 0 16px -12px;
 }
 
 .candidate-list {
@@ -8,6 +7,16 @@
   gap: 16px;
 }
 
-.error-message {
-  color: #b3261e;
+.candidate-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.danger {
+  color: var(--mat-sys-error);
+}
+
+.hire {
+  background-color: var(--mat-sys-tertiary);
+  color: var(--mat-sys-on-tertiary);
 }

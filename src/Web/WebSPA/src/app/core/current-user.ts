@@ -18,4 +18,9 @@ export class CurrentUser {
     }
     return this.userId$;
   }
+
+  /** Forgets the cached id so the next caller loads the newly signed-in user. */
+  clear(): void {
+    this.userId$ = undefined;
+  }
 }

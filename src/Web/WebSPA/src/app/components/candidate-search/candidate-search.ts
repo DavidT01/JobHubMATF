@@ -9,6 +9,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { CandidateProfile } from '../../models/candidate.model';
 import { JobService } from '../../services/job.service';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
 @Component({
   selector: 'app-candidate-search',
@@ -20,6 +21,7 @@ import { JobService } from '../../services/job.service';
     MatButtonModule,
     MatCardModule,
     MatChipsModule,
+    PageHeaderComponent,
   ],
   templateUrl: './candidate-search.html',
   styleUrl: './candidate-search.scss',
@@ -52,7 +54,7 @@ export class CandidateSearch {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set('Greška pri pretrazi kandidata.');
+        this.error.set('Could not search candidates. Please try again.');
         this.loading.set(false);
         console.error(err);
       },

@@ -65,6 +65,6 @@ describe('JobDetails application integration', () => {
     job['expirationDate'] = '2020-01-01T00:00:00Z';
     fixture.detectChanges();
     expect(page.querySelector('app-application-form')).toBeNull();
-    expect(page.textContent).toContain('više ne prima prijave');
+    expect(page.textContent).toContain('no longer accepting applications');
   });
 });

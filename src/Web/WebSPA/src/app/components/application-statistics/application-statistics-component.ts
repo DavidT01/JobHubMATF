@@ -17,6 +17,7 @@ import {
 } from '../../core/models/application-management-dto';
 import { ApplicationStatus } from '../../core/models/application-list-item-dto';
 import { ApplicationsService } from '../../core/services/applications/applications-service';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
 type ViewState =
   | { kind: 'loading'; period: ApplicationStatisticsPeriod }
@@ -26,7 +27,7 @@ type ViewState =
 @Component({
   selector: 'app-application-statistics',
   imports: [DecimalPipe, MatButtonModule, MatCardModule, MatFormFieldModule, MatInputModule,
-    MatProgressBarModule, ReactiveFormsModule],
+    MatProgressBarModule, ReactiveFormsModule, PageHeaderComponent],
   templateUrl: './application-statistics-component.html',
   styleUrl: './application-statistics-component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
