@@ -15,7 +15,7 @@ public sealed class ApplicationProfileGrpcService(ISender sender)
     public override async Task<ApplicationCandidateProfileResponse> GetCandidateByUserId(
         GetApplicationProfileRequest request, ServerCallContext context)
     {
-        RequireOwner(request.UserId, ["Candidate", "Employer", "Admin"], context);
+        RequireOwner(request.UserId, ["Candidate"], context);
         var profile = await QueryAsync(new GetCandidateProfileQuery(request.UserId), context.CancellationToken);
         if (profile is null)
             throw new RpcException(new Status(StatusCode.NotFound, "Candidate profile was not found."));
@@ -33,7 +33,7 @@ public sealed class ApplicationProfileGrpcService(ISender sender)
     public override async Task<ApplicationCompanyProfileResponse> GetCompanyByUserId(
         GetApplicationProfileRequest request, ServerCallContext context)
     {
-        RequireOwner(request.UserId, ["Employer", "Admin"], context);
+        RequireOwner(request.UserId, ["Employer"], context);
         var profile = await QueryAsync(new GetCompanyProfileQuery(request.UserId), context.CancellationToken);
         if (profile is null)
             throw new RpcException(new Status(StatusCode.NotFound, "Company profile was not found."));
@@ -60,7 +60,7 @@ public sealed class ApplicationProfileGrpcService(ISender sender)
         var subject = user.FindFirstValue("sub") ?? user.FindFirstValue(ClaimTypes.NameIdentifier);
         var hasRole = roles.Any(role => user.IsInRole(role) || user.HasClaim(ClaimTypes.Role, role));
         var isOwner = string.Equals(subject, userId, StringComparison.Ordinal);
-        if (!hasRole || (!isOwner && !user.IsInRole("Employer") && !user.IsInRole("Admin")))
+        if (!hasRole || !isOwner)
             throw new RpcException(new Status(StatusCode.PermissionDenied, "Only the profile owner can access this lookup."));
     }
 

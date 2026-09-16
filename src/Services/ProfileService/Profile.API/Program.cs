@@ -7,6 +7,7 @@ using Profile.API.Exceptions;
 using Profile.API.Features.Behaviors;
 using Profile.API.Services.GrpcServices;
 using Profile.API.Infrastructure;
+using Profile.API.Infrastructure.Messaging;
 using Scalar.AspNetCore;
 using System.Reflection;
 
@@ -29,6 +30,7 @@ builder.Services.AddProblemDetails();
 
 var connectionString = builder.Configuration.GetConnectionString("ProfileDbConnection") ?? throw new InvalidOperationException("Connection string 'ProfileDbConnection' is not valid.");
 builder.Services.AddDbContext<ProfileContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddOutboxMessaging(builder.Configuration);
 
 builder.Services.AddScoped<IProfileContext, ProfileContext>();
 
