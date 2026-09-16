@@ -228,7 +228,7 @@
         "DELETE",
         "OPTIONS"
       ],
-      "DownstreamPathTemplate": "/api/catalog/{everything}",
+      "DownstreamPathTemplate": "/api/v1/catalog/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
