@@ -5,6 +5,7 @@ import { JobSearch } from './components/job-search/job-search';
 import { JobDetails } from './components/job-details/job-details';
 import { JobCreate } from './components/job-create/job-create';
 import { SavedJobs } from './components/saved-jobs/saved-jobs';
+import { CandidateSearch } from './components/candidate-search/candidate-search';
 import { ChatComponent } from './components/chat/chat';
 import { DashboardComponent } from './components/dashboard/dashboard';
 import { roleGuard } from './guards/role';
@@ -83,6 +84,12 @@ export const routes: Routes = [
     path: 'applications/:applicationId',
     loadComponent: () => import('./components/candidate-application-view/candidate-application-view')
       .then(c => c.CandidateApplicationViewComponent)
+  },
+  {
+    path: 'candidates', 
+    component: CandidateSearch, 
+    canActivate: [roleGuard],
+    data: { roles: ['Employer'] }
   },
   { path: 'jobs', component: JobList },
   { path: 'search', component: JobSearch },

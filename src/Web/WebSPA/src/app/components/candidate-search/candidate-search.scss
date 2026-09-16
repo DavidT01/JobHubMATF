@@ -1,0 +1,48 @@
+.search-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px;
+
+  mat-form-field {
+    min-width: 180px;
+  }
+
+  .skills-field {
+    flex: 1 1 300px;
+  }
+
+  .actions {
+    display: flex;
+    padding-top: 8px;
+  }
+}
+
+.candidate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.candidate-card {
+  cursor: pointer;
+}
+
+.years {
+  font-weight: 500;
+  margin: 4px 0;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.error {
+  color: var(--mat-sys-error);
+  padding: 16px;
+}

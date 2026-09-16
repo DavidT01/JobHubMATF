@@ -1,0 +1,44 @@
+<div class="search-form">
+  <mat-form-field appearance="outline" class="skills-field">
+    <mat-label>Veštine (odvojene zarezom)</mat-label>
+    <input matInput [(ngModel)]="skills" placeholder="npr. C#, Angular, Docker" (keyup.enter)="onSearch()" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Lokacija</mat-label>
+    <input matInput [(ngModel)]="location" placeholder="npr. Beograd" (keyup.enter)="onSearch()" />
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-raised-button color="primary" (click)="onSearch()">Pretraži</button>
+  </div>
+</div>
+
+@if (loading()) {
+  <p>Pretraga u toku...</p>
+} @else if (searched() && error()) {
+  <p class="error">{{ error() }}</p>
+} @else if (searched() && results().length === 0) {
+  <p>Nema kandidata za zadatu pretragu.</p>
+} @else if (results().length > 0) {
+  <div class="candidate-grid">
+    @for (candidate of results(); track candidate.id) {
+      <mat-card class="candidate-card" (click)="openProfile(candidate.userId)">
+        <mat-card-header>
+          <mat-card-title>{{ candidate.firstName }} {{ candidate.lastName }}</mat-card-title>
+          <mat-card-subtitle>{{ candidate.location }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if (yearsOfExperience(candidate); as years) {
+            <p class="years">{{ years }} godina iskustva</p>
+          }
+          <div class="chips">
+            @for (skill of candidate.skills; track skill) {
+              <mat-chip>{{ skill }}</mat-chip>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+}

@@ -50,6 +50,9 @@ public class ProfileApiClient : IProfileApiClient
         return new CandidateProfileDto
         {
             Id = profile.ProfileId,
+            UserId = profile.UserId,
+            FirstName = profile.FirstName,
+            LastName = profile.LastName,
             Location = profile.Location,
             Skills = profile.Skills.ToList(),
             Experience = profile.Experience.Select(e => new ExperienceDto
