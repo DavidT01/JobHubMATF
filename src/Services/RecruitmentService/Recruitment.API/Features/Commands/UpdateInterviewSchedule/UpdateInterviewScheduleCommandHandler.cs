@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Recruitment.API.Data;
 using Recruitment.API.DTOs;
 using Recruitment.API.Exceptions;
+using Recruitment.API.Features.Events;
 using Recruitment.API.Infrastructure;
 
 namespace Recruitment.API.Features.Commands.UpdateInterviewSchedule;
@@ -58,6 +59,7 @@ public class UpdateInterviewScheduleCommandHandler(
 
         mapper.Map(request, schedule);
         schedule.ModifiedAt = DateTime.UtcNow;
+        context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(InterviewLifecycleEvent.Rescheduled(schedule)));
         await context.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Successfully updated interview schedule {InterviewScheduleId}.", schedule.Id);

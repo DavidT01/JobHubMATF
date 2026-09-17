@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Profile.API.Data;
+using Profile.API.Data.Outbox;
+using Profile.API.Features.Events;
 
 namespace Profile.API.Features.CandidateProfiles.Commands.UploadCv
 {
@@ -39,6 +41,7 @@ namespace Profile.API.Features.CandidateProfiles.Commands.UploadCv
             var fileUrl = $"/uploads/cvs/{fileName}";
             profile.CvUrl = fileUrl;
             profile.ModifiedAt = DateTime.UtcNow;
+            context.OutboxMessages.Add(OutboxMessage.Create(CandidateProfileLifecycleEvent.CvUploaded(profile)));
 
             await context.SaveChangesAsync(cancellationToken);
             logger.LogInformation("Saved CV for candidate {Id} at path {Path}", profile.Id, fileUrl);

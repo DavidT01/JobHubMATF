@@ -2,6 +2,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Profile.API.Data;
+using Profile.API.Data.Outbox;
+using Profile.API.Features.Events;
 
 namespace Profile.API.Features.CompanyProfiles.Commands.UpdateCompany
 {
@@ -20,6 +22,7 @@ namespace Profile.API.Features.CompanyProfiles.Commands.UpdateCompany
             mapper.Map(request, entity);
 
             entity.ModifiedAt = DateTime.UtcNow;
+            context.OutboxMessages.Add(OutboxMessage.Create(CompanyProfileLifecycleEvent.Updated(entity)));
 
             await context.SaveChangesAsync(cancellationToken);
             logger.LogInformation("Successfully updated company profile {ProfileId}", request.Id);

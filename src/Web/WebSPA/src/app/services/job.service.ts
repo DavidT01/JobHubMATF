@@ -3,6 +3,7 @@ import { HttpClient , HttpParams } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { JobType , Job , ExperienceLevel , WorkMode } from "../models/job.model";
 import { MatchResult } from "../models/match-result.model";
+import { CandidateProfile } from "../models/candidate.model";
 import { environment } from "../../environments/environment";
 
 @Injectable({ providedIn: 'root'})
@@ -95,6 +96,17 @@ export class JobService {
 
     getMatch(jobId: string, userId: string): Observable<MatchResult> {
         return this.http.get<MatchResult>(`${this.baseUrl}/match/${jobId}/${userId}`);
+    }
+
+    searchCandidates(skills: string[], location?: string, limit = 20): Observable<CandidateProfile[]> {
+        let params = new HttpParams().set('limit', limit);
+        for (const skill of skills) {
+            params = params.append('skills', skill);
+        }
+        if (location) {
+            params = params.set('location', location);
+        }
+        return this.http.get<CandidateProfile[]>(`${this.baseUrl}/search-candidates`, { params });
     }
 }
 

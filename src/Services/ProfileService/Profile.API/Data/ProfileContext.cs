@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Profile.API.Data.Outbox;
 using Profile.API.Entities;
 
 namespace Profile.API.Data
@@ -17,6 +18,7 @@ namespace Profile.API.Data
         public DbSet<Experience> Experience { get; set; } = null!;
         public DbSet<Project> Projects { get; set; } = null!;
         public DbSet<Language> Languages { get; set; } = null!;
+        public DbSet<OutboxMessage> OutboxMessages { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -48,6 +50,20 @@ namespace Profile.API.Data
                 .WithOne(l => l.CandidateProfile)
                 .HasForeignKey(l => l.CandidateProfileId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OutboxMessage>(entity =>
+            {
+                entity.ToTable("ProfileOutbox");
+                entity.HasKey(message => message.Id);
+                entity.Property(message => message.Id).ValueGeneratedNever();
+                entity.Property(message => message.Sequence).UseIdentityAlwaysColumn();
+                entity.Property(message => message.EventType).HasMaxLength(100).IsRequired();
+                entity.Property(message => message.Payload).HasColumnType("jsonb").IsRequired();
+                entity.HasIndex(message => message.Sequence).IsUnique();
+                entity.HasIndex(message => new { message.AggregateId, message.Sequence });
+                entity.HasIndex(message => new { message.NextAttemptAtUtc, message.Sequence })
+                    .HasFilter("\"PublishedAtUtc\" IS NULL");
+            });
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
