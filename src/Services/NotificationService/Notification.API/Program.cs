@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Notification.API.Data;
+using Notification.API.Messaging;
 using Notification.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,7 @@ builder.Services.AddDbContext<NotificationDbContext>(options =>
     options.UseSqlite(connectionString));
 
 builder.Services.AddScoped<INotificationService, NotificationAppService>();
+builder.Services.AddNotificationMessaging(builder.Configuration);
 
 var jwtSecret = builder.Configuration["JwtSettings:Secret"]
     ?? throw new InvalidOperationException("JwtSettings:Secret is required.");

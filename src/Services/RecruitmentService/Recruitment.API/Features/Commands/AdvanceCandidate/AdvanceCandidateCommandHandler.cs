@@ -34,6 +34,9 @@ namespace Recruitment.API.Features.Commands.AdvanceCandidate
                 throw new RecruitmentValidationException($"Candidate profile {request.CandidateProfileId} not found");
             }
 
+            var candidateProfile = await _profileServiceClient.GetCandidateProfileAsync(
+                request.CandidateProfileId, cancellationToken);
+
             var progress = await _context.Progresses
                 .FirstOrDefaultAsync(p => p.CandidateProfileId == request.CandidateProfileId && p.RecruitmentProcessId == request.RecruitmentProcessId, cancellationToken);
             
@@ -46,7 +49,7 @@ namespace Recruitment.API.Features.Commands.AdvanceCandidate
                 if (progress.CurrentSelectionRoundId is not null)
                 {
                     _context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(
-                        CandidateProgressLifecycleEvent.RoundAdvanced(progress, process.JobId)));
+                        CandidateProgressLifecycleEvent.RoundAdvanced(progress, process.JobId, candidateProfile.UserId)));
                 }
             }
             else
@@ -68,7 +71,7 @@ namespace Recruitment.API.Features.Commands.AdvanceCandidate
                     progress.ModifiedAt = DateTime.UtcNow;
                     _context.Progresses.Update(progress);
                     _context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(
-                        CandidateProgressLifecycleEvent.RoundAdvanced(progress, process.JobId)));
+                        CandidateProgressLifecycleEvent.RoundAdvanced(progress, process.JobId, candidateProfile.UserId)));
                 }
                 else
                 {

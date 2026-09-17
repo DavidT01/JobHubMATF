@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface UserNotification {
   id: string;
@@ -15,7 +16,7 @@ export interface UserNotification {
 })
 export class NotificationService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5283/api/notifications';
+  private apiUrl = environment.notificationApiUrl;
 
   list(): Observable<UserNotification[]> {
     return this.http.get<UserNotification[]>(this.apiUrl);

@@ -19,14 +19,14 @@ namespace Identity.API.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _environment;
-        private readonly NotificationService _notifications;
+        private readonly INotificationPublisher _notifications;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             IConfiguration configuration,
             IWebHostEnvironment environment,
-            NotificationService notifications)
+            INotificationPublisher notifications)
         {
             _userManager = userManager;
             _roleManager = roleManager;

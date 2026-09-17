@@ -6,6 +6,7 @@ namespace Notification.API.Data;
 public class NotificationDbContext(DbContextOptions<NotificationDbContext> options) : DbContext(options)
 {
     public DbSet<UserNotification> Notifications => Set<UserNotification>();
+    public DbSet<ProcessedBrokerEvent> ProcessedBrokerEvents => Set<ProcessedBrokerEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -17,6 +18,13 @@ public class NotificationDbContext(DbContextOptions<NotificationDbContext> optio
             entity.Property(x => x.Message).HasMaxLength(2000).IsRequired();
             entity.HasIndex(x => new { x.UserId, x.IsRead });
             entity.HasIndex(x => x.CreatedAtUtc);
+        });
+
+        modelBuilder.Entity<ProcessedBrokerEvent>(entity =>
+        {
+            entity.HasKey(x => x.EventId);
+            entity.Property(x => x.EventType).HasMaxLength(128).IsRequired();
+            entity.HasIndex(x => x.ProcessedAtUtc);
         });
     }
 }

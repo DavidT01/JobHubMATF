@@ -39,8 +39,8 @@ public class UpdateInterviewScheduleCommandHandler(
             throw new RecruitmentValidationException("The candidate already has an interview during this time.");
         }
 
-        var candidateContact = await profileServiceClient.GetCandidateContactAsync(schedule.CandidateProfileId, cancellationToken);
-        var attendeeEmails = new[] { candidateContact.Email }
+        var candidateProfile = await profileServiceClient.GetCandidateProfileAsync(schedule.CandidateProfileId, cancellationToken);
+        var attendeeEmails = new[] { candidateProfile.Email }
             .Concat(request.AdditionalAttendeeEmails)
             .Where(email => !string.IsNullOrWhiteSpace(email))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -59,7 +59,8 @@ public class UpdateInterviewScheduleCommandHandler(
 
         mapper.Map(request, schedule);
         schedule.ModifiedAt = DateTime.UtcNow;
-        context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(InterviewLifecycleEvent.Rescheduled(schedule)));
+        context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(
+            InterviewLifecycleEvent.Rescheduled(schedule, candidateProfile.UserId)));
         await context.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Successfully updated interview schedule {InterviewScheduleId}.", schedule.Id);

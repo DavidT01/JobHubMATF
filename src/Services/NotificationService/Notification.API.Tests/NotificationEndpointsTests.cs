@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Notification.API.Data;
@@ -16,6 +17,7 @@ namespace Notification.API.Tests;
 
 public class NotificationEndpointsTests : IClassFixture<NotificationApiFactory>
 {
+    private const string ApiKey = "JobHubNotificationInternalKey-ChangeInProduction";
     private readonly NotificationApiFactory _factory;
 
     public NotificationEndpointsTests(NotificationApiFactory factory)
@@ -28,20 +30,36 @@ public class NotificationEndpointsTests : IClassFixture<NotificationApiFactory>
     {
         using var client = _factory.CreateClient();
         var userId = Guid.NewGuid().ToString("N");
-        client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", CreateToken(userId));
 
-        var create = await client.PostAsJsonAsync("/api/notifications", new
+        using var createRequest = new HttpRequestMessage(HttpMethod.Post, "/api/notifications");
+        createRequest.Headers.TryAddWithoutValidation("X-Api-Key", ApiKey);
+        createRequest.Content = JsonContent.Create(new
         {
             userId,
             title = "Hello",
             message = "First notification"
         });
+        var create = await client.SendAsync(createRequest);
         Assert.Equal(HttpStatusCode.Accepted, create.StatusCode);
 
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", CreateToken(userId));
         var list = await client.GetFromJsonAsync<List<NotificationDto>>("/api/notifications");
         Assert.NotNull(list);
         Assert.Contains(list, n => n.Title == "Hello" && n.Message == "First notification");
+    }
+
+    [Fact]
+    public async Task Create_WithoutApiKey_ReturnsUnauthorized()
+    {
+        using var client = _factory.CreateClient();
+        var response = await client.PostAsJsonAsync("/api/notifications", new
+        {
+            userId = Guid.NewGuid().ToString("N"),
+            title = "Nope",
+            message = "No key"
+        });
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]
@@ -78,6 +96,17 @@ public class NotificationApiFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        builder.ConfigureAppConfiguration((_, config) =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["NotificationApi:ApiKey"] = "JobHubNotificationInternalKey-ChangeInProduction",
+                ["JwtSettings:Secret"] = "SuperSecretKeyForJobHubIdentityApiThatIsAtLeast32BytesLong!",
+                ["JwtSettings:Issuer"] = "JobHubIdentityAPI",
+                ["JwtSettings:Audience"] = "JobHubClients",
+                ["RabbitMq:Enabled"] = "false"
+            });
+        });
         builder.ConfigureServices(services =>
         {
             var descriptors = services

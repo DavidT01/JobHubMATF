@@ -47,8 +47,12 @@ namespace Recruitment.UnitTests.Commands
             var meetingServiceMock = new Mock<IMeetingService>();
             var profileServiceMock = new Mock<IProfileServiceClient>();
             profileServiceMock
-                .Setup(client => client.GetCandidateContactAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new CandidateContactResponse { Email = "candidate@example.com" });
+                .Setup(client => client.GetCandidateProfileAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new CandidateProfileResponse
+                {
+                    Email = "candidate@example.com",
+                    UserId = "candidate-user"
+                });
             meetingServiceMock
                 .Setup(m => m.ScheduleMeetingAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string[]>()))
                 .ReturnsAsync(("event-123", "https://meet.google.com/abc-defg-hij"));
