@@ -40,17 +40,6 @@ mat-card-header {
   gap: 12px;
 }
 
-.name-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-}
-
 .submit-button {
   height: 48px;
   font-size: 1rem;

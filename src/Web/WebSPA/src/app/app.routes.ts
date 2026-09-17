@@ -12,6 +12,7 @@ import { roleGuard } from './guards/role';
 import { authGuard, guestGuard, adminGuard } from './core/guards/auth.guard';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
+import { RegisterCompanyComponent } from './features/auth/register-company/register-company.component';
 import { ConfirmEmailComponent } from './features/auth/confirm-email/confirm-email.component';
 import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
@@ -43,6 +44,7 @@ export const routes: Routes = [
   },
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'register', component: RegisterComponent, canActivate: [guestGuard] },
+  { path: 'register-company', component: RegisterCompanyComponent, canActivate: [guestGuard] },
   { path: 'confirm-email', component: ConfirmEmailComponent, canActivate: [guestGuard] },
   { path: 'forgot-password', component: ForgotPasswordComponent, canActivate: [guestGuard] },
   { path: 'reset-password', component: ResetPasswordComponent, canActivate: [guestGuard] },

@@ -11,13 +11,8 @@ html {
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light dark;
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
+  // Keep light scheme so Material form fields don't stay gray under OS dark mode.
+  color-scheme: light;
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
@@ -25,4 +20,23 @@ body {
   height: 100%;
 }
 
-/* Tvoji dodatni globalni stilovi idu ovde */
+/* Auth forms: white fields, no lingering gray fill / autofill */
+.auth-form {
+  .mat-mdc-form-field {
+    --mdc-filled-text-field-container-color: #ffffff;
+    --mdc-outlined-text-field-container-color: #ffffff;
+  }
+
+  .mat-mdc-text-field-wrapper,
+  .mdc-text-field--outlined .mdc-notched-outline,
+  .mat-mdc-form-field-focus-overlay {
+    background-color: transparent !important;
+  }
+
+  input.mat-mdc-input-element {
+    background-color: transparent !important;
+    box-shadow: 0 0 0 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #1a202c;
+    caret-color: #1a202c;
+  }
+}

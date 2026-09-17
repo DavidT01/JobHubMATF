@@ -13,8 +13,7 @@
   border-radius: 16px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   padding: 24px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
 }
 
 mat-card-header {
@@ -70,6 +69,18 @@ mat-card-header {
   p {
     margin: 0 0 8px;
     color: #718096;
+  }
+
+  .register-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem;
+    align-items: center;
+  }
+
+  .sep {
+    color: #a0aec0;
   }
 
   a {

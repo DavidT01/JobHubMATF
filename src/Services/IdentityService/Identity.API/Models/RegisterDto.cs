@@ -2,12 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Identity.API.Models
 {
-    public class RegisterDto
+    public class RegisterDto : IValidatableObject
     {
-        [Required(ErrorMessage = "First name is required.")]
         public string? FirstName { get; set; }
 
-        [Required(ErrorMessage = "Last name is required.")]
         public string? LastName { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
@@ -19,6 +17,29 @@ namespace Identity.API.Models
         public string? Password { get; set; }
 
         [Required(ErrorMessage = "Role is required.")]
-        public string? Role { get; set; } 
+        public string? Role { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (string.Equals(Role, AppRoles.Candidate, StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrWhiteSpace(FirstName))
+                {
+                    yield return new ValidationResult("First name is required.", [nameof(FirstName)]);
+                }
+
+                if (string.IsNullOrWhiteSpace(LastName))
+                {
+                    yield return new ValidationResult("Last name is required.", [nameof(LastName)]);
+                }
+            }
+            else if (string.Equals(Role, AppRoles.Employer, StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrWhiteSpace(FirstName))
+                {
+                    yield return new ValidationResult("Company name is required.", [nameof(FirstName)]);
+                }
+            }
+        }
     }
 }

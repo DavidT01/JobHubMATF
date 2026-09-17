@@ -96,8 +96,9 @@ namespace Identity.API.Controllers
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email,
-                FirstName = model.FirstName,
-                LastName = model.LastName
+                FirstName = model.FirstName?.Trim(),
+                // Employers register with company name in FirstName; last name is optional.
+                LastName = string.IsNullOrWhiteSpace(model.LastName) ? null : model.LastName.Trim()
             };
 
             var result = await _userManager.CreateAsync(user, model.Password!);
