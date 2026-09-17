@@ -7,7 +7,7 @@
   </Folder>
   <Folder Name="/Services/">
     <Project Path="src/Services/ApplicationService/ApplicationService.csproj" />
-    <Project Path="src/Services/Catalog/Catalog.csproj" />
+    <Project Path="src/Services/CatalogService/Catalog/Catalog.csproj" />
     <Project Path="src/Services/Chat/Chat.API/Chat.API.csproj" />
     <Project Path="src/Services/IdentityService/Identity.API/Identity.API.csproj" />
     <Project Path="src/Services/ProfileService/Profile.API/Profile.API.csproj" />
@@ -15,7 +15,7 @@
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="src/Services/ApplicationService/tests/ApplicationService.UnitTests/ApplicationService.UnitTests.csproj" />
-    <Project Path="src/Services/Catalog.Tests/Catalog.Tests.csproj" />
+    <Project Path="src/Services/CatalogService/Catalog.Tests/Catalog.Tests.csproj" />
     <Project Path="src/Services/Chat/Chat.UnitTests/Chat.UnitTests.csproj" />
     <Project Path="src/Services/IdentityService/Identity.API.Tests/Identity.API.Tests.csproj" />
     <Project Path="src/Services/ProfileService/Profile.UnitTests/Profile.UnitTests.csproj" />

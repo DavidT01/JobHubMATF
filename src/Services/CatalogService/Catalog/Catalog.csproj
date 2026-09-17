@@ -16,6 +16,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\BuildingBlocks\JobHub.Grpc.Contracts\JobHub.Grpc.Contracts.csproj" />
+        <ProjectReference Include="..\..\..\BuildingBlocks\JobHub.Grpc.Contracts\JobHub.Grpc.Contracts.csproj" />
     </ItemGroup>
 </Project>
