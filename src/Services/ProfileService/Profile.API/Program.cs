@@ -16,6 +16,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
 builder.Services.AddControllers();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
 builder.Services.AddGrpc();
 builder.Services.AddApplicationProfileAuthentication(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
@@ -52,6 +60,8 @@ if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
 }
 
 app.UseExceptionHandler();
+
+app.UseCors("AllowFrontend");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
