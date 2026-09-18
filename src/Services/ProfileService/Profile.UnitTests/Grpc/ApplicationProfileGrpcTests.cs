@@ -104,7 +104,6 @@ public sealed class ApplicationProfileGrpcTests : IDisposable
 
     [Theory]
     [InlineData(false, "other", "Candidate")]
-    [InlineData(false, "owner", "Employer")]
     [InlineData(true, "other", "Employer")]
     [InlineData(true, "owner", "Candidate")]
     [InlineData(false, "owner", "Admin")]
@@ -112,6 +111,19 @@ public sealed class ApplicationProfileGrpcTests : IDisposable
     {
         await ExpectStatus(company, "owner", Headers(subject, role), StatusCode.PermissionDenied);
         sender.VerifyNoOtherCalls();
+    }
+
+    [Theory]
+    [InlineData("owner")]
+    [InlineData("other")]
+    public async Task Employer_can_read_any_candidate_profile(string subject)
+    {
+        var profile = new CandidateProfileDto { Id = Guid.NewGuid(), UserId = "owner" };
+        sender.Setup(x => x.Send(It.Is<GetCandidateProfileQuery>(q => q.UserId == "owner"), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(profile);
+        var result = await client.GetCandidateByUserIdAsync(new() { UserId = "owner" }, Headers(subject, "Employer"));
+        Assert.Equal(profile.Id.ToString(), result.ProfileId);
+        Assert.Equal("owner", result.UserId);
     }
 
     [Theory]

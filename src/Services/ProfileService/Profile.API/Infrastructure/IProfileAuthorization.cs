@@ -4,7 +4,7 @@ public interface IProfileAuthorization
 {
     string GetCurrentUserId();
 
-    Task EnsureUserAsync(string userId, CancellationToken cancellationToken);
+    Task EnsureCanReadCandidateProfileAsync(string userId, CancellationToken cancellationToken);
 
     Task EnsureCandidateProfileAsync(Guid profileId, CancellationToken cancellationToken);
 
