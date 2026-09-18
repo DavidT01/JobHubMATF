@@ -1,9 +1,11 @@
 using System.Text.Json;
+using Catalog.Authorization;
 using Catalog.Clients;
 using Catalog.DTOs;
 using Catalog.Entities;
 using Catalog.Repositories;
 using Catalog.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -18,19 +20,34 @@ public class CatalogController : ControllerBase
     private readonly IProfileApiClient _profileApiClient;
     private readonly IBookmarkRepository _bookmarkRepository;
     private readonly IDistributedCache _cache;
-    public CatalogController(IJobRepository repository, 
-                             IMatchingService matchingService, 
+    private readonly ICurrentUser _currentUser;
+    public CatalogController(IJobRepository repository,
+                             IMatchingService matchingService,
                              IProfileApiClient profileApiClient ,
                              IBookmarkRepository  bookmarkRepository,
-                             IDistributedCache cache)
+                             IDistributedCache cache,
+                             ICurrentUser currentUser)
     {
         _repository = repository;
         _matchingService = matchingService;
         _profileApiClient = profileApiClient;
         _bookmarkRepository = bookmarkRepository;
         _cache = cache;
+        _currentUser = currentUser;
     }
     
+    
+    private async Task<bool> OwnsCompanyAsync(string companyId)
+    {
+        if (_currentUser.UserId is null)
+            return false;
+
+        var ownCompanyId = await _profileApiClient.GetCompanyProfileIdByUserIdAsync(_currentUser.UserId);
+        return ownCompanyId != null && ownCompanyId == companyId;
+    }
+
+    private bool IsSelf(string userId) => _currentUser.UserId == userId;
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Job>>> GetAllJobs()
     {
@@ -40,7 +57,7 @@ public class CatalogController : ControllerBase
         {
             return Ok(JsonSerializer.Deserialize<List<Job>>(cached));
         }
-        
+
         var jobs = await _repository.GetAllAsync();
 
         await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(jobs),
@@ -48,7 +65,7 @@ public class CatalogController : ControllerBase
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
             });
-        
+
         return Ok(jobs);
     }
 
@@ -64,63 +81,86 @@ public class CatalogController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Employer")]
     [ProducesResponseType(typeof(Job),StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<Job>> CreateJob([FromBody] Job job)
     {
+        if (!await OwnsCompanyAsync(job.CompanyId))
+            return Forbid();
+
         await _repository.CreateJobAsync(job);
-        
+
         await _cache.RemoveAsync("allJobs");
         await _cache.RemoveAsync("activeJobs");
-        
+
         return CreatedAtAction(nameof(GetById), new { id = job.Id }, job);
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Employer")]
     [ProducesResponseType(typeof(Job), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<Job>> UpdateJob(string id, [FromBody] Job job)
     {
         if (id != job.Id)
             return BadRequest("Route id does not match job id in body.");
 
+        var existing = await _repository.GetByIdAsync(id);
+        if (existing == null)
+            return NotFound();
+
+        if (!await OwnsCompanyAsync(existing.CompanyId))
+            return Forbid();
+
         var result = await _repository.UpdateJobAsync(job);
         if (!result)
             return NotFound();
-        
+
         await _cache.RemoveAsync("allJobs");
         await _cache.RemoveAsync("activeJobs");
-        
+
         return Ok(job);
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Employer")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult> DeleteJob(string id)
     {
+        var existing = await _repository.GetByIdAsync(id);
+        if (existing == null)
+            return NotFound(null);
+
+        if (!await OwnsCompanyAsync(existing.CompanyId))
+            return Forbid();
+
         var result = await _repository.DeleteJobAsync(id);
         if (!result)
             return NotFound(null);
-        
+
         await _cache.RemoveAsync("allJobs");
         await _cache.RemoveAsync("activeJobs");
-        
+
         return Ok();
     }
-    
+
     [HttpGet("search")]
     public async Task<ActionResult<IEnumerable<Job>>> SearchJob([FromQuery] string query)
     {
         var jobs = await _repository.SearchJobAsync(query);
         return Ok(jobs);
     }
-    
+
     [HttpGet("filter")]
     public async Task<ActionResult<IEnumerable<Job>>> FilterJob(
         [FromQuery] JobType? jobType,
         [FromQuery] ExperienceLevel? experienceLevel,
-        [FromQuery] WorkMode? workMode,[FromQuery] string? city)   
+        [FromQuery] WorkMode? workMode,[FromQuery] string? city)
     {
         var jobs = await _repository.FilterJobAsync(jobType, experienceLevel, workMode, city);
         return Ok(jobs);
@@ -135,7 +175,7 @@ public class CatalogController : ControllerBase
         {
             return Ok(JsonSerializer.Deserialize<List<Job>>(cached));
         }
-        
+
         var jobs = await _repository.GetActiveJobsAsync();
 
         await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(jobs),
@@ -143,11 +183,11 @@ public class CatalogController : ControllerBase
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
             });
-        
+
         return Ok(jobs);
     }
-    
-    
+
+
     [HttpGet("filter/salary")]
     public async Task<ActionResult<IEnumerable<Job>>> FilterBySalary(
         [FromQuery] decimal? minSalary,
@@ -161,25 +201,29 @@ public class CatalogController : ControllerBase
         var jobs = await _repository.FilterBySalaryAsync(minSalary, maxSalary);
         return Ok(jobs);
     }
-    
+
     [HttpGet("company/{companyId}")]
     public async Task<ActionResult<IEnumerable<Job>>> GetByCompanyId(string companyId)
     {
         var jobs = await _repository.GetByCompanyIdAsync(companyId);
         return Ok(jobs);
     }
-    
-    
+
+
     [HttpGet("sorted/salary")]
     public async Task<ActionResult<IEnumerable<Job>>> GetSortedBySalary([FromQuery] bool ascending = true)
     {
         var jobs = await _repository.GetSortedBySalaryAsync(ascending);
         return Ok(jobs);
     }
-    
+
     [HttpGet("match/{jobId}/{userId}")]
+    [Authorize(Roles = "Candidate")]
     public async Task<IActionResult> MatchJobToCandidate(string jobId, string userId)
     {
+        if (!IsSelf(userId))
+            return Forbid();
+
         var job = await _repository.GetByIdAsync(jobId);
         if (job == null)
             return NotFound("Job did not found");
@@ -187,10 +231,10 @@ public class CatalogController : ControllerBase
         var candidateCacheKey = $"candidate:{userId}";
         var cachedCandidate = await _cache.GetStringAsync(candidateCacheKey);
         CandidateProfileDto? candidate;
-        
+
         if (cachedCandidate != null)
         {
-            candidate = JsonSerializer.Deserialize<CandidateProfileDto>(cachedCandidate);    
+            candidate = JsonSerializer.Deserialize<CandidateProfileDto>(cachedCandidate);
         }
         else
         {
@@ -211,30 +255,42 @@ public class CatalogController : ControllerBase
         var result = _matchingService.CalculateMatch(job, candidate);
         return Ok(result);
     }
-    
+
     [HttpPost("bookmarks")]
+    [Authorize(Roles = "Candidate")]
     public async Task<IActionResult> AddBookmark([FromQuery] string userId, [FromQuery] string jobId)
     {
+        if (!IsSelf(userId))
+            return Forbid();
+
         var alreadyExists = await _bookmarkRepository.IsBookmarkedAsync(userId, jobId);
         if (alreadyExists)
             return Conflict("Bookmark already exists");
-        
+
         await _bookmarkRepository.AddAsync(userId, jobId);
         return Ok();
     }
-    
+
     [HttpDelete("bookmarks")]
+    [Authorize(Roles = "Candidate")]
     public async Task<IActionResult> RemoveBookmark([FromQuery] string userId, [FromQuery] string jobId)
     {
+        if (!IsSelf(userId))
+            return Forbid();
+
         var result = await _bookmarkRepository.RemoveAsync(userId, jobId);
         if (!result)
             return NotFound();
         return Ok();
     }
-    
+
     [HttpGet("bookmarks/{userId}")]
+    [Authorize(Roles = "Candidate")]
     public async Task<ActionResult<IEnumerable<Job>>> GetBookmarkedJobs(string userId)
     {
+        if (!IsSelf(userId))
+            return Forbid();
+
         var bookmarks = await _bookmarkRepository.GetByUserIdAsync(userId);
         var jobIds = bookmarks.Select(b => b.JobId);
 
@@ -250,6 +306,7 @@ public class CatalogController : ControllerBase
     }
 
     [HttpGet("search-candidates")]
+    [Authorize(Roles = "Employer")]
     public async Task<ActionResult<IEnumerable<CandidateProfileDto>>> SearchCandidates(
         [FromQuery] List<string>? skills,
         [FromQuery] string? location,

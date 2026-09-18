@@ -45,6 +45,14 @@ public class ProfileApiClient : IProfileApiClient
         return response.Candidates.Select(MapToDto).ToList();
     }
 
+    public async Task<string?> GetCompanyProfileIdByUserIdAsync(string userId)
+    {
+        var identity = await _client.GetCompanyProfileByUserIdAsync(
+            new GetProfileByUserIdRequest { UserId = userId });
+
+        return string.IsNullOrEmpty(identity.ProfileId) ? null : identity.ProfileId;
+    }
+
     private static CandidateProfileDto MapToDto(CandidateProfileResponse profile)
     {
         return new CandidateProfileDto
