@@ -9,6 +9,7 @@ public sealed record InterviewLifecycleEvent(
     Guid InterviewScheduleId,
     Guid SelectionRoundId,
     Guid CandidateProfileId,
+    string? CandidateUserId,
     DateTimeOffset StartTimeUtc,
     DateTimeOffset EndTimeUtc,
     string? GoogleMeetUrl,
@@ -18,12 +19,16 @@ public sealed record InterviewLifecycleEvent(
     public const string RescheduledType = "interview.rescheduled.v1";
     public const string CancelledType = "interview.cancelled.v1";
 
-    public static InterviewLifecycleEvent Scheduled(InterviewSchedule schedule) => Create(schedule, ScheduledType);
-    public static InterviewLifecycleEvent Rescheduled(InterviewSchedule schedule) => Create(schedule, RescheduledType);
-    public static InterviewLifecycleEvent Cancelled(InterviewSchedule schedule) => Create(schedule, CancelledType);
+    public static InterviewLifecycleEvent Scheduled(InterviewSchedule schedule, string? candidateUserId) =>
+        Create(schedule, ScheduledType, candidateUserId);
+    public static InterviewLifecycleEvent Rescheduled(InterviewSchedule schedule, string? candidateUserId) =>
+        Create(schedule, RescheduledType, candidateUserId);
+    public static InterviewLifecycleEvent Cancelled(InterviewSchedule schedule, string? candidateUserId) =>
+        Create(schedule, CancelledType, candidateUserId);
 
-    private static InterviewLifecycleEvent Create(InterviewSchedule schedule, string eventType) => new(
+    private static InterviewLifecycleEvent Create(InterviewSchedule schedule, string eventType, string? candidateUserId) => new(
         Guid.NewGuid(), eventType, 1, schedule.Id, schedule.SelectionRoundId, schedule.CandidateProfileId,
+        candidateUserId,
         new DateTimeOffset(DateTime.SpecifyKind(schedule.StartTime, DateTimeKind.Utc)),
         new DateTimeOffset(DateTime.SpecifyKind(schedule.EndTime, DateTimeKind.Utc)),
         schedule.GoogleMeetUrl, DateTimeOffset.UtcNow);

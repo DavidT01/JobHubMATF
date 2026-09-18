@@ -43,6 +43,7 @@ services:
   rabbitmq:
     image: rabbitmq:4-management-alpine
     ports:
+      - "5672:5672"
       - "15672:15672"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
@@ -60,8 +61,12 @@ services:
     environment:
       <<: *dotnet-env
       ConnectionStrings__DefaultConnection: Data Source=/app/data/jobhub-identity.db
+      NotificationApi__BaseUrl: http://notification-api:8080
+      NotificationApi__ApiKey: ${NOTIFICATION_API_KEY:-JobHubNotificationInternalKey-ChangeInProduction}
     volumes:
       - identity-data:/app/data
+    depends_on:
+      - notification-api
     ports:
       - "5283:8080"
 
@@ -117,10 +122,17 @@ services:
       Kestrel__Endpoints__Grpc__Url: http://+:8081
       Kestrel__Endpoints__Grpc__Protocols: Http2
       GrpcServices__ProfileApi: http://profile-api:8081
+      Outbox__Enabled: "true"
+      Outbox__ConnectionUri: amqp://guest:guest@rabbitmq:5672/
+      Outbox__AllowInsecureAmqp: "true"
     depends_on:
       postgres:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
       profile-api:
+        condition: service_started
+      notification-api:
         condition: service_started
     ports:
       - "5116:8080"
@@ -139,8 +151,9 @@ services:
       GrpcServices__ProfileApi: http://profile-api:8081
       GrpcServices__CatalogApi: http://catalog-api:8081
       GrpcServices__RecruitmentApi: http://recruitment-api:8081
-      Outbox__Enabled: "false"
+      Outbox__Enabled: "true"
       Outbox__ConnectionUri: amqp://guest:guest@rabbitmq:5672/
+      Outbox__AllowInsecureAmqp: "true"
     depends_on:
       postgres:
         condition: service_healthy
@@ -151,6 +164,8 @@ services:
       catalog-api:
         condition: service_started
       recruitment-api:
+        condition: service_started
+      notification-api:
         condition: service_started
     ports:
       - "5020:8080"
@@ -183,11 +198,32 @@ services:
       - recruitment-api
       - application-api
       - chat-api
+      - notification-api
     ports:
       - "5107:8080"
+
+  notification-api:
+    build:
+      context: .
+      dockerfile: src/Services/NotificationService/Notification.API/Dockerfile
+    environment:
+      <<: *dotnet-env
+      ConnectionStrings__DefaultConnection: Data Source=/app/data/notification.db
+      NotificationApi__ApiKey: ${NOTIFICATION_API_KEY:-JobHubNotificationInternalKey-ChangeInProduction}
+      RabbitMq__Enabled: "true"
+      RabbitMq__ConnectionUri: amqp://guest:guest@rabbitmq:5672/
+      RabbitMq__AllowInsecureAmqp: "true"
+    volumes:
+      - notification-data:/app/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "5290:8080"
 
 volumes:
   postgres-data:
   mongo-data:
   identity-data:
   profile-uploads:
+  notification-data:

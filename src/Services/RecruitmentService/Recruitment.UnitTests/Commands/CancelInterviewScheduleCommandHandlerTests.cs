@@ -1,4 +1,5 @@
 using FluentAssertions;
+using JobHub.Grpc.Contracts.Profile;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Recruitment.API.Entities;
@@ -17,6 +18,7 @@ public class CancelInterviewScheduleCommandHandlerTests
         var handler = new CancelInterviewScheduleCommandHandler(
             context,
             new Mock<IMeetingService>().Object,
+            new Mock<IProfileServiceClient>().Object,
             NullLogger<CancelInterviewScheduleCommandHandler>.Instance);
 
         var act = () => handler.Handle(
@@ -34,9 +36,14 @@ public class CancelInterviewScheduleCommandHandlerTests
         context.InterviewSchedules.Add(schedule);
         await context.SaveChangesAsync();
         var meetingServiceMock = new Mock<IMeetingService>();
+        var profileServiceMock = new Mock<IProfileServiceClient>();
+        profileServiceMock
+            .Setup(client => client.GetCandidateProfileAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new CandidateProfileResponse { UserId = "candidate-user" });
         var handler = new CancelInterviewScheduleCommandHandler(
             context,
             meetingServiceMock.Object,
+            profileServiceMock.Object,
             NullLogger<CancelInterviewScheduleCommandHandler>.Instance);
 
         await handler.Handle(new CancelInterviewScheduleCommand(schedule.Id), CancellationToken.None);

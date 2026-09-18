@@ -7,6 +7,7 @@ public sealed class OutboxMessagingOptions
 {
     public bool Enabled { get; set; }
     public string? ConnectionUri { get; set; }
+    public bool AllowInsecureAmqp { get; set; }
     public string Exchange { get; set; } = "jobhub.recruitment.v1";
 
     public IConnectionFactory CreateConnectionFactory()
@@ -14,8 +15,9 @@ public sealed class OutboxMessagingOptions
         if (!Uri.TryCreate(ConnectionUri, UriKind.Absolute, out var uri)
             || uri.Scheme is not ("amqp" or "amqps") || string.IsNullOrEmpty(uri.Host)
             || string.IsNullOrWhiteSpace(uri.UserInfo) || !string.IsNullOrEmpty(uri.Query)
-            || !string.IsNullOrEmpty(uri.Fragment) || (uri.Scheme == "amqp" && !uri.IsLoopback))
-            throw new InvalidOperationException("Outbox:ConnectionUri must include credentials and use AMQPS (AMQP allowed only on loopback).");
+            || !string.IsNullOrEmpty(uri.Fragment)
+            || (uri.Scheme == "amqp" && !uri.IsLoopback && !AllowInsecureAmqp))
+            throw new InvalidOperationException("Outbox:ConnectionUri must include credentials and use AMQPS (AMQP allowed only on loopback unless AllowInsecureAmqp is true).");
         if (string.IsNullOrWhiteSpace(Exchange) || Encoding.UTF8.GetByteCount(Exchange) > 255
             || Exchange.StartsWith("amq.", StringComparison.Ordinal))
             throw new InvalidOperationException("Outbox:Exchange must be a non-reserved name of at most 255 UTF-8 bytes.");

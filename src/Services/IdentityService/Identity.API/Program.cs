@@ -78,6 +78,21 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<NotificationService>();
 
+if (builder.Environment.IsEnvironment("Testing"))
+{
+    // In-memory Identity tests: keep notifications in the same DB.
+    builder.Services.AddScoped<INotificationPublisher>(sp => sp.GetRequiredService<NotificationService>());
+}
+else
+{
+    var notificationBaseUrl = builder.Configuration["NotificationApi:BaseUrl"] ?? "http://localhost:5290/";
+    builder.Services.AddHttpClient<INotificationPublisher, HttpNotificationPublisher>(client =>
+    {
+        client.BaseAddress = new Uri(notificationBaseUrl.TrimEnd('/') + "/");
+        client.Timeout = TimeSpan.FromSeconds(5);
+    });
+}
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequiredLength = 8;

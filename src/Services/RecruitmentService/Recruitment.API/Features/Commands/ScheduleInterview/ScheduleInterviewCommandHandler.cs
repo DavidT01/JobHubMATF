@@ -38,8 +38,8 @@ namespace Recruitment.API.Features.Commands.ScheduleInterview
                 throw new RecruitmentValidationException("The candidate already has an interview during this time.");
             }
 
-            var candidateContact = await _profileServiceClient.GetCandidateContactAsync(request.CandidateProfileId, cancellationToken);
-            var attendeeEmails = new[] { candidateContact.Email }
+            var candidateProfile = await _profileServiceClient.GetCandidateProfileAsync(request.CandidateProfileId, cancellationToken);
+            var attendeeEmails = new[] { candidateProfile.Email }
                 .Concat(request.AttendeeEmails)
                 .Where(email => !string.IsNullOrWhiteSpace(email))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -51,7 +51,8 @@ namespace Recruitment.API.Features.Commands.ScheduleInterview
             schedule.GoogleMeetUrl = url;
 
             _context.InterviewSchedules.Add(schedule);
-            _context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(InterviewLifecycleEvent.Scheduled(schedule)));
+            _context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(
+                InterviewLifecycleEvent.Scheduled(schedule, candidateProfile.UserId)));
             await _context.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation("Successfully scheduled interview {InterviewScheduleId} for candidate {CandidateProfileId} in round {SelectionRoundId}", schedule.Id, request.CandidateProfileId, request.SelectionRoundId);

@@ -8,6 +8,7 @@ public sealed record CandidateProgressLifecycleEvent(
     int SchemaVersion,
     Guid CandidateProgressId,
     Guid CandidateProfileId,
+    string? CandidateUserId,
     Guid RecruitmentProcessId,
     string JobId,
     string Status,
@@ -18,14 +19,19 @@ public sealed record CandidateProgressLifecycleEvent(
     public const string RejectedType = "candidate.rejected.v1";
     public const string HiredType = "candidate.hired.v1";
 
-    public static CandidateProgressLifecycleEvent RoundAdvanced(CandidateProgress progress, string jobId) =>
-        Create(progress, jobId, RoundAdvancedType);
-    public static CandidateProgressLifecycleEvent Rejected(CandidateProgress progress, string jobId) =>
-        Create(progress, jobId, RejectedType);
-    public static CandidateProgressLifecycleEvent Hired(CandidateProgress progress, string jobId) =>
-        Create(progress, jobId, HiredType);
+    public static CandidateProgressLifecycleEvent RoundAdvanced(
+        CandidateProgress progress, string jobId, string? candidateUserId) =>
+        Create(progress, jobId, RoundAdvancedType, candidateUserId);
+    public static CandidateProgressLifecycleEvent Rejected(
+        CandidateProgress progress, string jobId, string? candidateUserId) =>
+        Create(progress, jobId, RejectedType, candidateUserId);
+    public static CandidateProgressLifecycleEvent Hired(
+        CandidateProgress progress, string jobId, string? candidateUserId) =>
+        Create(progress, jobId, HiredType, candidateUserId);
 
-    private static CandidateProgressLifecycleEvent Create(CandidateProgress progress, string jobId, string eventType) => new(
-        Guid.NewGuid(), eventType, 1, progress.Id, progress.CandidateProfileId, progress.RecruitmentProcessId,
-        jobId, progress.Status.ToString(), progress.CurrentSelectionRoundId, DateTimeOffset.UtcNow);
+    private static CandidateProgressLifecycleEvent Create(
+        CandidateProgress progress, string jobId, string eventType, string? candidateUserId) => new(
+        Guid.NewGuid(), eventType, 1, progress.Id, progress.CandidateProfileId, candidateUserId,
+        progress.RecruitmentProcessId, jobId, progress.Status.ToString(), progress.CurrentSelectionRoundId,
+        DateTimeOffset.UtcNow);
 }

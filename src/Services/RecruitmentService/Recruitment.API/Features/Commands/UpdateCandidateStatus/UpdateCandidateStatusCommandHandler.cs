@@ -45,9 +45,11 @@ public class UpdateCandidateStatusCommandHandler(
             .Where(process => process.Id == request.RecruitmentProcessId)
             .Select(process => process.JobId)
             .FirstOrDefaultAsync(cancellationToken) ?? string.Empty;
+        var candidateProfile = await profileServiceClient.GetCandidateProfileAsync(
+            request.CandidateProfileId, cancellationToken);
         var progressEvent = request.Status == CandidateProgressStatus.Hired
-            ? CandidateProgressLifecycleEvent.Hired(progress, jobId)
-            : CandidateProgressLifecycleEvent.Rejected(progress, jobId);
+            ? CandidateProgressLifecycleEvent.Hired(progress, jobId, candidateProfile.UserId)
+            : CandidateProgressLifecycleEvent.Rejected(progress, jobId, candidateProfile.UserId);
         context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(progressEvent));
         await context.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Successfully updated candidate {CandidateProfileId} to status {Status} in process {RecruitmentProcessId}", request.CandidateProfileId, request.Status, request.RecruitmentProcessId);
