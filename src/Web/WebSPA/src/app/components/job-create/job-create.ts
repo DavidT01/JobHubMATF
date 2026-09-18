@@ -1,5 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -8,6 +9,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { Job, JobType, ExperienceLevel, WorkMode } from '../../models/job.model';
 import { JobService } from '../../services/job.service';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { JobLabelPipe } from '../../shared/job-label.pipe';
+import { CompanyProfileService } from '../../core/services/company-profile/company-profile-service';
+import { CompanyProfileDto } from '../../core/models/company-profile-dto';
 
 @Component({
   selector: 'app-job-create',
@@ -18,13 +23,18 @@ import { JobService } from '../../services/job.service';
     MatSelectModule,
     MatButtonModule,
     MatCardModule,
+    PageHeaderComponent,
+    JobLabelPipe,
+    RouterLink,
   ],
   templateUrl: './job-create.html',
   styleUrl: './job-create.scss',
 })
-export class JobCreate {
+export class JobCreate implements OnInit {
   private fb = inject(FormBuilder);
   private jobService = inject(JobService);
+  private companyProfiles = inject(CompanyProfileService);
+  private route = inject(ActivatedRoute);
   private router = inject(Router);
 
   jobTypes: JobType[] = ['FullTime', 'PartTime', 'Contract', 'Internship'];
@@ -33,6 +43,14 @@ export class JobCreate {
 
   submitting = signal(false);
   error = signal<string | null>(null);
+
+  /** The company the job is posted under; it always comes from the signed-in employer's profile. */
+  company = signal<CompanyProfileDto | null>(null);
+  companyMissing = signal(false);
+  loading = signal(true);
+
+  /** Set when the form edits an existing job instead of posting a new one. */
+  editedJob = signal<Job | null>(null);
 
   form = this.fb.group({
     title: ['', Validators.required],
@@ -55,6 +73,54 @@ export class JobCreate {
     city: [''],
     country: [''],
   });
+
+  ngOnInit(): void {
+    this.companyProfiles.getMine().subscribe({
+      next: company => {
+        this.company.set(company);
+        this.form.patchValue({ companyId: company.id, companyName: company.companyName });
+
+        const jobId = this.route.snapshot.paramMap.get('id');
+        if (jobId) {
+          this.loadJob(jobId, company);
+        } else {
+          this.loading.set(false);
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.loading.set(false);
+        if (err.status === 404) {
+          this.companyMissing.set(true);
+        } else {
+          this.error.set('Your company profile could not be loaded. Please try again.');
+        }
+      },
+    });
+  }
+
+  private loadJob(jobId: string, company: CompanyProfileDto): void {
+    this.jobService.getById(jobId).subscribe({
+      next: job => {
+        // Only the company that posted a job may change it.
+        if (job.companyId !== company.id) {
+          this.router.navigate(['/jobs', jobId]);
+          return;
+        }
+        this.editedJob.set(job);
+        this.form.patchValue({
+          ...job,
+          skills: job.skills?.join(', ') ?? '',
+          requirements: job.requirements?.join(', ') ?? '',
+          responsibilities: job.responsibilities?.join(', ') ?? '',
+        });
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.error.set('The job could not be loaded.');
+      },
+    });
+  }
 
   private toList(value: string | null): string[] {
     return (value ?? '')
@@ -96,14 +162,21 @@ export class JobCreate {
     this.submitting.set(true);
     this.error.set(null);
 
-    this.jobService.create(job).subscribe({
-      next: (created) => {
+    const edited = this.editedJob();
+    const request = edited
+      ? this.jobService.update(edited.id, { ...edited, ...job })
+      : this.jobService.create(job);
+
+    request.subscribe({
+      next: (saved) => {
         this.submitting.set(false);
-        this.router.navigate(['/jobs', created.id]);
+        this.router.navigate(['/jobs', saved?.id ?? edited?.id]);
       },
       error: (err) => {
         this.submitting.set(false);
-        this.error.set('Greška pri kreiranju oglasa.');
+        this.error.set(edited
+          ? 'The job could not be saved. Please try again.'
+          : 'The job could not be posted. Please try again.');
         console.error(err);
       },
     });

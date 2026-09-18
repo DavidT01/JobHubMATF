@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 import { JobDetails } from './job-details';
 import { JobService } from '../../services/job.service';
 import { AuthService } from '../../core/services/auth.service';
+import { CompanyProfileService } from '../../core/services/company-profile/company-profile-service';
 
 describe('JobDetails application integration', () => {
   let fixture: ComponentFixture<JobDetails>;
@@ -23,6 +24,7 @@ describe('JobDetails application integration', () => {
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ id: jobId }) } } },
         { provide: AuthService, useValue: auth },
         { provide: JobService, useValue: { getById: () => of(job), getBookmarks: () => of([]) } },
+        { provide: CompanyProfileService, useValue: { getMine: () => of({ id: 'company-1' }) } },
       ],
     }).compileComponents();
     http = TestBed.inject(HttpTestingController);
@@ -47,6 +49,22 @@ describe('JobDetails application integration', () => {
     auth.me = () => of({ roles: ['Employer'] });
     expect(render().querySelector('app-application-form')).toBeNull();
   });
+  it('gives the owning employer management links instead of candidate actions', () => {
+    auth.me = () => of({ roles: ['Employer'] });
+    job['companyId'] = 'company-1';
+    const page = render();
+    expect(page.querySelector(`a[href="/recruitment-processes/${jobId}"]`)).not.toBeNull();
+    expect(page.querySelector(`a[href="/jobs/${jobId}/edit"]`)).not.toBeNull();
+    expect(page.textContent).toContain('Delete job');
+    expect(page.textContent).not.toContain('Check match');
+  });
+  it('shows no management links to an employer who does not own the job', () => {
+    auth.me = () => of({ roles: ['Employer'] });
+    job['companyId'] = 'another-company';
+    const page = render();
+    expect(page.querySelector(`a[href="/jobs/${jobId}/edit"]`)).toBeNull();
+    expect(page.textContent).not.toContain('Delete job');
+  });
   it('asks a visitor to log in', () => {
     auth.isLoggedIn = () => false;
     const page = render();
@@ -65,6 +83,6 @@ describe('JobDetails application integration', () => {
     job['expirationDate'] = '2020-01-01T00:00:00Z';
     fixture.detectChanges();
     expect(page.querySelector('app-application-form')).toBeNull();
-    expect(page.textContent).toContain('više ne prima prijave');
+    expect(page.textContent).toContain('no longer accepting applications');
   });
 });

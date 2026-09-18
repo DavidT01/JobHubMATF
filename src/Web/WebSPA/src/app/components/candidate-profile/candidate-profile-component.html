@@ -2,6 +2,8 @@
   <div class="loading-spinner">
     <p>Loading profile...</p>
   </div>
+} @else if (loadError()) {
+  <p class="state-message profile-state" role="alert">{{ loadError() }}</p>
 } @else {
   <div class="profile-container">
 
@@ -26,7 +28,7 @@
             </div>
             <input type="file" #fileInput (change)="onPictureSelected($event)" accept="image/png, image/jpeg" style="display: none;" />
             @if (isEditMode() && profileData()?.pictureUrl) {
-              <button mat-mini-fab color="warn" class="delete-pic-btn" (click)="deletePicture()" type="button" title="Remove Picture">
+              <button mat-mini-fab color="warn" class="delete-pic-btn" (click)="deletePicture()" type="button" title="Remove picture">
                 <mat-icon>delete</mat-icon>
               </button>
             }
@@ -36,15 +38,15 @@
             @if (!isEditMode()) {
               <h1>{{ profileData()?.firstName }} {{ profileData()?.lastName }}</h1>
             } @else {
-              <h1>Edit Profile</h1>
+              <h1>Edit profile</h1>
             }
           </div>
         </div>
         <div class="header-actions">
-          @if (!isEditMode()) {
-            <button mat-flat-button color="primary" (click)="toggleEditMode()">Edit Profile</button>
-            <button mat-stroked-button color="warn" (click)="deleteProfile()">Delete Profile</button>
-          } @else {
+          @if (!isEditMode() && isOwner()) {
+            <button mat-flat-button color="primary" (click)="toggleEditMode()">Edit profile</button>
+            <button mat-stroked-button color="warn" (click)="deleteProfile()">Delete profile</button>
+          } @else if (isEditMode()) {
             <button mat-stroked-button (click)="toggleEditMode()">Cancel</button>
           }
         </div>
@@ -58,7 +60,7 @@
         <!-- General Information -->
         <mat-card class="profile-section">
           <mat-card-header>
-            <mat-card-title>General Information</mat-card-title>
+            <mat-card-title>General information</mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <div class="info-grid">
@@ -125,7 +127,7 @@
                     <h3>{{ proj.name }}</h3>
                     <p>{{ proj.description }}</p>
                     @if (proj.repositoryUrl) {
-                      <a [href]="proj.repositoryUrl" target="_blank" class="link-btn">View Repository</a>
+                      <a [href]="proj.repositoryUrl" target="_blank" class="link-btn">View repository</a>
                     }
                   </div>
                 }
@@ -223,16 +225,16 @@
         <!-- General Information -->
         <mat-card class="form-section">
           <mat-card-header>
-            <mat-card-title>General Information</mat-card-title>
+            <mat-card-title>General information</mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <div class="form-row-2">
               <mat-form-field appearance="outline">
-                <mat-label>First Name</mat-label>
+                <mat-label>First name</mat-label>
                 <input matInput type="text" formControlName="firstName" />
               </mat-form-field>
               <mat-form-field appearance="outline">
-                <mat-label>Last Name</mat-label>
+                <mat-label>Last name</mat-label>
                 <input matInput type="text" formControlName="lastName" />
               </mat-form-field>
             </div>
@@ -242,7 +244,7 @@
                 <input matInput type="email" formControlName="email" />
               </mat-form-field>
               <mat-form-field appearance="outline">
-                <mat-label>Phone Number</mat-label>
+                <mat-label>Phone number</mat-label>
                 <input matInput type="text" formControlName="phoneNumber" />
               </mat-form-field>
               <mat-form-field appearance="outline">
@@ -257,7 +259,7 @@
         <mat-card class="form-section">
           <div class="section-title-with-action">
             <mat-card-title>Experience</mat-card-title>
-            <button mat-mini-fab color="warn" type="button" (click)="addExperience()" title="Add Experience">
+            <button mat-mini-fab color="warn" type="button" (click)="addExperience()" title="Add experience">
               <mat-icon>add</mat-icon>
             </button>
           </div>
@@ -268,7 +270,7 @@
                 <div class="array-item-card flex-grow">
                   <div class="form-grid">
                     <mat-form-field appearance="outline">
-                      <mat-label>Company Name</mat-label>
+                      <mat-label>Company name</mat-label>
                       <input matInput type="text" formControlName="companyName" />
                     </mat-form-field>
                     <mat-form-field appearance="outline">
@@ -278,13 +280,13 @@
                   </div>
                   <div class="form-grid">
                     <mat-form-field appearance="outline">
-                      <mat-label>Start Date</mat-label>
+                      <mat-label>Start date</mat-label>
                       <input matInput [matDatepicker]="expStartPicker" formControlName="startDate" />
                       <mat-datepicker-toggle matIconSuffix [for]="expStartPicker"></mat-datepicker-toggle>
                       <mat-datepicker #expStartPicker></mat-datepicker>
                     </mat-form-field>
                     <mat-form-field appearance="outline">
-                      <mat-label>End Date</mat-label>
+                      <mat-label>End date</mat-label>
                       <input matInput [matDatepicker]="expEndPicker" formControlName="endDate" />
                       <mat-datepicker-toggle matIconSuffix [for]="expEndPicker"></mat-datepicker-toggle>
                       <mat-datepicker #expEndPicker></mat-datepicker>
@@ -306,7 +308,7 @@
         <mat-card class="form-section">
           <div class="section-title-with-action">
             <mat-card-title>Education</mat-card-title>
-            <button mat-mini-fab color="warn" type="button" (click)="addEducation()" title="Add Education">
+            <button mat-mini-fab color="warn" type="button" (click)="addEducation()" title="Add education">
               <mat-icon>add</mat-icon>
             </button>
           </div>
@@ -317,7 +319,7 @@
                 <div class="array-item-card flex-grow">
                   <div class="form-grid">
                     <mat-form-field appearance="outline">
-                      <mat-label>Institution Name</mat-label>
+                      <mat-label>Institution name</mat-label>
                       <input matInput type="text" formControlName="institutionName" />
                     </mat-form-field>
                     <mat-form-field appearance="outline">
@@ -327,13 +329,13 @@
                   </div>
                   <div class="form-grid">
                     <mat-form-field appearance="outline">
-                      <mat-label>Start Date</mat-label>
+                      <mat-label>Start date</mat-label>
                       <input matInput [matDatepicker]="eduStartPicker" formControlName="startDate" />
                       <mat-datepicker-toggle matIconSuffix [for]="eduStartPicker"></mat-datepicker-toggle>
                       <mat-datepicker #eduStartPicker></mat-datepicker>
                     </mat-form-field>
                     <mat-form-field appearance="outline">
-                      <mat-label>End Date</mat-label>
+                      <mat-label>End date</mat-label>
                       <input matInput [matDatepicker]="eduEndPicker" formControlName="startDate" />
                       <mat-datepicker-toggle matIconSuffix [for]="eduEndPicker"></mat-datepicker-toggle>
                       <mat-datepicker #eduEndPicker></mat-datepicker>
@@ -355,7 +357,7 @@
         <mat-card class="form-section">
           <div class="section-title-with-action">
             <mat-card-title>Projects</mat-card-title>
-            <button mat-mini-fab color="warn" type="button" (click)="addProject()" title="Add Project">
+            <button mat-mini-fab color="warn" type="button" (click)="addProject()" title="Add project">
               <mat-icon>add</mat-icon>
             </button>
           </div>
@@ -366,7 +368,7 @@
                 <div class="array-item-card flex-grow">
                   <div class="form-grid">
                     <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>Project Name</mat-label>
+                      <mat-label>Project name</mat-label>
                       <input matInput type="text" formControlName="name" />
                     </mat-form-field>
                     <mat-form-field appearance="outline" class="full-width">
@@ -394,7 +396,7 @@
         <mat-card class="form-section">
           <div class="section-title-with-action">
             <mat-card-title>Skills</mat-card-title>
-            <button mat-mini-fab color="warn" type="button" (click)="addSkill()" title="Add Skill">
+            <button mat-mini-fab color="warn" type="button" (click)="addSkill()" title="Add skill">
               <mat-icon>add</mat-icon>
             </button>
           </div>
@@ -407,7 +409,7 @@
                   <input matInput type="text" [formControlName]="$index" />
                 </mat-form-field>
                 <div class="array-item-actions">
-                  <button mat-mini-fab color="warn" type="button" (click)="removeSkill($index)" title="Remove Skill">
+                  <button mat-mini-fab color="warn" type="button" (click)="removeSkill($index)" title="Remove skill">
                     <mat-icon>delete</mat-icon>
                   </button>
                 </div>
@@ -421,7 +423,7 @@
         <mat-card class="form-section">
           <div class="section-title-with-action">
             <mat-card-title>Languages</mat-card-title>
-            <button mat-mini-fab color="warn" type="button" (click)="addLanguage()" title="Add Language">
+            <button mat-mini-fab color="warn" type="button" (click)="addLanguage()" title="Add language">
               <mat-icon>add</mat-icon>
             </button>
           </div>
@@ -485,7 +487,7 @@
               <div class="cv-actions">
                 <input type="file" #cvInput (change)="onCvSelected($event)" accept="application/pdf" style="display: none;" />
                 <button mat-stroked-button color="primary" type="button" (click)="cvInput.click()" style="line-height: normal; padding: 0 12px; height: 32px;">
-                  <mat-icon style="margin-right: 4px; font-size: 18px; width: 18px; height: 18px;">upload_file</mat-icon> Choose File
+                  <mat-icon style="margin-right: 4px; font-size: 18px; width: 18px; height: 18px;">upload_file</mat-icon> Choose file
                 </button>
                 @if (profileData()?.cvUrl) {
                   <button mat-stroked-button color="warn" type="button" (click)="deleteCv()" style="line-height: normal; padding: 0 12px; height: 32px;">
@@ -499,10 +501,10 @@
 
         <div class="form-actions" style="display: flex; align-items: center; gap: 12px;">
           <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || isSaving()" style="padding: 0 2rem; font-size: 1.1rem;">
-            {{ isSaving() ? 'Saving...' : 'Save Profile' }}
+            {{ isSaving() ? 'Saving...' : 'Save profile' }}
           </button>
           @if (isSaving()) {
-            <span aria-live="polite" style="font-size: 0.9rem; color: rgba(0,0,0,0.7);">Saving profile...</span>
+            <span aria-live="polite" class="saving-status">Saving profile...</span>
           }
         </div>
       </form>

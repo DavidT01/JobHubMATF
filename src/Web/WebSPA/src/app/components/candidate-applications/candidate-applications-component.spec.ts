@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSelect } from '@angular/material/select';
+import { provideRouter } from '@angular/router';
 
 import { ApplicationListItemDto, ApplicationStatus } from '../../core/models/application-list-item-dto';
 import { CandidateApplicationsComponent } from './candidate-applications-component';
@@ -17,6 +18,9 @@ describe('CandidateApplicationsComponent', () => {
     submittedAtUtc: '2026-09-02T10:00:00Z', updatedAtUtc: '2026-09-02T11:00:00Z',
   });
   const content = () => fixture.nativeElement.textContent as string;
+  const statusChips = () => Array.from(
+    fixture.nativeElement.querySelectorAll('.status-chip') as NodeListOf<HTMLElement>,
+  ).map(chip => chip.textContent?.trim());
   const clickButton = (label: string) => {
     const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
     const button = buttons.find(button => button.textContent?.trim() === label);
@@ -33,7 +37,7 @@ describe('CandidateApplicationsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CandidateApplicationsComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
     http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(CandidateApplicationsComponent);
@@ -54,7 +58,7 @@ describe('CandidateApplicationsComponent', () => {
     expect(content()).toContain('5 applications in total');
     expect(content()).toContain('Job ID: aaaaaaaaaaaaaaaaaaaaaaaa');
     for (const label of ['Submitted', 'In review', 'Interview', 'Rejected', 'Accepted']) {
-      expect(content()).toContain(`Status: ${label}`);
+      expect(statusChips()).toContain(label);
     }
     expect(fixture.nativeElement.querySelectorAll('mat-card').length).toBe(5);
     expect(fixture.nativeElement.querySelector('time').getAttribute('datetime')).toBe(item().submittedAtUtc);
@@ -129,7 +133,7 @@ describe('CandidateApplicationsComponent', () => {
       items: [item('Accepted')], totalCount: 100, pageNumber: 1, pageSize: 50,
     });
     fixture.detectChanges();
-    expect(content()).toContain('Status: Accepted');
+    expect(statusChips()).toContain('Accepted');
     const current = fixture.debugElement.query(By.directive(MatPaginator)).componentInstance as MatPaginator;
     expect(current.pageSize).toBe(50);
     expect(current.pageIndex).toBe(0);

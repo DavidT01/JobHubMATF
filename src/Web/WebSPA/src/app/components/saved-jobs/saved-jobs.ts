@@ -5,6 +5,8 @@ import { switchMap } from 'rxjs';
 import { Job } from '../../models/job.model';
 import { JobService } from '../../services/job.service';
 import { CurrentUser } from '../../core/current-user';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { JobLabelPipe } from '../../shared/job-label.pipe';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,6 +22,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    PageHeaderComponent,
+    JobLabelPipe,
   ],
   templateUrl: './saved-jobs.html',
   styleUrl: './saved-jobs.scss',
@@ -47,7 +51,7 @@ export class SavedJobs implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set('Greška pri učitavanju sačuvanih oglasa.');
+        this.error.set('Could not load your saved jobs.');
         this.loading.set(false);
         console.error(err);
       },

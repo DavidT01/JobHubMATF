@@ -1,14 +1,5 @@
 import { Routes } from '@angular/router';
 import { applicationRoleGuard } from './core/guards/application-role.guard';
-import { JobList } from './components/job-list/job-list';
-import { JobSearch } from './components/job-search/job-search';
-import { JobDetails } from './components/job-details/job-details';
-import { JobCreate } from './components/job-create/job-create';
-import { SavedJobs } from './components/saved-jobs/saved-jobs';
-import { CandidateSearch } from './components/candidate-search/candidate-search';
-import { ChatComponent } from './components/chat/chat';
-import { DashboardComponent } from './components/dashboard/dashboard';
-import { roleGuard } from './guards/role';
 import { authGuard, guestGuard, adminGuard } from './core/guards/auth.guard';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
@@ -20,6 +11,7 @@ import { HomeComponent } from './features/home/home.component';
 import { NotificationsComponent } from './features/notifications/notifications.component';
 import { AdminUsersComponent } from './features/admin/admin-users.component';
 
+// Every page is lazy loaded so the initial bundle only contains the app shell.
 export const routes: Routes = [
   {
     path: 'admin/statistics',
@@ -52,52 +44,80 @@ export const routes: Routes = [
   { path: 'admin', component: AdminUsersComponent, canActivate: [adminGuard] },
   {
     path: 'dashboard',
-    component: DashboardComponent,
-    canActivate: [roleGuard],
+    loadComponent: () => import('./components/dashboard/dashboard').then(c => c.DashboardComponent),
+    canActivate: [applicationRoleGuard],
     data: { roles: ['Candidate', 'Employer', 'Admin'] }
   },
   {
     path: 'chat',
-    component: ChatComponent,
-    canActivate: [roleGuard],
+    loadComponent: () => import('./components/chat/chat').then(c => c.ChatComponent),
+    canActivate: [applicationRoleGuard],
     data: { roles: ['Candidate', 'Employer', 'Admin'] }
   },
   {
     path: 'profile/candidate/:userId',
     loadComponent: () => import('./components/candidate-profile/candidate-profile-component')
-      .then(c => c.CandidateProfileComponent)
+      .then(c => c.CandidateProfileComponent),
+    canActivate: [authGuard]
   },
   {
     path: 'profile/company/:userId',
     loadComponent: () => import('./components/company-profile/company-profile-component')
-      .then(c => c.CompanyProfileComponent)
+      .then(c => c.CompanyProfileComponent),
+    canActivate: [authGuard]
   },
   {
     path: 'recruitment-processes/:jobId',
     loadComponent: () => import('./components/recruitment-process/recruitment-process-component')
-      .then(c => c.RecruitmentProcessComponent)
+      .then(c => c.RecruitmentProcessComponent),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Employer', 'Admin'] }
   },
   {
     path: 'recruitment-processes/:jobId/rounds/:selectionRoundId',
     loadComponent: () => import('./components/round-candidates/round-candidates-component')
-      .then(c => c.RoundCandidatesComponent)
+      .then(c => c.RoundCandidatesComponent),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Employer', 'Admin'] }
   },
   {
     path: 'applications/:applicationId',
     loadComponent: () => import('./components/candidate-application-view/candidate-application-view')
-      .then(c => c.CandidateApplicationViewComponent)
+      .then(c => c.CandidateApplicationViewComponent),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Candidate'] }
   },
   {
-    path: 'candidates', 
-    component: CandidateSearch, 
-    canActivate: [roleGuard],
+    path: 'candidates',
+    loadComponent: () => import('./components/candidate-search/candidate-search').then(c => c.CandidateSearch),
+    canActivate: [applicationRoleGuard],
     data: { roles: ['Employer'] }
   },
-  { path: 'jobs', component: JobList },
-  { path: 'search', component: JobSearch },
-  { path: 'jobs/new', component: JobCreate },
-  { path: 'bookmarks', component: SavedJobs },
-  { path: 'jobs/:id', component: JobDetails },
-  { path: '', component: HomeComponent, canActivate: [authGuard] },
+  { path: 'jobs', loadComponent: () => import('./components/job-list/job-list').then(c => c.JobList) },
+  { path: 'search', loadComponent: () => import('./components/job-search/job-search').then(c => c.JobSearch) },
+  {
+    path: 'jobs/new',
+    loadComponent: () => import('./components/job-create/job-create').then(c => c.JobCreate),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Employer'] }
+  },
+  {
+    path: 'jobs/:id/edit',
+    loadComponent: () => import('./components/job-create/job-create').then(c => c.JobCreate),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Employer'] }
+  },
+  {
+    path: 'bookmarks',
+    loadComponent: () => import('./components/saved-jobs/saved-jobs').then(c => c.SavedJobs),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Candidate'] }
+  },
+  { path: 'jobs/:id', loadComponent: () => import('./components/job-details/job-details').then(c => c.JobDetails) },
+  {
+    path: '',
+    loadComponent: () => import('./features/home/home.component').then(c => c.HomeComponent),
+    canActivate: [authGuard]
+  },
   { path: '**', redirectTo: '' }
 ];

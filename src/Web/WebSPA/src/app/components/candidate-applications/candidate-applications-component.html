@@ -1,9 +1,6 @@
 @let view = state();
-<section aria-labelledby="applications-heading" [attr.aria-busy]="view.kind === 'loading'">
-  <header>
-    <h1 id="applications-heading">My applications</h1>
-    <p>Track the status of your job applications.</p>
-  </header>
+<section class="page page--narrow" aria-labelledby="applications-heading" [attr.aria-busy]="view.kind === 'loading'">
+  <app-page-header title="My applications" subtitle="Track the status of your job applications." headingId="applications-heading" />
 
   <div class="filters" role="group" aria-label="Application filters and sorting">
     <mat-form-field appearance="outline">
@@ -64,7 +61,7 @@
                   <a [routerLink]="['/applications', application.id]">Application details</a>
                 </mat-card-title>
                 <mat-card-subtitle>Job ID: {{ application.jobId }}</mat-card-subtitle>
-                <mat-card-subtitle>Status: {{ statusLabel(application.status) }}</mat-card-subtitle>
+                <app-status-chip [status]="application.status" />
               </mat-card-header>
               <mat-card-content>
                 <dl>

@@ -1,46 +1,58 @@
-<div class="job-list-toolbar">
-  <a routerLink="/bookmarks" mat-stroked-button>
-    <mat-icon>bookmark</mat-icon>
-    Sačuvani oglasi
-  </a>
-  <button mat-raised-button color="primary" (click)="openCreate()">Kreiraj oglas</button>
-</div>
-
-@if (loading()) {
-  <div class="loading-container">
-    <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-  </div>
-} @else if (error()) {
-  <p class="error">{{ error() }}</p>
-} @else if (jobs().length === 0) {
-  <p>Trenutno nema oglasa.</p>
-} @else {
-  <div class="job-grid">
-    @for (job of jobs(); track job.id) {
-      <mat-card class="job-card" (click)="openDetails(job.id)">
-        <mat-card-header>
-          <mat-card-title>{{ job.title }}</mat-card-title>
-          <mat-card-subtitle>{{ job.companyName }} — {{ job.city }}</mat-card-subtitle>
-          <button
-            mat-icon-button
-            class="bookmark-btn"
-            (click)="toggleBookmark($event, job.id)"
-            [attr.aria-label]="isBookmarked(job.id) ? 'Ukloni iz sačuvanih' : 'Sačuvaj oglas'"
-          >
-            <mat-icon>{{ isBookmarked(job.id) ? 'bookmark' : 'bookmark_border' }}</mat-icon>
-          </button>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="chips">
-            <mat-chip class="chip-primary">{{ job.jobType }}</mat-chip>
-            <mat-chip class="chip-tertiary">{{ job.experienceLevel }}</mat-chip>
-            <mat-chip class="chip-primary">{{ job.workMode }}</mat-chip>
-          </div>
-          @if (job.salaryMin && job.salaryMax) {
-            <p class="salary">{{ job.salaryMin }} - {{ job.salaryMax }} {{ job.currency }}</p>
-          }
-        </mat-card-content>
-      </mat-card>
+<section class="page">
+  <app-page-header title="Browse jobs" subtitle="All open positions on JobHub">
+    @if (session.role() === 'Candidate') {
+      <a mat-stroked-button routerLink="/bookmarks">
+        <mat-icon>bookmark_border</mat-icon>
+        Saved jobs
+      </a>
     }
-  </div>
-}
+    @if (session.role() === 'Employer') {
+      <a mat-flat-button routerLink="/jobs/new">
+        <mat-icon>add</mat-icon>
+        Post a job
+      </a>
+    }
+  </app-page-header>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+  } @else if (error()) {
+    <p class="error-text" role="alert">{{ error() }}</p>
+  } @else if (jobs().length === 0) {
+    <p class="state-message">There are no job openings right now.</p>
+  } @else {
+    <div class="card-grid">
+      @for (job of jobs(); track job.id) {
+        <mat-card appearance="outlined" class="job-card clickable-card" (click)="openDetails(job.id)">
+          <mat-card-header>
+            <mat-card-title>{{ job.title }}</mat-card-title>
+            <mat-card-subtitle>{{ job.companyName }}{{ job.city ? ' · ' + job.city : '' }}</mat-card-subtitle>
+          </mat-card-header>
+          @if (session.role() === 'Candidate') {
+            <button
+              mat-icon-button
+              type="button"
+              class="bookmark-btn"
+              (click)="toggleBookmark($event, job.id)"
+              [attr.aria-label]="isBookmarked(job.id) ? 'Remove from saved jobs' : 'Save job'"
+            >
+              <mat-icon>{{ isBookmarked(job.id) ? 'bookmark' : 'bookmark_border' }}</mat-icon>
+            </button>
+          }
+          <mat-card-content>
+            <div class="chip-row">
+              <mat-chip class="chip-meta">{{ job.jobType | jobLabel: 'jobType' }}</mat-chip>
+              <mat-chip class="chip-meta">{{ job.experienceLevel | jobLabel: 'experienceLevel' }}</mat-chip>
+              <mat-chip class="chip-meta">{{ job.workMode | jobLabel: 'workMode' }}</mat-chip>
+            </div>
+            @if (job.salaryMin && job.salaryMax) {
+              <p class="salary">{{ job.salaryMin }} – {{ job.salaryMax }} {{ job.currency }}</p>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</section>

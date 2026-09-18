@@ -4,6 +4,9 @@ import { switchMap } from 'rxjs';
 import { Job } from '../../models/job.model';
 import { JobService } from '../../services/job.service';
 import { CurrentUser } from '../../core/current-user';
+import { SessionService } from '../../core/services/session.service';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { JobLabelPipe } from '../../shared/job-label.pipe';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -14,7 +17,8 @@ import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-job-list',
-  imports: [CommonModule , MatCardModule , MatChipsModule , MatProgressSpinnerModule , MatButtonModule , MatIconModule , RouterLink],
+  imports: [CommonModule , MatCardModule , MatChipsModule , MatProgressSpinnerModule , MatButtonModule , MatIconModule , RouterLink,
+    PageHeaderComponent, JobLabelPipe],
   templateUrl: './job-list.html',
   styleUrl: './job-list.scss',
 })
@@ -22,6 +26,7 @@ export class JobList implements OnInit {
   private jobService = inject(JobService);
   private currentUser = inject(CurrentUser);
   private router = inject(Router);
+  protected readonly session = inject(SessionService);
 
 
   jobs = signal<Job[]>([]);
@@ -36,7 +41,7 @@ export class JobList implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set('Greška pri učitavanju oglasa.');
+        this.error.set('Could not load job openings.');
         this.loading.set(false);
         console.error(err);
       }
@@ -82,9 +87,5 @@ export class JobList implements OnInit {
 
   openDetails(id: string): void {
     this.router.navigate(['/jobs', id]);
-  }
-
-  openCreate(): void {
-    this.router.navigate(['/jobs/new']);
   }
 }

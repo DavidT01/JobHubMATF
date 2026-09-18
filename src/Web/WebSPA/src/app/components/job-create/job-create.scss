@@ -1,12 +1,8 @@
-.create-card {
-  max-width: 800px;
-  margin: 16px auto;
-}
-
 .create-form {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding-top: 16px;
 
   .full-width {
     width: 100%;
@@ -20,10 +16,6 @@
     mat-form-field {
       flex: 1 1 200px;
     }
-  }
-
-  .error {
-    color: var(--mat-sys-error);
   }
 
   .actions {

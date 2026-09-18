@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { finalize } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -41,6 +41,7 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-
 })
 export class CandidateProfileComponent implements OnInit {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
   private profileService = inject(CandidateProfileService);
   private authService = inject(AuthService);
@@ -52,6 +53,10 @@ export class CandidateProfileComponent implements OnInit {
   isSaving = signal<boolean>(false);
   isEditMode = signal<boolean>(false);
 
+  /** Only the owner sees the edit and delete actions. */
+  isOwner = signal<boolean>(false);
+  loadError = signal<string | null>(null);
+
   userId: string = '';
   form!: FormGroup;
 
@@ -59,7 +64,10 @@ export class CandidateProfileComponent implements OnInit {
     this.initForm();
     this.authService.me().subscribe({
       next: user => {
-        this.userId = user.id;
+        // "me" (or the user's own id) opens the editable profile; any other id is read-only.
+        const requested = this.route.snapshot.paramMap.get('userId');
+        this.userId = !requested || requested === 'me' ? user.id : requested;
+        this.isOwner.set(this.userId === user.id);
         this.loadProfile();
       },
       error: () => this.router.navigate(['/login'])
@@ -96,8 +104,14 @@ export class CandidateProfileComponent implements OnInit {
       error: (err) => {
         console.error(err);
         this.isLoading.set(false);
-        if (err.status === 404) {
+        if (err.status === 404 && this.isOwner()) {
           this.router.navigate(['/']);
+        } else if (err.status === 404) {
+          this.loadError.set('This profile does not exist.');
+        } else if (err.status === 403) {
+          this.loadError.set('This profile is only visible to its owner.');
+        } else {
+          this.loadError.set('The profile could not be loaded. Please try again.');
         }
       }
     });

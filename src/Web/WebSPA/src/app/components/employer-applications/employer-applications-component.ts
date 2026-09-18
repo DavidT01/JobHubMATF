@@ -14,6 +14,7 @@ import { ApplicationStatus, PagedResult } from '../../core/models/application-li
 import { ApplicationSortBy, SortDirection } from '../../core/models/application-management-dto';
 import { EmployerApplicationDto } from '../../core/models/employer-application-dto';
 import { ApplicationsService } from '../../core/services/applications/applications-service';
+import { applicationStatusLabel, StatusChipComponent } from '../../shared/status-chip/status-chip.component';
 
 interface Query {
   jobId: string;
@@ -40,7 +41,7 @@ const STATUS_TRANSITIONS: Readonly<Record<ApplicationStatus, readonly Applicatio
 @Component({
   selector: 'app-employer-applications',
   imports: [DatePipe, MatButtonModule, MatCardModule, MatFormFieldModule, MatPaginatorModule,
-    MatProgressBarModule, MatSelectModule],
+    MatProgressBarModule, MatSelectModule, StatusChipComponent],
   templateUrl: './employer-applications-component.html',
   styleUrl: './employer-applications-component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -102,8 +103,7 @@ export class EmployerApplicationsComponent implements OnChanges {
   }
 
   protected statusLabel(status: ApplicationStatus): string {
-    return ({ Submitted: 'Submitted', InReview: 'In review', Interview: 'Interview',
-      Rejected: 'Rejected', Accepted: 'Accepted' } as Record<ApplicationStatus, string>)[status] ?? 'Unknown status';
+    return applicationStatusLabel(status);
   }
 
   protected currentQuery(): Query | null {

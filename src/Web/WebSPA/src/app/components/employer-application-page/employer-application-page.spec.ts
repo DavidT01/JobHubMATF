@@ -51,7 +51,7 @@ describe('EmployerApplicationPage', () => {
   it('shows an empty state for a company without jobs', () => {
     getByCompanyId.mockReturnValue(of([]));
     profile();
-    expect(fixture.nativeElement.textContent).toContain('Firma još nema oglase');
+    expect(fixture.nativeElement.textContent).toContain("Your company hasn't posted any jobs yet.");
   });
   it('shows a retryable error instead of querying jobs with a user ID', () => {
     http.expectOne('/api/company-profiles/identity-user').flush({}, { status: 404, statusText: 'Not Found' });
@@ -62,6 +62,6 @@ describe('EmployerApplicationPage', () => {
   it('excludes jobs belonging to a different company', () => {
     getByCompanyId.mockReturnValue(of([{ ...first, companyId: 'another-company' }]));
     profile();
-    expect(fixture.nativeElement.textContent).toContain('Firma još nema oglase');
+    expect(fixture.nativeElement.textContent).toContain("Your company hasn't posted any jobs yet.");
   });
 });

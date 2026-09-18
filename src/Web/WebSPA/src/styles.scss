@@ -1,13 +1,25 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
+// Single source of the application theme. Components read colors, typography and elevation
+// from the Material system variables (--mat-sys-*) instead of hard-coded values.
 @use '@angular/material' as mat;
 
 html {
   height: 100%;
-  @include mat.theme(( color: ( primary: mat.$cyan-palette, tertiary: mat.$orange-palette, theme-type: light, ), typography: Roboto, density: 0, ));
+  color-scheme: light;
+  @include mat.theme((
+    color: (
+      primary: mat.$cyan-palette,
+      tertiary: mat.$orange-palette,
+      theme-type: light,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+
+  // The cyan palette resolves the primary container to a neon #00fbfb. Every surface built on
+  // that token shouts, including ones Material fills itself, such as the datepicker selection
+  // and the slider. Mixing the primary back toward the surface keeps the hue and restores a
+  // container tone that text can sit on; --mat-sys-on-primary-container stays readable on it.
+  --mat-sys-primary-container: color-mix(in srgb, var(--mat-sys-primary) 20%, var(--mat-sys-surface));
 }
 
 body {
@@ -16,8 +28,45 @@ body {
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
-  margin: 0;
+}
+
+a {
+  color: var(--mat-sys-primary);
+}
+
+// ---------------------------------------------------------------------------
+// Page layout shared by every screen rendered inside the app shell
+// ---------------------------------------------------------------------------
+
+.page {
+  display: block;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page--narrow {
+  max-width: 900px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+}
+
+// A title that wraps onto a second line must not make its card taller than its neighbours,
+// so cards fill the row and their content is pushed to a common baseline.
+.card-grid > .mat-mdc-card {
+  display: flex;
+  flex-direction: column;
   height: 100%;
+
+  .mat-mdc-card-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
 }
 
 /* Auth forms: white fields, no lingering gray fill / autofill */

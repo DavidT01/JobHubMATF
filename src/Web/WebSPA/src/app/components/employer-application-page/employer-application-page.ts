@@ -11,15 +11,16 @@ import { CompanyProfileService } from '../../core/services/company-profile/compa
 import { JobService } from '../../services/job.service';
 import { Job } from '../../models/job.model';
 import { EmployerApplicationsComponent } from '../employer-applications/employer-applications-component';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
 type State = { kind: 'loading' } | { kind: 'error' } | { kind: 'loaded'; jobs: Job[] };
 
 @Component({
   selector: 'app-employer-application-page',
   imports: [RouterLink, MatButtonModule, MatFormFieldModule, MatSelectModule,
-    MatProgressBarModule, EmployerApplicationsComponent],
+    MatProgressBarModule, EmployerApplicationsComponent, PageHeaderComponent],
   templateUrl: './employer-application-page.html',
-  styles: [':host { display: block; padding: 24px; } mat-form-field { width: min(100%, 480px); }'],
+  styles: [':host { display: block; } mat-form-field { width: min(100%, 480px); }'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmployerApplicationPage {

@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -13,11 +13,12 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog-compone
 import { CandidateProgressDto } from '../../core/models/candidate-progress-dto';
 import { InterviewScheduleDto } from '../../core/models/interview-schedule-dto';
 import { RecruitmentProcessService } from '../../core/services/recruitment-process/recruitment-process-service';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
 @Component({
   selector: 'app-round-candidates',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatCardModule, MatDialogModule],
+  imports: [CommonModule, MatButtonModule, MatCardModule, MatDialogModule, RouterLink, PageHeaderComponent],
   templateUrl: './round-candidates-component.html',
   styleUrl: './round-candidates-component.scss'
 })
@@ -31,9 +32,11 @@ export class RoundCandidatesComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   private selectionRoundId = '';
+  protected jobId = '';
 
   ngOnInit(): void {
     this.selectionRoundId = this.route.snapshot.paramMap.get('selectionRoundId') ?? '';
+    this.jobId = this.route.snapshot.paramMap.get('jobId') ?? '';
     if (!this.selectionRoundId) {
       this.error.set('The selection round could not be identified.');
       this.loading.set(false);

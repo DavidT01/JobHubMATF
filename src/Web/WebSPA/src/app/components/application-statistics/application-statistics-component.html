@@ -1,9 +1,7 @@
 @let view = state();
-<section aria-labelledby="application-statistics-heading" [attr.aria-busy]="view.kind === 'loading'">
-  <header>
-    <h1 id="application-statistics-heading">Application statistics</h1>
-    <p>Review application volume and status distribution from the Application Service.</p>
-  </header>
+<section class="page" aria-labelledby="application-statistics-heading" [attr.aria-busy]="view.kind === 'loading'">
+  <app-page-header title="Application statistics" subtitle="Application volume and status breakdown for the selected period"
+    headingId="application-statistics-heading" />
 
   <form class="period" [formGroup]="periodForm" (ngSubmit)="applyPeriod()">
     <mat-form-field appearance="outline">

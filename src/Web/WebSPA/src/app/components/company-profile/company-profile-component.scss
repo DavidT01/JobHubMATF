@@ -1,7 +1,12 @@
-.profile-container { 
-  max-width: 900px; 
-  margin: 2rem auto; 
-  padding-bottom: 2rem;
+.profile-container,
+.profile-state {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.saving-status {
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 /* HEADER */
@@ -109,25 +114,25 @@ mat-card-header {
   height: 80px;
   border-radius: 4px;
   overflow: hidden;
-  background-color: var(--mat-sys-surface-variant, #e0e0e0);
+  background-color: var(--mat-sys-surface-variant);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px dashed var(--mat-sys-outline, #ccc);
+  border: 1px dashed var(--mat-sys-outline);
 }
 
 .company-logo {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background-color: white;
+  background-color: var(--mat-sys-surface-container-lowest);
 }
 
 .logo-placeholder mat-icon {
   font-size: 40px;
   width: 40px;
   height: 40px;
-  color: var(--mat-sys-outline, #9e9e9e);
+  color: var(--mat-sys-outline);
 }
 
 .logo-overlay {
@@ -136,7 +141,7 @@ mat-card-header {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.4);
+  background: color-mix(in srgb, var(--mat-sys-scrim) 40%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;

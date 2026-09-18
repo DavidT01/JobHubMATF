@@ -19,6 +19,9 @@ describe('EmployerApplicationsComponent', () => {
   let fixture: ComponentFixture<EmployerApplicationsComponent>;
   let http: HttpTestingController;
   const content = () => fixture.nativeElement.textContent as string;
+  const statusChips = () => Array.from(
+    fixture.nativeElement.querySelectorAll('.status-chip') as NodeListOf<HTMLElement>,
+  ).map(chip => chip.textContent?.trim());
   const respond = (items = [item()], totalCount = items.length, requestUrl = url()) => {
     http.expectOne(requestUrl).flush({ items, totalCount, pageNumber: 1, pageSize: 20 });
     fixture.detectChanges();
@@ -51,7 +54,7 @@ describe('EmployerApplicationsComponent', () => {
     respond();
     expect(content()).toContain('Ana Test');
     expect(content()).toContain('candidate-1');
-    expect(content()).toContain('Status: In review');
+    expect(statusChips()).toContain('In review');
     expect(content()).toContain('First line\nSecond line');
     expect(fixture.nativeElement.querySelectorAll('time').length).toBe(2);
     const link = fixture.nativeElement.querySelector('a') as HTMLAnchorElement;
@@ -96,7 +99,7 @@ describe('EmployerApplicationsComponent', () => {
     fixture.detectChanges();
     expect(content()).toContain('Loading applications');
     respond([item({ status: 'InReview' })]);
-    expect(content()).toContain('Status: In review');
+    expect(statusChips()).toContain('In review');
   });
 
   it('shows a safe status error and allows a deliberate retry', () => {

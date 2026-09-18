@@ -1,6 +1,6 @@
 @let view = state();
-<main class="application-view-container" aria-labelledby="application-heading" [attr.aria-busy]="view.kind === 'loading'">
-  <a mat-button routerLink="/applications">Back to applications</a>
+<section class="application-view-container page page--narrow" aria-labelledby="application-heading" [attr.aria-busy]="view.kind === 'loading'">
+  <a mat-button routerLink="/applications" class="back-link">&larr; Back to applications</a>
 
   @if (view.kind === 'loading') {
     <section class="state" role="status">
@@ -19,9 +19,7 @@
         <h1 id="application-heading">{{ view.data.job.title }}</h1>
         <p>{{ view.data.job.companyName }} · {{ view.data.job.city || 'Location not specified' }}</p>
       </div>
-      <span class="status" [class]="'status status-' + view.data.application.status.toLowerCase()">
-        {{ statusLabel(view.data.application.status) }}
-      </span>
+      <app-status-chip [status]="view.data.application.status" />
     </header>
 
     <section class="summary-grid" aria-label="Application summary">
@@ -82,4 +80,4 @@
       </mat-card-content>
     </mat-card>
   }
-</main>
+</section>

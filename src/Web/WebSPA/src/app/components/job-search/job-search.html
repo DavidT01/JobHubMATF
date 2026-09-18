@@ -1,80 +1,86 @@
-<div class="search-form">
-  <mat-form-field appearance="outline" class="query-field">
-    <mat-label>Pretraga (naslov, opis, kompanija)</mat-label>
-    <input matInput
-      [ngModel]="query()"
-      (ngModelChange)="query.set($event)"
-      (keyup.enter)="onSearch()"
-      placeholder="npr. React developer" />
-  </mat-form-field>
+<section class="page">
+  <app-page-header title="Search jobs" subtitle="Search by keyword, or leave it empty and narrow the results with filters" />
 
-  <mat-form-field appearance="outline">
-    <mat-label>Tip posla</mat-label>
-    <mat-select [ngModel]="jobType()" (ngModelChange)="jobType.set($event)">
-      <mat-option value="">Svi</mat-option>
-      @for (type of jobTypes; track type) {
-        <mat-option [value]="type">{{ type }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+  <mat-card appearance="outlined" class="filter-card">
+    <mat-card-content class="search-form">
+      <mat-form-field appearance="outline" class="query-field">
+        <mat-label>Keyword (title, description, company)</mat-label>
+        <input matInput
+          [ngModel]="query()"
+          (ngModelChange)="query.set($event)"
+          (keyup.enter)="onSearch()"
+          placeholder="e.g. React developer" />
+      </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Iskustvo</mat-label>
-    <mat-select [ngModel]="experienceLevel()" (ngModelChange)="experienceLevel.set($event)">
-      <mat-option value="">Svi</mat-option>
-      @for (level of experienceLevels; track level) {
-        <mat-option [value]="level">{{ level }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline">
-    <mat-label>Način rada</mat-label>
-    <mat-select [ngModel]="workMode()" (ngModelChange)="workMode.set($event)">
-      <mat-option value="">Svi</mat-option>
-      @for (mode of workModes; track mode) {
-        <mat-option [value]="mode">{{ mode }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline">
-    <mat-label>Grad</mat-label>
-    <input matInput
-      [ngModel]="city()"
-      (ngModelChange)="city.set($event)"
-      placeholder="npr. Beograd" />
-  </mat-form-field>
-
-  <div class="actions">
-    <button mat-raised-button color="primary" (click)="onSearch()">Pretraži</button>
-    <button mat-stroked-button (click)="onReset()">Resetuj</button>
-  </div>
-</div>
-
-@if (loading()) {
-  <p>Pretraga u toku...</p>
-} @else if (searched() && results().length === 0) {
-  <p>Nema rezultata za zadatu pretragu.</p>
-} @else if (results().length > 0) {
-  <div class="job-grid">
-    @for (job of results(); track job.id) {
-      <mat-card class="job-card" (click)="openDetails(job.id)">
-        <mat-card-header>
-          <mat-card-title>{{ job.title }}</mat-card-title>
-          <mat-card-subtitle>{{ job.companyName }} — {{ job.city }}</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="chips">
-            <mat-chip class="chip-primary">{{ job.jobType }}</mat-chip>
-            <mat-chip class="chip-tertiary">{{ job.experienceLevel }}</mat-chip>
-            <mat-chip class="chip-primary">{{ job.workMode }}</mat-chip>
-          </div>
-          @if (job.salaryMin && job.salaryMax) {
-            <p class="salary">{{ job.salaryMin }} - {{ job.salaryMax }} {{ job.currency }}</p>
+      <mat-form-field appearance="outline">
+        <mat-label>Job type</mat-label>
+        <mat-select [ngModel]="jobType()" (ngModelChange)="jobType.set($event)">
+          <mat-option value="">Any</mat-option>
+          @for (type of jobTypes; track type) {
+            <mat-option [value]="type">{{ type | jobLabel: 'jobType' }}</mat-option>
           }
-        </mat-card-content>
-      </mat-card>
-    }
-  </div>
-}
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Experience level</mat-label>
+        <mat-select [ngModel]="experienceLevel()" (ngModelChange)="experienceLevel.set($event)">
+          <mat-option value="">Any</mat-option>
+          @for (level of experienceLevels; track level) {
+            <mat-option [value]="level">{{ level | jobLabel: 'experienceLevel' }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Work mode</mat-label>
+        <mat-select [ngModel]="workMode()" (ngModelChange)="workMode.set($event)">
+          <mat-option value="">Any</mat-option>
+          @for (mode of workModes; track mode) {
+            <mat-option [value]="mode">{{ mode | jobLabel: 'workMode' }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>City</mat-label>
+        <input matInput
+          [ngModel]="city()"
+          (ngModelChange)="city.set($event)"
+          placeholder="e.g. Belgrade" />
+      </mat-form-field>
+
+      <div class="actions">
+        <button mat-flat-button type="button" (click)="onSearch()">Search</button>
+        <button mat-stroked-button type="button" (click)="onReset()">Reset</button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  @if (loading()) {
+    <p class="state-message">Searching...</p>
+  } @else if (searched() && results().length === 0) {
+    <p class="state-message">No jobs match your search.</p>
+  } @else if (results().length > 0) {
+    <div class="card-grid">
+      @for (job of results(); track job.id) {
+        <mat-card appearance="outlined" class="clickable-card" (click)="openDetails(job.id)">
+          <mat-card-header>
+            <mat-card-title>{{ job.title }}</mat-card-title>
+            <mat-card-subtitle>{{ job.companyName }}{{ job.city ? ' · ' + job.city : '' }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chip-row">
+              <mat-chip class="chip-meta">{{ job.jobType | jobLabel: 'jobType' }}</mat-chip>
+              <mat-chip class="chip-meta">{{ job.experienceLevel | jobLabel: 'experienceLevel' }}</mat-chip>
+              <mat-chip class="chip-meta">{{ job.workMode | jobLabel: 'workMode' }}</mat-chip>
+            </div>
+            @if (job.salaryMin && job.salaryMax) {
+              <p class="salary">{{ job.salaryMin }} – {{ job.salaryMax }} {{ job.currency }}</p>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</section>

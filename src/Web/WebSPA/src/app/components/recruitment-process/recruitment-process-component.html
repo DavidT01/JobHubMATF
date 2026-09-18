@@ -1,40 +1,44 @@
-<div class="profile-container" *ngIf="error()">
-  <p class="error-message">{{ error() }}</p>
-</div>
+<section class="page page--narrow">
+  <app-page-header title="Recruitment process" subtitle="Selection rounds and candidates for this job">
+    @if (!loading() && process()) {
+      <button mat-flat-button type="button" (click)="editRounds()">Edit rounds</button>
+    }
+  </app-page-header>
 
-<div class="profile-container" *ngIf="loading()">
-  <p>Loading recruitment process...</p>
-</div>
+  @if (error()) {
+    <p class="error-text" role="alert">{{ error() }}</p>
+  }
 
-<div class="profile-container" *ngIf="!loading() && process(); else noProcess">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>Recruitment Process Details</mat-card-title>
-      <mat-card-subtitle>Active: {{ process()?.isActive }}</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <p>Total Rounds: {{ process()?.rounds?.length }}</p>
-
-      <ul class="rounds-list">
-        <li *ngFor="let round of process()?.rounds">
-          <strong>{{ round.orderIndex }}. {{ round.title }}</strong>
-          <p *ngIf="round.description">{{ round.description }}</p>
-          <button mat-button color="primary" (click)="viewRoundCandidates(round.id)">View Candidates</button>
-        </li>
-      </ul>
-    </mat-card-content>
-    <mat-card-actions>
-       <button mat-button color="primary" (click)="editRounds()">Edit Rounds</button>
-    </mat-card-actions>
-  </mat-card>
-</div>
-
-<ng-template #noProcess>
-  <div class="profile-container" *ngIf="!loading()">
+  @if (loading()) {
+    <p class="state-message">Loading recruitment process...</p>
+  } @else if (process(); as current) {
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Selection rounds</mat-card-title>
+        <mat-card-subtitle>
+          {{ current.isActive ? 'Active' : 'Inactive' }} · {{ current.rounds.length }} {{ current.rounds.length === 1 ? 'round' : 'rounds' }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <ol class="rounds-list">
+          @for (round of current.rounds; track $index) {
+            <li>
+              <div>
+                <strong>{{ round.orderIndex }}. {{ round.title }}</strong>
+                @if (round.description) {
+                  <p>{{ round.description }}</p>
+                }
+              </div>
+              <button mat-stroked-button type="button" (click)="viewRoundCandidates(round.id)">View candidates</button>
+            </li>
+          }
+        </ol>
+      </mat-card-content>
+    </mat-card>
+  } @else {
     <div class="empty-state">
-      <p>No active recruitment process found for this job.</p>
-      <button mat-raised-button color="accent" (click)="initializeProcess()">Initialize Process</button>
+      <p>This job doesn't have a recruitment process yet.</p>
+      <button mat-flat-button type="button" (click)="initializeProcess()">Start recruitment process</button>
     </div>
-  </div>
-</ng-template>
-
+  }
+</section>

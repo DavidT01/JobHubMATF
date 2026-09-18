@@ -1,38 +1,43 @@
-@if (loading()) {
-  <div class="loading-container">
-    <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-  </div>
-} @else if (error()) {
-  <p class="error">{{ error() }}</p>
-} @else if (jobs().length === 0) {
-  <p>Nemaš sačuvanih oglasa.</p>
-} @else {
-  <div class="job-grid">
-    @for (job of jobs(); track job.id) {
-      <mat-card class="job-card" (click)="openDetails(job.id)">
-        <mat-card-header>
-          <mat-card-title>{{ job.title }}</mat-card-title>
-          <mat-card-subtitle>{{ job.companyName }} — {{ job.city }}</mat-card-subtitle>
+<section class="page">
+  <app-page-header title="Saved jobs" subtitle="Jobs you bookmarked for later" />
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+  } @else if (error()) {
+    <p class="error-text" role="alert">{{ error() }}</p>
+  } @else if (jobs().length === 0) {
+    <p class="state-message">You haven't saved any jobs yet.</p>
+  } @else {
+    <div class="card-grid">
+      @for (job of jobs(); track job.id) {
+        <mat-card appearance="outlined" class="job-card clickable-card" (click)="openDetails(job.id)">
+          <mat-card-header>
+            <mat-card-title>{{ job.title }}</mat-card-title>
+            <mat-card-subtitle>{{ job.companyName }}{{ job.city ? ' · ' + job.city : '' }}</mat-card-subtitle>
+          </mat-card-header>
           <button
             mat-icon-button
+            type="button"
             class="bookmark-btn"
             (click)="removeBookmark($event, job.id)"
-            aria-label="Ukloni iz sačuvanih"
+            aria-label="Remove from saved jobs"
           >
             <mat-icon>bookmark</mat-icon>
           </button>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="chips">
-            <mat-chip class="chip-primary">{{ job.jobType }}</mat-chip>
-            <mat-chip class="chip-tertiary">{{ job.experienceLevel }}</mat-chip>
-            <mat-chip class="chip-primary">{{ job.workMode }}</mat-chip>
-          </div>
-          @if (job.salaryMin && job.salaryMax) {
-            <p class="salary">{{ job.salaryMin }} - {{ job.salaryMax }} {{ job.currency }}</p>
-          }
-        </mat-card-content>
-      </mat-card>
-    }
-  </div>
-}
+          <mat-card-content>
+            <div class="chip-row">
+              <mat-chip class="chip-meta">{{ job.jobType | jobLabel: 'jobType' }}</mat-chip>
+              <mat-chip class="chip-meta">{{ job.experienceLevel | jobLabel: 'experienceLevel' }}</mat-chip>
+              <mat-chip class="chip-meta">{{ job.workMode | jobLabel: 'workMode' }}</mat-chip>
+            </div>
+            @if (job.salaryMin && job.salaryMax) {
+              <p class="salary">{{ job.salaryMin }} – {{ job.salaryMax }} {{ job.currency }}</p>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</section>
