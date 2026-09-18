@@ -1,6 +1,7 @@
 # JobHubMATF
-Projekat predstavlja web portal namenjen povezivanju firmi koje nude posao i korisnika koji traže zaposlenje. Firme putem portala mogu objavljivati oglase za slobodna radna mesta i pregledati prijave kandidata, dok korisnici mogu pretraživati dostupne poslove, prijavljivati se na oglase i pratiti status svojih prijava.
+JobHubMATF is a web portal that connects companies offering jobs with people looking for work. Companies can post job openings and review candidates' applications, while candidates can search available jobs, apply to them, and track the status of their applications.
 
-## Dokumentacija
+## Documentation
 
-- [SETUP](./SETUP.md)
+- [SETUP](./SETUP.md) - preparing the development environment
+- [BUILD](./BUILD.md) - building and running the whole project on your machine
