@@ -45,3 +45,8 @@
     align-self: stretch;
   }
 }
+
+// Deleting is the one destructive action here, so it alone carries the error colour.
+.delete-job {
+  color: var(--mat-sys-error);
+}

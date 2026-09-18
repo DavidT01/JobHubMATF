@@ -2,6 +2,8 @@
   <div class="loading-spinner">
     <p>Loading profile...</p>
   </div>
+} @else if (loadError()) {
+  <p class="state-message profile-state" role="alert">{{ loadError() }}</p>
 } @else {
   <div class="profile-container">
 
@@ -41,10 +43,10 @@
           </div>
         </div>
         <div class="header-actions">
-          @if (!isEditMode()) {
+          @if (!isEditMode() && isOwner()) {
             <button mat-flat-button color="primary" (click)="toggleEditMode()">Edit profile</button>
             <button mat-stroked-button color="warn" (click)="deleteProfile()">Delete profile</button>
-          } @else {
+          } @else if (isEditMode()) {
             <button mat-stroked-button (click)="toggleEditMode()">Cancel</button>
           }
         </div>

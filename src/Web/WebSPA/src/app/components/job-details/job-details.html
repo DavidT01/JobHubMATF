@@ -11,7 +11,18 @@
   } @else if (error()) {
     <p class="error-text" role="alert">{{ error() }}</p>
   } @else if (job()) {
-    <app-page-header [title]="job()!.title" [subtitle]="locationLabel(job()!)" />
+    <app-page-header [title]="job()!.title" [subtitle]="locationLabel(job()!)">
+      @if (isOwner()) {
+        <a mat-stroked-button [routerLink]="['/recruitment-processes', job()!.id]">
+          <mat-icon>account_tree</mat-icon>
+          Recruitment process
+        </a>
+        <a mat-stroked-button routerLink="/applications-received">
+          <mat-icon>inbox</mat-icon>
+          Applications
+        </a>
+      }
+    </app-page-header>
 
     <mat-card appearance="outlined" class="details-card">
       <mat-card-content>
@@ -91,7 +102,18 @@
         }
       </mat-card-content>
 
-      @if (job()!.applyUrl || isCandidate()) {
+      @if (isOwner()) {
+        <mat-card-actions class="details-actions">
+          <a mat-stroked-button [routerLink]="['/jobs', job()!.id, 'edit']">
+            <mat-icon>edit</mat-icon>
+            Edit job
+          </a>
+          <button mat-stroked-button type="button" class="delete-job" (click)="deleteJob()" [disabled]="deleting()">
+            <mat-icon>delete_outline</mat-icon>
+            Delete job
+          </button>
+        </mat-card-actions>
+      } @else if (job()!.applyUrl || isCandidate()) {
         <mat-card-actions class="details-actions">
           @if (job()!.applyUrl) {
             <a [href]="job()!.applyUrl" target="_blank" rel="noopener noreferrer" mat-stroked-button>External application page</a>

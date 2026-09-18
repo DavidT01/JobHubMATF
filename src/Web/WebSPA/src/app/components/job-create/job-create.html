@@ -1,6 +1,15 @@
 <section class="page page--narrow">
-  <app-page-header title="Post a job" subtitle="Describe the role so candidates know what to expect" />
+  <app-page-header [title]="editedJob() ? 'Edit job' : 'Post a job'"
+                   [subtitle]="company() ? 'Posting as ' + company()!.companyName : 'Describe the role so candidates know what to expect'" />
 
+  @if (loading()) {
+    <p class="state-message">Loading...</p>
+  } @else if (companyMissing()) {
+    <p class="state-message">
+      Jobs are posted under your company profile, and you don't have one yet.
+      <a routerLink="/profile/company/me">Create your company profile</a> first.
+    </p>
+  } @else {
   <mat-card appearance="outlined">
     <mat-card-content>
       <form [formGroup]="form" (ngSubmit)="submit()" class="create-form">
@@ -40,18 +49,6 @@
                 <mat-option [value]="m">{{ m | jobLabel: 'workMode' }}</mat-option>
               }
             </mat-select>
-          </mat-form-field>
-        </div>
-
-        <div class="row">
-          <mat-form-field appearance="outline">
-            <mat-label>Company ID</mat-label>
-            <input matInput formControlName="companyId" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Company name</mat-label>
-            <input matInput formControlName="companyName" />
           </mat-form-field>
         </div>
 
@@ -129,10 +126,18 @@
 
         <div class="actions">
           <button mat-flat-button type="submit" [disabled]="submitting()">
-            {{ submitting() ? 'Posting...' : 'Post job' }}
+            @if (editedJob()) {
+              {{ submitting() ? 'Saving...' : 'Save changes' }}
+            } @else {
+              {{ submitting() ? 'Posting...' : 'Post job' }}
+            }
           </button>
+          @if (editedJob(); as job) {
+            <a mat-button [routerLink]="['/jobs', job.id]">Cancel</a>
+          }
         </div>
       </form>
     </mat-card-content>
   </mat-card>
+  }
 </section>

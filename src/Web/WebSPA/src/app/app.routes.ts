@@ -80,27 +80,35 @@ export const routes: Routes = [
   {
     path: 'profile/candidate/:userId',
     loadComponent: () => import('./components/candidate-profile/candidate-profile-component')
-      .then(c => c.CandidateProfileComponent)
+      .then(c => c.CandidateProfileComponent),
+    canActivate: [authGuard]
   },
   {
     path: 'profile/company/:userId',
     loadComponent: () => import('./components/company-profile/company-profile-component')
-      .then(c => c.CompanyProfileComponent)
+      .then(c => c.CompanyProfileComponent),
+    canActivate: [authGuard]
   },
   {
     path: 'recruitment-processes/:jobId',
     loadComponent: () => import('./components/recruitment-process/recruitment-process-component')
-      .then(c => c.RecruitmentProcessComponent)
+      .then(c => c.RecruitmentProcessComponent),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Employer', 'Admin'] }
   },
   {
     path: 'recruitment-processes/:jobId/rounds/:selectionRoundId',
     loadComponent: () => import('./components/round-candidates/round-candidates-component')
-      .then(c => c.RoundCandidatesComponent)
+      .then(c => c.RoundCandidatesComponent),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Employer', 'Admin'] }
   },
   {
     path: 'applications/:applicationId',
     loadComponent: () => import('./components/candidate-application-view/candidate-application-view')
-      .then(c => c.CandidateApplicationViewComponent)
+      .then(c => c.CandidateApplicationViewComponent),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Candidate'] }
   },
   {
     path: 'candidates',
@@ -110,8 +118,24 @@ export const routes: Routes = [
   },
   { path: 'jobs', loadComponent: () => import('./components/job-list/job-list').then(c => c.JobList) },
   { path: 'search', loadComponent: () => import('./components/job-search/job-search').then(c => c.JobSearch) },
-  { path: 'jobs/new', loadComponent: () => import('./components/job-create/job-create').then(c => c.JobCreate) },
-  { path: 'bookmarks', loadComponent: () => import('./components/saved-jobs/saved-jobs').then(c => c.SavedJobs) },
+  {
+    path: 'jobs/new',
+    loadComponent: () => import('./components/job-create/job-create').then(c => c.JobCreate),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Employer'] }
+  },
+  {
+    path: 'jobs/:id/edit',
+    loadComponent: () => import('./components/job-create/job-create').then(c => c.JobCreate),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Employer'] }
+  },
+  {
+    path: 'bookmarks',
+    loadComponent: () => import('./components/saved-jobs/saved-jobs').then(c => c.SavedJobs),
+    canActivate: [applicationRoleGuard],
+    data: { roles: ['Candidate'] }
+  },
   { path: 'jobs/:id', loadComponent: () => import('./components/job-details/job-details').then(c => c.JobDetails) },
   {
     path: '',
