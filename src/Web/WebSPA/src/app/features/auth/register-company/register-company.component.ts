@@ -11,7 +11,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-register',
+  selector: 'app-register-company',
   standalone: true,
   imports: [
     CommonModule,
@@ -25,18 +25,17 @@ import { AuthService } from '../../../core/services/auth.service';
     MatIconModule,
     MatSnackBarModule
   ],
-  templateUrl: './register.component.html',
-  styleUrl: './register.component.scss'
+  templateUrl: './register-company.component.html',
+  styleUrl: './register-company.component.scss'
 })
-export class RegisterComponent {
+export class RegisterCompanyComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
 
   registerForm = this.fb.group({
-    firstName: ['', [Validators.required]],
-    lastName: ['', [Validators.required]],
+    companyName: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
@@ -50,11 +49,14 @@ export class RegisterComponent {
 
     const value = this.registerForm.getRawValue();
     this.authService.register({
-      ...value,
-      role: 'Candidate'
+      firstName: value.companyName,
+      lastName: null,
+      email: value.email,
+      password: value.password,
+      role: 'Employer'
     }).subscribe({
       next: (res) => {
-        this.snackBar.open(res.message || 'Registration successful!', 'Close', { duration: 5000 });
+        this.snackBar.open(res.message || 'Company registration successful!', 'Close', { duration: 5000 });
         const url = new URL(res.confirmationUrl);
         this.router.navigate(['/confirm-email'], {
           queryParams: {

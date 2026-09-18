@@ -50,6 +50,22 @@ public class AuthEndpointsTests : IClassFixture<IdentityApiFactory>
     }
 
     [Fact]
+    public async Task Register_Employer_WithoutLastName_ReturnsOk()
+    {
+        using var client = _factory.CreateClient();
+        var response = await client.PostAsJsonAsync("/api/auth/register", new
+        {
+            firstName = "Acme Corp",
+            lastName = (string?)null,
+            email = $"co-{Guid.NewGuid():N}@example.com",
+            password = "Pass123!",
+            role = "Employer"
+        });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Register_DuplicateEmail_ReturnsBadRequest()
     {
         using var client = _factory.CreateClient();

@@ -46,7 +46,8 @@ export class LoginComponent {
       this.authService.login(this.loginForm.value).subscribe({
         next: () => {
           this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
-          this.router.navigate(['/']);
+          // Dashboard already shows Candidate vs Employer vs Admin content.
+          this.router.navigate(['/dashboard']);
         },
         error: (err) => {
           this.snackBar.open(err.error?.message || 'Login failed!', 'Close', { duration: 3000 });
