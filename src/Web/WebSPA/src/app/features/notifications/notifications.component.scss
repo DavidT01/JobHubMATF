@@ -19,9 +19,13 @@
 }
 
 .notification-list li.unread {
-  border-color: var(--mat-sys-primary);
-  background-color: var(--mat-sys-primary-container);
-  color: var(--mat-sys-on-primary-container);
+  border-color: var(--mat-sys-outline);
+  background-color: var(--mat-sys-surface-container);
+  border-left: 4px solid var(--mat-sys-primary);
+}
+
+.notification-list li.unread strong {
+  color: var(--mat-sys-on-surface);
 }
 
 .meta {

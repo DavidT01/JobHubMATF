@@ -4,7 +4,7 @@
   align-items: center;
   min-height: 100vh;
   box-sizing: border-box;
-  background: linear-gradient(135deg, var(--mat-sys-primary) 0%, var(--mat-sys-tertiary) 100%);
+  background-color: var(--mat-sys-surface-container);
   padding: 20px;
 }
 
@@ -12,9 +12,10 @@
   width: 100%;
   max-width: 400px;
   border-radius: 16px;
-  box-shadow: var(--mat-sys-level3);
+  box-shadow: var(--mat-sys-level1);
+  border: 1px solid var(--mat-sys-outline-variant);
   padding: 24px;
-  background-color: var(--mat-sys-surface-container-lowest);
+  background-color: var(--mat-sys-surface);
 }
 
 mat-card-header {
@@ -42,8 +43,7 @@ mat-card-header {
 
 .submit-button {
   height: 48px;
-  font-size: 1rem;
-  font-weight: 600;
+  font: var(--mat-sys-title-small);
   border-radius: 8px;
   margin-top: 8px;
 }

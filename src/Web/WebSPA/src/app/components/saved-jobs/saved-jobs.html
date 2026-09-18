@@ -28,9 +28,9 @@
           </button>
           <mat-card-content>
             <div class="chip-row">
-              <mat-chip class="chip-primary">{{ job.jobType | jobLabel: 'jobType' }}</mat-chip>
-              <mat-chip class="chip-tertiary">{{ job.experienceLevel | jobLabel: 'experienceLevel' }}</mat-chip>
-              <mat-chip class="chip-primary">{{ job.workMode | jobLabel: 'workMode' }}</mat-chip>
+              <mat-chip class="chip-meta">{{ job.jobType | jobLabel: 'jobType' }}</mat-chip>
+              <mat-chip class="chip-meta">{{ job.experienceLevel | jobLabel: 'experienceLevel' }}</mat-chip>
+              <mat-chip class="chip-meta">{{ job.workMode | jobLabel: 'workMode' }}</mat-chip>
             </div>
             @if (job.salaryMin && job.salaryMax) {
               <p class="salary">{{ job.salaryMin }} – {{ job.salaryMax }} {{ job.currency }}</p>

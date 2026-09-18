@@ -34,8 +34,8 @@
 
       .my-badge {
         font: var(--mat-sys-label-medium);
-        color: var(--mat-sys-on-primary-container);
-        background-color: var(--mat-sys-primary-container);
+        color: var(--mat-sys-on-surface-variant);
+        background-color: var(--mat-sys-surface-container-highest);
         padding: 4px 8px;
         border-radius: 6px;
       }
@@ -56,20 +56,20 @@
         }
 
         &.active {
-          background-color: var(--mat-sys-primary-container);
-          border-left: 4px solid var(--mat-sys-primary);
+          background-color: var(--mat-sys-secondary-container);
+          color: var(--mat-sys-on-secondary-container);
         }
 
         .user-avatar {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background-color: var(--mat-sys-primary);
-          color: var(--mat-sys-on-primary);
+          background-color: var(--mat-sys-surface-container-highest);
+          color: var(--mat-sys-on-surface-variant);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: bold;
+          font: var(--mat-sys-title-small);
         }
 
         .user-name {
@@ -104,10 +104,9 @@
             top: 50% !important;
             right: 0 !important;
             transform: translateY(-50%) !important;
-            background-color: var(--mat-sys-error);
-            color: var(--mat-sys-on-error);
-            font-size: 10px;
-            font-weight: bold;
+            background-color: var(--mat-sys-primary);
+            color: var(--mat-sys-on-primary);
+            font: var(--mat-sys-label-small);
             width: 16px;
             height: 16px;
             line-height: 16px;
@@ -146,7 +145,7 @@
         }
 
         strong {
-          color: var(--mat-sys-primary);
+          color: var(--mat-sys-on-surface);
           font-weight: 600;
         }
       }
@@ -181,8 +180,8 @@
 
         &.sent {
           align-self: flex-end;
-          background-color: var(--mat-sys-primary);
-          color: var(--mat-sys-on-primary);
+          background-color: var(--mat-sys-primary-container);
+          color: var(--mat-sys-on-primary-container);
           border-bottom-right-radius: 2px;
         }
 
@@ -201,8 +200,8 @@
       bottom: 90px;
       left: 50%;
       transform: translateX(-50%);
-      background-color: var(--mat-sys-tertiary) !important;
-      color: var(--mat-sys-on-tertiary) !important;
+      background-color: var(--mat-sys-secondary) !important;
+      color: var(--mat-sys-on-secondary) !important;
       box-shadow: var(--mat-sys-level3);
     }
 

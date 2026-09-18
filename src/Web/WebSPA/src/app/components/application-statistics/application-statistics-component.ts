@@ -18,6 +18,7 @@ import {
 import { ApplicationStatus } from '../../core/models/application-list-item-dto';
 import { ApplicationsService } from '../../core/services/applications/applications-service';
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { applicationStatusLabel } from '../../shared/status-chip/status-chip.component';
 
 type ViewState =
   | { kind: 'loading'; period: ApplicationStatisticsPeriod }
@@ -79,9 +80,7 @@ export class ApplicationStatisticsComponent {
   }
 
   protected statusLabel(status: ApplicationStatus): string {
-    return ({ Submitted: 'Submitted', InReview: 'In review', Interview: 'Interview',
-      Rejected: 'Rejected', Accepted: 'Accepted' } as Record<ApplicationStatus, string>)[status]
-      ?? 'Unknown status';
+    return applicationStatusLabel(status);
   }
 
   private errorMessage(error: unknown): string {

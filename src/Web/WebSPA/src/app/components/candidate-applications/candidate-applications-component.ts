@@ -15,6 +15,7 @@ import { ApplicationListItemDto, ApplicationStatus, PagedResult } from '../../co
 import { ApplicationSortBy, SortDirection } from '../../core/models/application-management-dto';
 import { ApplicationsService } from '../../core/services/applications/applications-service';
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { applicationStatusLabel, StatusChipComponent } from '../../shared/status-chip/status-chip.component';
 
 interface PageRequest {
   pageIndex: number;
@@ -31,7 +32,7 @@ type ViewState =
 @Component({
   selector: 'app-candidate-applications',
   imports: [DatePipe, MatButtonModule, MatCardModule, MatFormFieldModule, MatPaginatorModule,
-    MatProgressBarModule, MatSelectModule, RouterLink, PageHeaderComponent],
+    MatProgressBarModule, MatSelectModule, RouterLink, PageHeaderComponent, StatusChipComponent],
   templateUrl: './candidate-applications-component.html',
   styleUrl: './candidate-applications-component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -89,11 +90,7 @@ export class CandidateApplicationsComponent {
   }
 
   protected statusLabel(status: ApplicationStatus): string {
-    const labels: Record<ApplicationStatus, string> = {
-      Submitted: 'Submitted', InReview: 'In review', Interview: 'Interview',
-      Rejected: 'Rejected', Accepted: 'Accepted',
-    };
-    return labels[status] ?? 'Unknown status';
+    return applicationStatusLabel(status);
   }
 
   private changeFilters(changes: Partial<PageRequest>): void {

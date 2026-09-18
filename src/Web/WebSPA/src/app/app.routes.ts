@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { applicationRoleGuard } from './core/guards/application-role.guard';
-import { roleGuard } from './guards/role';
 import { authGuard, guestGuard, adminGuard } from './core/guards/auth.guard';
 
 // Every page is lazy loaded so the initial bundle only contains the app shell.
@@ -69,13 +68,13 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     loadComponent: () => import('./components/dashboard/dashboard').then(c => c.DashboardComponent),
-    canActivate: [roleGuard],
+    canActivate: [applicationRoleGuard],
     data: { roles: ['Candidate', 'Employer', 'Admin'] }
   },
   {
     path: 'chat',
     loadComponent: () => import('./components/chat/chat').then(c => c.ChatComponent),
-    canActivate: [roleGuard],
+    canActivate: [applicationRoleGuard],
     data: { roles: ['Candidate', 'Employer', 'Admin'] }
   },
   {
@@ -106,7 +105,7 @@ export const routes: Routes = [
   {
     path: 'candidates',
     loadComponent: () => import('./components/candidate-search/candidate-search').then(c => c.CandidateSearch),
-    canActivate: [roleGuard],
+    canActivate: [applicationRoleGuard],
     data: { roles: ['Employer'] }
   },
   { path: 'jobs', loadComponent: () => import('./components/job-list/job-list').then(c => c.JobList) },

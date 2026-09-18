@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ChatService } from '../../services/chat';
 import { profileLinkFor } from '../../core/layout/navigation';
+import { decodeJwtPayload } from '../../core/jwt';
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
 import { MatCardModule } from '@angular/material/card';
@@ -74,7 +75,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!token) return;
 
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = decodeJwtPayload(token) ?? {};
 
       this.currentUserId = payload.sub ||
         payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || '';

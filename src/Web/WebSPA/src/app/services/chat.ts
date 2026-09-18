@@ -2,6 +2,7 @@ import { Injectable, NgZone } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+import { decodeJwtPayload } from '../core/jwt';
 
 export interface ChatMessage {
   id?: string;
@@ -153,9 +154,7 @@ export class ChatService {
     if (!token) return 'user1';
 
     try {
-      const payloadBase64 = token.split('.')[1];
-      const decodedJson = atob(payloadBase64);
-      const decoded = JSON.parse(decodedJson);
+      const decoded = decodeJwtPayload(token) ?? {};
 
       return decoded.sub ||
         decoded.nameid ||
@@ -173,9 +172,7 @@ export class ChatService {
     if (!token) return 'User';
 
     try {
-      const payloadBase64 = token.split('.')[1];
-      const decodedJson = atob(payloadBase64);
-      const decoded = JSON.parse(decodedJson);
+      const decoded = decodeJwtPayload(token) ?? {};
 
       return decoded.username ||
         decoded.unique_name ||

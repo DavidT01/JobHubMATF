@@ -63,7 +63,7 @@
             <mat-card appearance="outlined" [attr.aria-busy]="isUpdating(application.id)">
               <mat-card-header>
                 <mat-card-title><h2>{{ application.candidateName || 'Candidate profile' }}</h2></mat-card-title>
-                <mat-card-subtitle>Status: {{ statusLabel(application.status) }}</mat-card-subtitle>
+                <app-status-chip [status]="application.status" />
               </mat-card-header>
               <mat-card-content>
                 <dl>

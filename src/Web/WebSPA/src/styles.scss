@@ -14,6 +14,12 @@ html {
     typography: Roboto,
     density: 0,
   ));
+
+  // The cyan palette resolves the primary container to a neon #00fbfb. Every surface built on
+  // that token shouts, including ones Material fills itself, such as the datepicker selection
+  // and the slider. Mixing the primary back toward the surface keeps the hue and restores a
+  // container tone that text can sit on; --mat-sys-on-primary-container stays readable on it.
+  --mat-sys-primary-container: color-mix(in srgb, var(--mat-sys-primary) 20%, var(--mat-sys-surface));
 }
 
 body {
@@ -48,6 +54,21 @@ a {
   gap: 16px;
 }
 
+// A title that wraps onto a second line must not make its card taller than its neighbours,
+// so cards fill the row and their content is pushed to a common baseline.
+.card-grid > .mat-mdc-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .mat-mdc-card-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+}
+
 .clickable-card {
   cursor: pointer;
   transition: box-shadow 0.2s ease;
@@ -75,6 +96,9 @@ a {
 
 // ---------------------------------------------------------------------------
 // Job chips (job type, experience level, work mode)
+//
+// These are plain metadata, not actions or states, so they stay outlined and neutral.
+// Accent colours are reserved for things that carry meaning, such as an application status.
 // ---------------------------------------------------------------------------
 
 .chip-row {
@@ -84,18 +108,12 @@ a {
   margin: 8px 0;
 }
 
-.mat-mdc-chip.chip-primary {
-  background-color: var(--mat-sys-primary-container) !important;
+.mat-mdc-chip.chip-meta {
+  background-color: transparent !important;
+  border: 1px solid var(--mat-sys-outline-variant);
 
   .mdc-evolution-chip__text-label {
-    color: var(--mat-sys-on-primary-container) !important;
-  }
-}
-
-.mat-mdc-chip.chip-tertiary {
-  background-color: var(--mat-sys-tertiary-container) !important;
-
-  .mdc-evolution-chip__text-label {
-    color: var(--mat-sys-on-tertiary-container) !important;
+    color: var(--mat-sys-on-surface-variant) !important;
+    font: var(--mat-sys-label-large) !important;
   }
 }

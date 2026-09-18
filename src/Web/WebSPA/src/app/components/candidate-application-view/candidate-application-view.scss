@@ -13,8 +13,7 @@
 
   .eyebrow {
     color: var(--mat-sys-on-surface-variant);
-    font-size: 12px;
-    font-weight: 700;
+    font: var(--mat-sys-label-medium);
     letter-spacing: .08em;
     margin: 0 0 8px;
     text-transform: uppercase;
@@ -23,19 +22,6 @@
   h1, h2, h3 { margin-top: 0; }
   .page-header h1 { margin-bottom: 8px; }
   .page-header p:last-child { margin-bottom: 0; }
-
-  .status {
-    border-radius: 16px;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 8px 14px;
-    white-space: nowrap;
-  }
-
-  .status-submitted, .status-inreview { background: var(--mat-sys-primary-container); color: var(--mat-sys-on-primary-container); }
-  .status-interview { background: var(--mat-sys-tertiary-container); color: var(--mat-sys-on-tertiary-container); }
-  .status-rejected { background: var(--mat-sys-error-container); color: var(--mat-sys-on-error-container); }
-  .status-accepted { background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container); }
 
   .summary-grid {
     display: grid;

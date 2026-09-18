@@ -44,7 +44,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   public myId: string = 'user1';
   public myName: string = '';
   public currentUserId: string = 'user1';
-  public receiverId: string = 'user2';
+  public receiverId: string = '';
   public receiverName: string = '';
 
   public unreadCount: number = 0;
@@ -81,9 +81,9 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.receiverId = recipientIdFromState;
       this.receiverName = recipientNameFromState || recipientIdFromState;
     } else {
-      // Fallback ako se na chat dolazi direktno bez state-a
-      this.receiverId = (this.myId.toLowerCase() === 'user1') ? 'user2' : 'user1';
-      this.receiverName = this.receiverId;
+      // Opening /chat directly shows the conversation list until one is picked.
+      this.receiverId = '';
+      this.receiverName = '';
     }
 
     this.isInitialLoad = true;
@@ -91,7 +91,9 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.unreadCount = 0;
 
     this.hideScrollContainer();
-    this.chatService.loadHistory(this.receiverId, this.myId);
+    if (this.receiverId) {
+      this.chatService.loadHistory(this.receiverId, this.myId);
+    }
 
     // 2. CELOKUPNA POSTOJEĆA LOGIKA ZA PORUKE I SIGNALR OSTAJE ISTA
     this.messageSub = this.chatService.messages$.subscribe((allMessages) => {

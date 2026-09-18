@@ -16,9 +16,9 @@
     <mat-card appearance="outlined" class="details-card">
       <mat-card-content>
         <div class="chip-row">
-          <mat-chip class="chip-primary">{{ job()!.jobType | jobLabel: 'jobType' }}</mat-chip>
-          <mat-chip class="chip-tertiary">{{ job()!.experienceLevel | jobLabel: 'experienceLevel' }}</mat-chip>
-          <mat-chip class="chip-primary">{{ job()!.workMode | jobLabel: 'workMode' }}</mat-chip>
+          <mat-chip class="chip-meta">{{ job()!.jobType | jobLabel: 'jobType' }}</mat-chip>
+          <mat-chip class="chip-meta">{{ job()!.experienceLevel | jobLabel: 'experienceLevel' }}</mat-chip>
+          <mat-chip class="chip-meta">{{ job()!.workMode | jobLabel: 'workMode' }}</mat-chip>
         </div>
 
         @if (job()!.salaryMin && job()!.salaryMax) {
@@ -74,7 +74,7 @@
               <p><strong>Matched skills:</strong></p>
               <div class="chip-row">
                 @for (skill of matchResult()!.matchedSkills; track skill) {
-                  <mat-chip class="chip-primary">{{ skill }}</mat-chip>
+                  <mat-chip class="chip-meta">{{ skill }}</mat-chip>
                 }
               </div>
             }

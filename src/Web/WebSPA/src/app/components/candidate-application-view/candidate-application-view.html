@@ -19,9 +19,7 @@
         <h1 id="application-heading">{{ view.data.job.title }}</h1>
         <p>{{ view.data.job.companyName }} · {{ view.data.job.city || 'Location not specified' }}</p>
       </div>
-      <span class="status" [class]="'status status-' + view.data.application.status.toLowerCase()">
-        {{ statusLabel(view.data.application.status) }}
-      </span>
+      <app-status-chip [status]="view.data.application.status" />
     </header>
 
     <section class="summary-grid" aria-label="Application summary">
