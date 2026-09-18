@@ -10,6 +10,7 @@ namespace Recruitment.API.Features.Commands.CancelInterviewSchedule;
 public class CancelInterviewScheduleCommandHandler(
     RecruitmentContext context,
     IMeetingService meetingService,
+    IProfileServiceClient profileServiceClient,
     ILogger<CancelInterviewScheduleCommandHandler> logger) : IRequestHandler<CancelInterviewScheduleCommand>
 {
     public async Task Handle(CancelInterviewScheduleCommand request, CancellationToken cancellationToken)
@@ -28,7 +29,9 @@ public class CancelInterviewScheduleCommandHandler(
             await meetingService.DeleteMeetingAsync(schedule.EventId);
         }
 
-        var cancelledEvent = InterviewLifecycleEvent.Cancelled(schedule);
+        var candidateProfile = await profileServiceClient.GetCandidateProfileAsync(
+            schedule.CandidateProfileId, cancellationToken);
+        var cancelledEvent = InterviewLifecycleEvent.Cancelled(schedule, candidateProfile.UserId);
         context.InterviewSchedules.Remove(schedule);
         context.OutboxMessages.Add(Data.Outbox.OutboxMessage.Create(cancelledEvent));
         await context.SaveChangesAsync(cancellationToken);

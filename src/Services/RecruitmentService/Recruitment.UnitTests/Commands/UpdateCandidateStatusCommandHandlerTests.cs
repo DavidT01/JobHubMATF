@@ -49,6 +49,9 @@ public class UpdateCandidateStatusCommandHandlerTests
         profileServiceMock
             .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
+        profileServiceMock
+            .Setup(client => client.GetCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new CandidateProfileResponse { UserId = "candidate-user" });
         var handler = CreateHandler(context, profileServiceMock);
 
         var result = await handler.Handle(new UpdateCandidateStatusCommand

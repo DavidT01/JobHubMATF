@@ -2,7 +2,7 @@
   <mat-card class="auth-card">
     <mat-card-header>
       <mat-card-title>Register</mat-card-title>
-      <mat-card-subtitle>Join the JobHub community</mat-card-subtitle>
+      <mat-card-subtitle>Create a candidate account</mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
@@ -30,14 +30,6 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Account type</mat-label>
-          <mat-select formControlName="role">
-            <mat-option *ngFor="let role of roles" [value]="role">{{role}}</mat-option>
-          </mat-select>
-          <mat-icon matSuffix>badge</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
           <mat-label>Password</mat-label>
           <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
           <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
@@ -54,6 +46,7 @@
     </mat-card-content>
 
     <mat-card-footer class="auth-footer">
+      <p>Registering a company? <a routerLink="/register-company">Register company</a></p>
       <p>Already have an account? <a routerLink="/login">Sign in here</a></p>
     </mat-card-footer>
   </mat-card>

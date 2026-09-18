@@ -1,0 +1,24 @@
+@Notification.API_HostAddress = http://localhost:5290
+
+### List notifications (requires Bearer token)
+GET {{Notification.API_HostAddress}}/api/notifications
+Authorization: Bearer {{token}}
+
+### Unread count
+GET {{Notification.API_HostAddress}}/api/notifications/unread-count
+Authorization: Bearer {{token}}
+
+### Create notification
+POST {{Notification.API_HostAddress}}/api/notifications
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "userId": "user-id-from-identity",
+  "title": "Welcome",
+  "message": "Your account is ready."
+}
+
+### Mark all read
+POST {{Notification.API_HostAddress}}/api/notifications/read-all
+Authorization: Bearer {{token}}

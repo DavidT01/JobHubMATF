@@ -4,7 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Identity.API.Services;
 
-public class NotificationService
+/// <summary>
+/// Local EF-backed notifications (used in automated tests / fallback).
+/// </summary>
+public class NotificationService : INotificationPublisher
 {
     private readonly AppDbContext _db;
 

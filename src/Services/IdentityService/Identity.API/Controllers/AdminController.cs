@@ -14,12 +14,12 @@ public class AdminController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly NotificationService _notifications;
+    private readonly INotificationPublisher _notifications;
 
     public AdminController(
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
-        NotificationService notifications)
+        INotificationPublisher notifications)
     {
         _userManager = userManager;
         _roleManager = roleManager;

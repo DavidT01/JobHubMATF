@@ -7,7 +7,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -24,7 +23,6 @@ import { AuthService } from '../../../core/services/auth.service';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatSelectModule,
     MatSnackBarModule
   ],
   templateUrl: './register.component.html',
@@ -40,30 +38,34 @@ export class RegisterComponent {
     firstName: ['', [Validators.required]],
     lastName: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
-    role: ['Candidate', [Validators.required]]
+    password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
-  roles = ['Candidate', 'Employer'];
   hidePassword = true;
 
   onSubmit(): void {
-    if (this.registerForm.valid) {
-      this.authService.register(this.registerForm.value).subscribe({
-        next: (res) => {
-          this.snackBar.open(res.message || 'Registration successful!', 'Close', { duration: 5000 });
-          const url = new URL(res.confirmationUrl);
-          this.router.navigate(['/confirm-email'], {
-            queryParams: {
-              userId: url.searchParams.get('userId'),
-              token: url.searchParams.get('token')
-            }
-          });
-        },
-        error: (err) => {
-          this.snackBar.open(err.error?.message || 'Registration failed!', 'Close', { duration: 3000 });
-        }
-      });
+    if (this.registerForm.invalid) {
+      return;
     }
+
+    const value = this.registerForm.getRawValue();
+    this.authService.register({
+      ...value,
+      role: 'Candidate'
+    }).subscribe({
+      next: (res) => {
+        this.snackBar.open(res.message || 'Registration successful!', 'Close', { duration: 5000 });
+        const url = new URL(res.confirmationUrl);
+        this.router.navigate(['/confirm-email'], {
+          queryParams: {
+            userId: url.searchParams.get('userId'),
+            token: url.searchParams.get('token')
+          }
+        });
+      },
+      error: (err) => {
+        this.snackBar.open(err.error?.message || 'Registration failed!', 'Close', { duration: 3000 });
+      }
+    });
   }
 }

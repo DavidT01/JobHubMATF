@@ -1,4 +1,5 @@
 using FluentAssertions;
+using JobHub.Grpc.Contracts.Profile;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Recruitment.API.Entities;
@@ -45,6 +46,9 @@ namespace Recruitment.UnitTests.Commands
             profileServiceMock
                 .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
+            profileServiceMock
+                .Setup(client => client.GetCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new CandidateProfileResponse { UserId = "candidate-user" });
             var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object, NullLogger<AdvanceCandidateCommandHandler>.Instance);
             var command = new AdvanceCandidateCommand { CandidateProfileId = candidateId, RecruitmentProcessId = process.Id };
 
@@ -83,6 +87,9 @@ namespace Recruitment.UnitTests.Commands
             profileServiceMock
                 .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
+            profileServiceMock
+                .Setup(client => client.GetCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new CandidateProfileResponse { UserId = "candidate-user" });
             var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object, NullLogger<AdvanceCandidateCommandHandler>.Instance);
 
             var result = await handler.Handle(command, CancellationToken.None);
@@ -118,6 +125,9 @@ namespace Recruitment.UnitTests.Commands
             profileServiceMock
                 .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
+            profileServiceMock
+                .Setup(client => client.GetCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new CandidateProfileResponse { UserId = "candidate-user" });
             var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object, NullLogger<AdvanceCandidateCommandHandler>.Instance);
 
             var result = await handler.Handle(command, CancellationToken.None);
@@ -149,6 +159,9 @@ namespace Recruitment.UnitTests.Commands
             profileServiceMock
                 .Setup(client => client.ValidateCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
+            profileServiceMock
+                .Setup(client => client.GetCandidateProfileAsync(candidateId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new CandidateProfileResponse { UserId = "candidate-user" });
             var handler = new AdvanceCandidateCommandHandler(context, mapper, profileServiceMock.Object, NullLogger<AdvanceCandidateCommandHandler>.Instance);
 
             var act = () => handler.Handle(command, CancellationToken.None);

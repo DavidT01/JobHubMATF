@@ -15,7 +15,7 @@
   box-shadow: var(--mat-sys-level1);
   border: 1px solid var(--mat-sys-outline-variant);
   padding: 24px;
-  background-color: var(--mat-sys-surface);
+  background: #ffffff;
 }
 
 mat-card-header {
@@ -57,6 +57,18 @@ mat-card-header {
   p {
     margin: 0 0 8px;
     color: var(--mat-sys-on-surface-variant);
+  }
+
+  .register-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem;
+    align-items: center;
+  }
+
+  .sep {
+    color: #a0aec0;
   }
 
   a {

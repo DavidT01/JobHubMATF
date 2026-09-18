@@ -1,6 +1,15 @@
 import { Routes } from '@angular/router';
 import { applicationRoleGuard } from './core/guards/application-role.guard';
 import { authGuard, guestGuard, adminGuard } from './core/guards/auth.guard';
+import { LoginComponent } from './features/auth/login/login.component';
+import { RegisterComponent } from './features/auth/register/register.component';
+import { RegisterCompanyComponent } from './features/auth/register-company/register-company.component';
+import { ConfirmEmailComponent } from './features/auth/confirm-email/confirm-email.component';
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
+import { HomeComponent } from './features/home/home.component';
+import { NotificationsComponent } from './features/notifications/notifications.component';
+import { AdminUsersComponent } from './features/admin/admin-users.component';
 
 // Every page is lazy loaded so the initial bundle only contains the app shell.
 export const routes: Routes = [
@@ -25,46 +34,14 @@ export const routes: Routes = [
     canActivate: [applicationRoleGuard],
     data: { roles: ['Candidate'] },
   },
-  {
-    path: 'login',
-    loadComponent: () => import('./features/auth/login/login.component').then(c => c.LoginComponent),
-    canActivate: [guestGuard],
-    data: { layout: 'auth' }
-  },
-  {
-    path: 'register',
-    loadComponent: () => import('./features/auth/register/register.component').then(c => c.RegisterComponent),
-    canActivate: [guestGuard],
-    data: { layout: 'auth' }
-  },
-  {
-    path: 'confirm-email',
-    loadComponent: () => import('./features/auth/confirm-email/confirm-email.component').then(c => c.ConfirmEmailComponent),
-    canActivate: [guestGuard],
-    data: { layout: 'auth' }
-  },
-  {
-    path: 'forgot-password',
-    loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(c => c.ForgotPasswordComponent),
-    canActivate: [guestGuard],
-    data: { layout: 'auth' }
-  },
-  {
-    path: 'reset-password',
-    loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(c => c.ResetPasswordComponent),
-    canActivate: [guestGuard],
-    data: { layout: 'auth' }
-  },
-  {
-    path: 'notifications',
-    loadComponent: () => import('./features/notifications/notifications.component').then(c => c.NotificationsComponent),
-    canActivate: [authGuard]
-  },
-  {
-    path: 'admin',
-    loadComponent: () => import('./features/admin/admin-users.component').then(c => c.AdminUsersComponent),
-    canActivate: [adminGuard]
-  },
+  { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
+  { path: 'register', component: RegisterComponent, canActivate: [guestGuard] },
+  { path: 'register-company', component: RegisterCompanyComponent, canActivate: [guestGuard] },
+  { path: 'confirm-email', component: ConfirmEmailComponent, canActivate: [guestGuard] },
+  { path: 'forgot-password', component: ForgotPasswordComponent, canActivate: [guestGuard] },
+  { path: 'reset-password', component: ResetPasswordComponent, canActivate: [guestGuard] },
+  { path: 'notifications', component: NotificationsComponent, canActivate: [authGuard] },
+  { path: 'admin', component: AdminUsersComponent, canActivate: [adminGuard] },
   {
     path: 'dashboard',
     loadComponent: () => import('./components/dashboard/dashboard').then(c => c.DashboardComponent),

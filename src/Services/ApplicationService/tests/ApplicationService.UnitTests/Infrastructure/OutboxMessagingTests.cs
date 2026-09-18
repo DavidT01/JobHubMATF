@@ -37,9 +37,15 @@ public sealed class OutboxMessagingTests
     [Theory]
     [InlineData("amqp://user:secret@localhost:5672")]
     [InlineData("amqps://user:secret@rabbitmq:5671")]
+    [InlineData("amqp://guest:guest@rabbitmq:5672")]
     public void Valid_configuration_creates_factory_without_connecting(string uri)
     {
-        var factory = Assert.IsType<ConnectionFactory>(new OutboxMessagingOptions { ConnectionUri = uri }.CreateConnectionFactory());
+        var allowInsecure = uri.Contains("rabbitmq", StringComparison.Ordinal);
+        var factory = Assert.IsType<ConnectionFactory>(new OutboxMessagingOptions
+        {
+            ConnectionUri = uri,
+            AllowInsecureAmqp = allowInsecure
+        }.CreateConnectionFactory());
         Assert.False(factory.AutomaticRecoveryEnabled);
         Assert.Equal(TimeSpan.FromSeconds(10), factory.RequestedConnectionTimeout);
         Assert.Equal("jobhub-application-outbox", factory.ClientProvidedName);

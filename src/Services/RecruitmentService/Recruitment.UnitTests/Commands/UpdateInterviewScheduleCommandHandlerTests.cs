@@ -48,8 +48,12 @@ public class UpdateInterviewScheduleCommandHandlerTests
         var meetingServiceMock = new Mock<IMeetingService>();
         var profileServiceMock = new Mock<IProfileServiceClient>();
         profileServiceMock
-            .Setup(client => client.GetCandidateContactAsync(schedule.CandidateProfileId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new CandidateContactResponse { Email = "candidate@example.com" });
+            .Setup(client => client.GetCandidateProfileAsync(schedule.CandidateProfileId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new CandidateProfileResponse
+            {
+                Email = "candidate@example.com",
+                UserId = "candidate-user"
+            });
         var handler = CreateHandler(context, meetingServiceMock, profileServiceMock);
         var command = new UpdateInterviewScheduleCommand
         {
