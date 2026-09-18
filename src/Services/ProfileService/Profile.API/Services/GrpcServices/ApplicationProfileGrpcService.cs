@@ -15,7 +15,7 @@ public sealed class ApplicationProfileGrpcService(ISender sender)
     public override async Task<ApplicationCandidateProfileResponse> GetCandidateByUserId(
         GetApplicationProfileRequest request, ServerCallContext context)
     {
-        RequireOwner(request.UserId, ["Candidate"], context);
+        RequireOwnerOrRole(request.UserId, ["Candidate"], "Employer", context);
         var profile = await QueryAsync(new GetCandidateProfileQuery(request.UserId), context.CancellationToken);
         if (profile is null)
             throw new RpcException(new Status(StatusCode.NotFound, "Candidate profile was not found."));
@@ -59,6 +59,23 @@ public sealed class ApplicationProfileGrpcService(ISender sender)
             throw new RpcException(new Status(StatusCode.InvalidArgument, "user_id is required."));
         var subject = user.FindFirstValue("sub") ?? user.FindFirstValue(ClaimTypes.NameIdentifier);
         var hasRole = roles.Any(role => user.IsInRole(role) || user.HasClaim(ClaimTypes.Role, role));
+        var isOwner = string.Equals(subject, userId, StringComparison.Ordinal);
+        if (!hasRole || !isOwner)
+            throw new RpcException(new Status(StatusCode.PermissionDenied, "Only the profile owner can access this lookup."));
+    }
+
+    private static void RequireOwnerOrRole(
+        string userId, IReadOnlyCollection<string> ownerRoles, string bypassRole, ServerCallContext context)
+    {
+        var user = context.GetHttpContext().User;
+        if (user.Identity?.IsAuthenticated != true)
+            throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication is required."));
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new RpcException(new Status(StatusCode.InvalidArgument, "user_id is required."));
+        if (user.IsInRole(bypassRole) || user.HasClaim(ClaimTypes.Role, bypassRole))
+            return;
+        var subject = user.FindFirstValue("sub") ?? user.FindFirstValue(ClaimTypes.NameIdentifier);
+        var hasRole = ownerRoles.Any(role => user.IsInRole(role) || user.HasClaim(ClaimTypes.Role, role));
         var isOwner = string.Equals(subject, userId, StringComparison.Ordinal);
         if (!hasRole || !isOwner)
             throw new RpcException(new Status(StatusCode.PermissionDenied, "Only the profile owner can access this lookup."));

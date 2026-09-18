@@ -22,9 +22,9 @@ public sealed class ProfileAuthorization(
         return userId;
     }
 
-    public async Task EnsureUserAsync(string userId, CancellationToken cancellationToken)
+    public async Task EnsureCanReadCandidateProfileAsync(string userId, CancellationToken cancellationToken)
     {
-        if (User.IsInRole("Admin"))
+        if (User.IsInRole("Admin") || User.IsInRole("Employer"))
         {
             return;
         }

@@ -25,7 +25,7 @@ namespace Profile.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCandidateProfile(string userId)
         {
-            await authorization.EnsureUserAsync(userId, HttpContext.RequestAborted);
+            await authorization.EnsureCanReadCandidateProfileAsync(userId, HttpContext.RequestAborted);
             logger.LogInformation("Received GetCandidateProfile request for userId: {UserId}", userId);
             var result = await mediator.Send(new GetCandidateProfileQuery(userId));
             return result != null ? Ok(result) : NotFound();

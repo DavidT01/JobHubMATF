@@ -7,6 +7,7 @@ using Profile.API.Features.CompanyProfiles.Commands.DeleteCompany;
 using Profile.API.Features.CompanyProfiles.Commands.UpdateCompany;
 using Profile.API.Features.CompanyProfiles.Commands.UploadLogo;
 using Profile.API.Features.CompanyProfiles.Queries.GetCompanyProfile;
+using Profile.API.Features.CompanyProfiles.Queries.GetCompanyProfileById;
 using Profile.API.Infrastructure;
 
 namespace Profile.API.Controllers
@@ -24,9 +25,18 @@ namespace Profile.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCompanyProfile(string userId)
         {
-            await authorization.EnsureUserAsync(userId, HttpContext.RequestAborted);
             logger.LogInformation("Received GetCompanyProfile request for userId: {UserId}", userId);
             var result = await mediator.Send(new GetCompanyProfileQuery(userId));
+            return result != null ? Ok(result) : NotFound();
+        }
+
+        [HttpGet("by-id/{id}")]
+        [ProducesResponseType(typeof(CompanyProfileDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetCompanyProfileById(Guid id)
+        {
+            logger.LogInformation("Received GetCompanyProfileById request for Id: {Id}", id);
+            var result = await mediator.Send(new GetCompanyProfileByIdQuery(id));
             return result != null ? Ok(result) : NotFound();
         }
 
