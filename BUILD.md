@@ -238,13 +238,6 @@ Docker Desktop isn't running. Start it and run the command again.
 **`port is already allocated`**  
 Another program is using one of the ports from section 1. Stop it, then run `docker compose up -d` again.
 
-**The candidate profile doesn't load (the browser console shows `https://localhost:7043` and `ERR_CONNECTION_REFUSED`)**  
-`profileApiUrl` in `src\Web\WebSPA\src\environments\environment.development.ts` points to the HTTPS port that Profile.API uses only when it is started with `dotnet run` and the `https` profile. When the backend runs in Docker, the address must be:
-
-```ts
-profileApiUrl: 'http://localhost:5213/api',
-```
-
 **A service doesn't start or keeps restarting**  
 Check its logs, for example `docker compose logs profile-api`.
 
