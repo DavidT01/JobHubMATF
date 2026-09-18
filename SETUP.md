@@ -1,28 +1,28 @@
 # SETUP
 
-Ovaj dokument opisuje šta je potrebno da bi se lokalno pokrenuo projekat i krenulo sa razvojem.
+This document describes what you need to run the project locally and start developing.
 
-## 1) Preduslovi
+## 1) Prerequisites
 
 ### .NET SDK 10
 
-1. Preuzmite i instalirajte **.NET 10 SDK**:  
+1. Download and install the **.NET 10 SDK**:  
    https://dotnet.microsoft.com/en-us/download
-2. Proverite instalaciju:
+2. Verify the installation:
 
 ```powershell
 dotnet --version
 ```
 
-Očekivano: verzija počinje sa `10.`
+Expected: the version starts with `10.`
 
 ---
 
 ### Node.js (LTS 24.x.x)
 
-1. Preuzmite i instalirajte **Node.js 24.x.x (LTS)**:  
+1. Download and install **Node.js 24.x.x (LTS)**:  
    https://nodejs.org/en
-2. Proverite instalaciju:
+2. Verify the installation:
 
 ```powershell
 node -v
@@ -33,49 +33,49 @@ npm -v
 
 ## 2) Frontend setup (Angular SPA)
 
-Angular aplikacija je u folderu `src\Web\WebSPA`.
+The Angular application is in the `src\Web\WebSPA` folder.
 
-1. Otvorite terminal u root-u repozitorijuma.
-2. Pozicionirajte se u SPA folder:
+1. Open a terminal in the repository root.
+2. Go to the SPA folder:
 
 ```powershell
 cd .\src\Web\WebSPA
 ```
 
-3. Instalirajte zavisnosti:
+3. Install the dependencies:
 
 ```powershell
 npm install
 ```
 
-> Ovo instalira pakete iz `package.json` (uključujući Angular pakete/teme).
+> This installs the packages from `package.json` (including the Angular packages and themes).
 
 ---
 
-## 3) Angular CLI (opciono)
+## 3) Angular CLI (optional)
 
-Možete koristiti lokalni CLI preko `npx` (preporučeno), ili ga instalirati globalno.
+You can use the local CLI through `npx` (recommended) or install it globally.
 
-### Opcija A — bez globalne instalacije (preporučeno)
+### Option A — without a global install (recommended)
 
 ```powershell
 npx ng version
 ```
 
-### Opcija B — globalna instalacija
+### Option B — global install
 
 ```powershell
 npm install -g @angular/cli
 ng version
 ```
 
-> Čak i sa globalnim CLI-jem, i dalje morate uraditi `npm install` u `src\Web\WebSPA`.
+> Even with the global CLI, you still need to run `npm install` in `src\Web\WebSPA`.
 
 ---
 
-## 4) Brza provera da je okruženje spremno
+## 4) Quick check that the environment is ready
 
-Pokrenite sledeće komande i potvrdite da rade bez greške:
+Run the following commands and confirm they complete without errors:
 
 ```powershell
 dotnet --version
@@ -86,34 +86,34 @@ npm install
 npx ng version
 ```
 
-Ako sve prolazi, okruženje je spremno za rad.
+If everything passes, the environment is ready.
 
 ---
 
-## 5) Uputstvo za rad na projektu
+## 5) Working on the project
 
-### Mikroservisi (`src\Services`)
+### Microservices (`src\Services`)
 
-- U folderu `src\Services` svaki član tima samostalno generiše i održava svoj mikroservis.
-- Novi mikroservisi se dodaju kao zasebni projekti/folderi unutar `src\Services`.
+- In the `src\Services` folder, each team member generates and maintains their own microservice.
+- New microservices are added as separate projects/folders inside `src\Services`.
 
 
-### Angular razvoj (`src\Web\WebSPA`)
+### Angular development (`src\Web\WebSPA`)
 
-- Frontend je inicijalizovan; za nove delove aplikacije kreirajte komponente.
-- Komponente kreirajte komandom:
+- The frontend is already initialized; create components for new parts of the application.
+- Create components with:
 
 ```powershell
-ng generate component ime-komponente
+ng generate component component-name
 ```
 
-- Ova komanda generiše:
-   - `.html` (izgled),
-   - `.scss` (stil),
-   - `.ts` (funkcionalnost),
-   - `.spec.ts` (testiranje).
+- This command generates:
+   - `.html` (layout),
+   - `.scss` (styles),
+   - `.ts` (behavior),
+   - `.spec.ts` (tests).
 
-### Git ignore pravila
+### Git ignore rules
 
-- Za .NET mikroservise koristi se `src\Services\.gitignore` (Visual Studio/.NET pravila).
-- Za Angular frontend koristi se `src\Web\WebSPA\.gitignore` (Angular/Node pravila).
+- .NET microservices use `src\Services\.gitignore` (Visual Studio/.NET rules).
+- The Angular frontend uses `src\Web\WebSPA\.gitignore` (Angular/Node rules).
